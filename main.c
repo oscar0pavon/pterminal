@@ -71,7 +71,6 @@ void kscrolldown(const Arg *);
 #define XEMBED_FOCUS_OUT 5
 
 /* macros */
-#define IS_SET(flag) ((win.mode & (flag)) != 0)
 #define TRUERED(x) (((x) & 0xff0000) >> 8)
 #define TRUEGREEN(x) (((x) & 0xff00))
 #define TRUEBLUE(x) (((x) & 0xff) << 8)
