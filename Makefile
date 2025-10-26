@@ -18,7 +18,7 @@ STCFLAGS = $(INCS) $(STCPPFLAGS) $(CPPFLAGS) $(CFLAGS)
 STLDFLAGS = $(LIBS) $(LDFLAGS)
 
 
-SRC = st.c main.c
+SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
 all: pterminal
@@ -26,8 +26,6 @@ all: pterminal
 .c.o:
 	$(CC) $(STCFLAGS) -c $<
 
-st.o: config.h st.h win.h
-main.o: arg.h config.h st.h win.h
 
 $(OBJ): config.h
 
@@ -39,5 +37,8 @@ clean:
 
 install: pterminal
 	cp -f pterminal /bin
+
+test: all
+	./pterminal -c "pterminal-test" -t "pterminal"
 
 .PHONY: all clean install

@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <wchar.h>
 
-#include "st.h"
+#include "terminal.h"
 #include "win.h"
 
 #include <pty.h>
