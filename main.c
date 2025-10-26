@@ -3,6 +3,7 @@
 #include <X11/Xatom.h>
 #include <X11/Xft/Xft.h>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #include <X11/cursorfont.h>
 #include <X11/keysym.h>
 #include <errno.h>
@@ -20,6 +21,15 @@ char *argv0;
 #include "terminal.h"
 #include "win.h"
 #include "draw.h"
+
+//OpenGL
+#include <GL/gl.h>
+#include <GL/glx.h>
+#include <stdbool.h>
+
+bool is_opengl = false;
+
+int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 /* types used in config.h */
 typedef struct {
@@ -94,6 +104,10 @@ typedef struct {
   Colormap cmap;
   Window win;
   Drawable buf;
+  //OpenGL
+  GLXContext gl_context;
+  XVisualInfo* visual_info;
+
   GlyphFontSpec *specbuf; /* font spec buffer used for rendering */
   Atom xembed, wmdeletewin, netwmname, netwmiconname, netwmpid;
   struct {
@@ -1024,6 +1038,11 @@ void xinit(int cols, int rows) {
   xw.scr = XDefaultScreen(xw.dpy);
   xw.vis = XDefaultVisual(xw.dpy, xw.scr);
 
+  //OpenGL
+  xw.visual_info = glXChooseVisual(xw.dpy,xw.scr,gl_attributes);
+  if(!xw.visual_info)
+    die("can't create glx visual\n");
+
   /* font */
   if (!FcInit())
     die("could not init fontconfig.\n");
@@ -1032,7 +1051,14 @@ void xinit(int cols, int rows) {
   xloadfonts(usedfont, 0);
 
   /* colors */
-  xw.cmap = XDefaultColormap(xw.dpy, xw.scr);
+  if (!is_opengl)
+    xw.cmap = XDefaultColormap(xw.dpy, xw.scr);
+  else {
+
+   xw.cmap = XCreateColormap(xw.dpy, RootWindow(xw.dpy, xw.visual_info->screen),
+                    xw.visual_info->visual, AllocNone);
+  }
+
   xloadcols();
 
   /* adjust fixed window geometry */
@@ -1056,11 +1082,23 @@ void xinit(int cols, int rows) {
   root = XRootWindow(xw.dpy, xw.scr);
   if (!(opt_embed && (parent = strtol(opt_embed, NULL, 0))))
     parent = root;
-  xw.win = XCreateWindow(xw.dpy, root, xw.l, xw.t, win.w, win.h, 0,
-                         XDefaultDepth(xw.dpy, xw.scr), InputOutput, xw.vis,
-                         CWBackPixel | CWBorderPixel | CWBitGravity |
-                             CWEventMask | CWColormap,
-                         &xw.attrs);
+
+  if (!is_opengl) {
+
+    xw.win = XCreateWindow(xw.dpy, root, xw.l, xw.t, win.w, win.h, 0,
+                           XDefaultDepth(xw.dpy, xw.scr), InputOutput, xw.vis,
+                           CWBackPixel | CWBorderPixel | CWBitGravity |
+                               CWEventMask | CWColormap,
+                           &xw.attrs);
+  } else {
+
+    xw.win = XCreateWindow(
+        xw.dpy, root, xw.l, xw.t, win.w, win.h, 0,
+        XDefaultDepth(xw.dpy, xw.scr), InputOutput, xw.visual_info->visual,
+        CWBackPixel | CWBorderPixel | CWBitGravity | CWEventMask | CWColormap,
+        &xw.attrs);
+  }
+
   if (parent != root)
     XReparentWindow(xw.dpy, xw.win, parent, xw.l, xw.t);
 
@@ -1841,6 +1879,9 @@ void usage(void) {
 }
 
 int main(int argc, char *argv[]) {
+
+  is_opengl = true;
+
   xw.l = xw.t = 0;
   xw.isfixed = False;
   xsetcursor(cursorshape);

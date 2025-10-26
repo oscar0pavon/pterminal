@@ -11,7 +11,7 @@ X11LIB = /usr/lib
 
 INCS = -I$(X11INC) -I/usr/include/freetype2
 
-LIBS = -L/usr/lib -lm -lrt -lX11 -lutil -lXft -lfreetype -lfontconfig
+LIBS = -L/usr/lib -lm -lrt -lX11 -lutil -lXft -lfreetype -lfontconfig -lGL
 
 STCPPFLAGS = -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=600
 STCFLAGS = $(INCS) $(STCPPFLAGS) $(CPPFLAGS) $(CFLAGS)
