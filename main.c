@@ -1083,21 +1083,15 @@ void xinit(int cols, int rows) {
   if (!(opt_embed && (parent = strtol(opt_embed, NULL, 0))))
     parent = root;
 
-  if (!is_opengl) {
-
-    xw.win = XCreateWindow(xw.dpy, root, xw.l, xw.t, win.w, win.h, 0,
-                           XDefaultDepth(xw.dpy, xw.scr), InputOutput, xw.vis,
-                           CWBackPixel | CWBorderPixel | CWBitGravity |
-                               CWEventMask | CWColormap,
-                           &xw.attrs);
-  } else {
-
-    xw.win = XCreateWindow(
-        xw.dpy, root, xw.l, xw.t, win.w, win.h, 0,
-        XDefaultDepth(xw.dpy, xw.scr), InputOutput, xw.visual_info->visual,
-        CWBackPixel | CWBorderPixel | CWBitGravity | CWEventMask | CWColormap,
-        &xw.attrs);
+  if (is_opengl) {
+    xw.vis = xw.visual_info->visual;
   }
+
+  xw.win = XCreateWindow(xw.dpy, root, xw.l, xw.t, win.w, win.h, 0,
+                         XDefaultDepth(xw.dpy, xw.scr), InputOutput, xw.vis,
+                         CWBackPixel | CWBorderPixel | CWBitGravity |
+                             CWEventMask | CWColormap,
+                         &xw.attrs);
 
   if (parent != root)
     XReparentWindow(xw.dpy, xw.win, parent, xw.l, xw.t);
