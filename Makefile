@@ -29,7 +29,7 @@ all: pterminal
 st.o: config.h st.h win.h
 main.o: arg.h config.h st.h win.h
 
-$(OBJ): config.h config.mk
+$(OBJ): config.h
 
 pterminal: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(STLDFLAGS)
