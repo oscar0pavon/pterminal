@@ -1093,6 +1093,16 @@ void xinit(int cols, int rows) {
                              CWEventMask | CWColormap,
                          &xw.attrs);
 
+  if(is_opengl){
+    xw.gl_context = glXCreateContext(xw.dpy,
+        xw.visual_info, None, GL_TRUE);
+    if(!xw.gl_context){
+      die("Can't create GL context");
+    }
+
+    glXMakeCurrent(xw.dpy, xw.win, xw.gl_context);
+  }
+
   if (parent != root)
     XReparentWindow(xw.dpy, xw.win, parent, xw.l, xw.t);
 
