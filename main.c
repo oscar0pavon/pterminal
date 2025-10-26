@@ -26,6 +26,7 @@ char *argv0;
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <stdbool.h>
+#include "opengl.h"
 
 bool is_opengl = false;
 
@@ -1101,6 +1102,8 @@ void xinit(int cols, int rows) {
     }
 
     glXMakeCurrent(xw.dpy, xw.win, xw.gl_context);
+    set_ortho_projection(win.w, win.h); 
+    load_texture(&font_texture_id, "/root/pterminal/font1.png");
   }
 
   if (parent != root)
