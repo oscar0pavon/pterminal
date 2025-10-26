@@ -1040,9 +1040,12 @@ void xinit(int cols, int rows) {
   xw.vis = XDefaultVisual(xw.dpy, xw.scr);
 
   //OpenGL
-  xw.visual_info = glXChooseVisual(xw.dpy,xw.scr,gl_attributes);
-  if(!xw.visual_info)
-    die("can't create glx visual\n");
+  if (is_opengl) {
+
+    xw.visual_info = glXChooseVisual(xw.dpy, xw.scr, gl_attributes);
+    if (!xw.visual_info)
+      die("can't create glx visual\n");
+  }
 
   /* font */
   if (!FcInit())
@@ -1101,7 +1104,7 @@ void xinit(int cols, int rows) {
       die("Can't create GL context");
     }
 
-    glXMakeCurrent(xw.dpy, xw.win, xw.gl_context);
+    //glXMakeCurrent(xw.dpy, xw.win, xw.gl_context);
     set_ortho_projection(win.w, win.h); 
     load_texture(&font_texture_id, "/root/pterminal/font1.png");
   }
@@ -1868,6 +1871,7 @@ void run(void) {
     }
 
     draw();
+    //glXSwapBuffers(xw.dpy,xw.win);
     XFlush(xw.dpy);
     drawing = 0;
   }
@@ -1887,7 +1891,7 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 
-  is_opengl = true;
+  //is_opengl = true;
 
   xw.l = xw.t = 0;
   xw.isfixed = False;

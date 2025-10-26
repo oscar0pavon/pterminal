@@ -1,6 +1,7 @@
 #include "draw.h"
 #include "terminal.h"
 #include "win.h"
+#include "opengl.h"
 
 void drawregion(int x1, int y1, int x2, int y2) {
   int y, L;
@@ -38,6 +39,9 @@ void draw(void) {
   xfinishdraw();
   if (ocx != term.ocx || ocy != term.ocy)
     xximspot(term.ocx, term.ocy);
+
+  //gl_draw_char('d', 50, 50, 50, 50);
+
 }
 
 
