@@ -1148,6 +1148,7 @@ void tsetchar(Rune u, const Glyph *attr, int x, int y) {
   term.dirty[y] = 1;
   line[x] = *attr;
   line[x].u = u;
+  line[x].utf8_value = (int)u;
 }
 
 void tclearregion(int x1, int y1, int x2, int y2) {

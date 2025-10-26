@@ -32,12 +32,14 @@ enum term_mode {
 
 #define TRUECOLOR(r, g, b) (1 << 24 | (r) << 16 | (g) << 8 | (b))
 #define IS_TRUECOL(x) (1 << 24 & (x))
-#define IS_SET(flag) ((term.mode & (flag)) != 0)
+
 #define ISCONTROLC0(c) (BETWEEN(c, 0, 0x1f) || (c) == 0x7f)
 #define ISCONTROLC1(c) (BETWEEN(c, 0x80, 0x9f))
 #define ISCONTROL(c) (ISCONTROLC0(c) || ISCONTROLC1(c))
 #define ISDELIM(u) (u && wcschr(worddelimiters, u))
 
+
+#define IS_SET(flag) ((term.mode & (flag)) != 0)
 #define TSCREEN term.screen[IS_SET(MODE_ALTSCREEN)]
 #define TLINEOFFSET(y)                                                         \
   (((y) + TSCREEN.cur - TSCREEN.off + TSCREEN.size) % TSCREEN.size)
@@ -80,6 +82,7 @@ typedef struct {
   ushort mode; /* attribute flags */
   uint32_t fg; /* foreground  */
   uint32_t bg; /* background  */
+  uint16_t utf8_value;
 } Glyph;
 
 typedef Glyph *Line;

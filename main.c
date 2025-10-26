@@ -1105,7 +1105,7 @@ void xinit(int cols, int rows) {
       die("Can't create GL context");
     }
 
-    //glXMakeCurrent(xw.dpy, xw.win, xw.gl_context);
+    glXMakeCurrent(xw.dpy, xw.win, xw.gl_context);
     set_ortho_projection(win.w, win.h); 
     load_texture(&font_texture_id, "/root/pterminal/font1.png");
   }
@@ -1414,6 +1414,8 @@ void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
   r.width = width;
   XftDrawSetClipRectangles(xw.draw, winx, winy, &r, 1);
 
+  gl_draw_char(base.utf8_value, winx, winy,32, 32);
+
   /* Render the glyphs. */
   XftDrawGlyphFontSpec(xw.draw, fg, specs, len);
 
@@ -1576,12 +1578,17 @@ void xdrawline(Line line, int x1, int y1, int x2) {
     }
     i++;
   }
-  if (i > 0)
+  if (i > 0){
     xdrawglyphfontspecs(specs, base, i, ox, y1);
+    //gl_draw_char('t', ox, y1, 32, 32);
+  }
 }
 
 void xfinishdraw(void) {
-  XCopyArea(xw.dpy, xw.buf, xw.win, dc.gc, 0, 0, win.w, win.h, 0, 0);
+
+  //XCopyArea(xw.dpy, xw.buf, xw.win, dc.gc, 0, 0, win.w, win.h, 0, 0);
+
+
   XSetForeground(xw.dpy, dc.gc,
                  dc.col[IS_SET(MODE_REVERSE) ? defaultfg : defaultbg].pixel);
 }
@@ -1871,9 +1878,16 @@ void run(void) {
       }
     }
 
+    glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
+   // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     draw();
-    //glXSwapBuffers(xw.dpy,xw.win);
+
     XFlush(xw.dpy);
+
+    gl_draw_char('d', 50, 50, 50, 50);
+    glXSwapBuffers(xw.dpy, xw.win);
+    // glXSwapBuffers(xw.dpy,xw.win);
     drawing = 0;
   }
 }
@@ -1892,7 +1906,7 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 
-  //is_opengl = true;
+  is_opengl = true;
 
   xw.l = xw.t = 0;
   xw.isfixed = False;
