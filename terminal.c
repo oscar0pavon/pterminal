@@ -19,6 +19,7 @@
 
 #include "terminal.h"
 #include "win.h"
+#include "draw.h"
 
 #include <pty.h>
 
@@ -30,17 +31,6 @@
 #define STR_BUF_SIZ ESC_BUF_SIZ
 #define STR_ARG_SIZ ESC_ARG_SIZ
 
-/* macros */
-#define IS_SET(flag) ((term.mode & (flag)) != 0)
-#define ISCONTROLC0(c) (BETWEEN(c, 0, 0x1f) || (c) == 0x7f)
-#define ISCONTROLC1(c) (BETWEEN(c, 0x80, 0x9f))
-#define ISCONTROL(c) (ISCONTROLC0(c) || ISCONTROLC1(c))
-#define ISDELIM(u) (u && wcschr(worddelimiters, u))
-
-#define TSCREEN term.screen[IS_SET(MODE_ALTSCREEN)]
-#define TLINEOFFSET(y)                                                         \
-  (((y) + TSCREEN.cur - TSCREEN.off + TSCREEN.size) % TSCREEN.size)
-#define TLINE(y) (TSCREEN.buffer[TLINEOFFSET(y)])
 
 enum term_mode {
   MODE_WRAP = 1 << 0,
@@ -80,12 +70,6 @@ enum escape_state {
   ESC_UTF8 = 64,
 };
 
-typedef struct {
-  Glyph attr; /* current char attributes */
-  int x;
-  int y;
-  char state;
-} TCursor;
 
 typedef struct {
   int mode;
@@ -105,35 +89,7 @@ typedef struct {
   int alt;
 } Selection;
 
-/* Screen lines */
-typedef struct {
-  Line *buffer; /* ring buffer */
-  int size;     /* size of buffer */
-  int cur;      /* start of active screen */
-  int off;      /* scrollback line offset */
-  TCursor sc;   /* saved cursor */
-} LineBuffer;
 
-/* Internal representation of the screen */
-typedef struct {
-  int row;              /* nb row */
-  int col;              /* nb col */
-  LineBuffer screen[2]; /* screen and alternate screen */
-  int linelen;          /* allocated line length */
-  int *dirty;           /* dirtyness of lines */
-  TCursor c;            /* cursor */
-  int ocx;              /* old cursor col */
-  int ocy;              /* old cursor row */
-  int top;              /* top    scroll limit */
-  int bot;              /* bottom scroll limit */
-  int mode;             /* terminal mode flags */
-  int esc;              /* escape state flags */
-  char trantbl[4];      /* charset table translation */
-  int charset;          /* current charset */
-  int icharset;         /* selected charset for sequence */
-  int *tabs;
-  Rune lastc; /* last printed char outside of sequence, 0 if control */
-} Term;
 
 /* CSI Escape sequence structs */
 /* ESC '[' [[ [<priv>] <arg> [;]] <mode> [<mode>]] */
@@ -226,7 +182,7 @@ static char base64dec_getc(const char **);
 static ssize_t xwrite(int, const char *, size_t);
 
 /* Globals */
-static Term term;
+Term term;
 static Selection sel;
 static CSIEscape csiescseq;
 static STREscape strescseq;
@@ -2524,44 +2480,6 @@ void tresize(int col, int row) {
 }
 
 void resettitle(void) { xsettitle(NULL); }
-
-void drawregion(int x1, int y1, int x2, int y2) {
-  int y, L;
-
-  L = TLINEOFFSET(y1);
-  for (y = y1; y < y2; y++) {
-    if (term.dirty[y]) {
-      term.dirty[y] = 0;
-      xdrawline(TSCREEN.buffer[L], x1, y, x2);
-    }
-    L = (L + 1) % TSCREEN.size;
-  }
-}
-
-void draw(void) {
-  int cx = term.c.x, ocx = term.ocx, ocy = term.ocy;
-
-  if (!xstartdraw())
-    return;
-
-  /* adjust cursor position */
-  LIMIT(term.ocx, 0, term.col - 1);
-  LIMIT(term.ocy, 0, term.row - 1);
-  if (TLINE(term.ocy)[term.ocx].mode & ATTR_WDUMMY)
-    term.ocx--;
-  if (TLINE(term.c.y)[cx].mode & ATTR_WDUMMY)
-    cx--;
-
-  drawregion(0, 0, term.col, term.row);
-  if (TSCREEN.off == 0)
-    xdrawcursor(cx, term.c.y, TLINE(term.c.y)[cx], term.ocx, term.ocy,
-                TLINE(term.ocy)[term.ocx]);
-  term.ocx = cx;
-  term.ocy = term.c.y;
-  xfinishdraw();
-  if (ocx != term.ocx || ocy != term.ocy)
-    xximspot(term.ocx, term.ocy);
-}
 
 void redraw(void) {
   tfulldirt();

@@ -1,4 +1,6 @@
 /* See LICENSE for license details. */
+#ifndef XWINDOW_H
+#define XWINDOW_H
 
 enum win_mode {
 	MODE_VISIBLE     = 1 << 0,
@@ -39,3 +41,5 @@ void xsetpointermotion(int);
 void xsetsel(char *);
 int xstartdraw(void);
 void xximspot(int, int);
+
+#endif

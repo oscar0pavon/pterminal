@@ -19,6 +19,7 @@ char *argv0;
 #include "arg.h"
 #include "terminal.h"
 #include "win.h"
+#include "draw.h"
 
 /* types used in config.h */
 typedef struct {
