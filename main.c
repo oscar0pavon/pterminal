@@ -12,6 +12,7 @@
 #include <locale.h>
 #include <math.h>
 #include <signal.h>
+#include <stdio.h>
 #include <sys/select.h>
 #include <time.h>
 #include <unistd.h>
@@ -1321,7 +1322,7 @@ void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
   //putchar(base.utf8_value);
   
   //gl_draw_char((int)base.u, winx-32, winy,32, 32);
-  draw_text(&base,len,winx,winy);
+  //draw_text(&base,len,winx,winy);
 
   /* Fallback on color display for attributes not supported by the font */
   if (base.mode & ATTR_ITALIC && base.mode & ATTR_BOLD) {
@@ -1570,6 +1571,14 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
   int i, current_x_position, old_x, numspecs;
   Glyph base, new;
   XftGlyphFontSpec *specs = xw.specbuf;
+
+  int line_char_count = 0;
+  for(int i = 0; i < column - position_x; i++){
+    int charlen = 32;
+    int winx = ((i * 8)-position_x)-4;
+    int winy = borderpx + position_y * win.ch;
+    gl_draw_char(line[i].u, winx, winy, 22,22);
+  }
 
   numspecs = xmakeglyphfontspecs(specs, &line[position_x], column - position_x,
                                  position_x, position_y);
