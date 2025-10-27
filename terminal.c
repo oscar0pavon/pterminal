@@ -1128,7 +1128,7 @@ void tsetchar(Rune u, Glyph *attr, int x, int y) {
       "│", "≤", "≥", "π", "≠", "£", "·",      /* x - ~ */
   };
   Line line = TLINE(y);
-  line[x].utf8_value = (int)u;
+  //line[x].utf8_value = u;
 
   /*
    * The table is proudly stolen from rxvt.
@@ -1152,7 +1152,7 @@ void tsetchar(Rune u, Glyph *attr, int x, int y) {
   term.dirty[y] = 1;
   line[x] = *attr;
   line[x].u = u;
-  //line[x].utf8_value = (int)u;
+  //putchar(line[x].u);
 }
 
 void tclearregion(int x1, int y1, int x2, int y2) {
@@ -2310,22 +2310,20 @@ check_control_code:
      */
     return;
   }
+
   if (selected(term.cursor.x, term.cursor.y))
     selclear();
 
   gp = &TLINE(term.cursor.y)[term.cursor.x];
-  gp->utf8_value = original_rune;
   if (IS_SET(MODE_WRAP) && (term.cursor.state & CURSOR_WRAPNEXT)) {
     gp->mode |= ATTR_WRAP;
     tnewline(1);
     gp = &TLINE(term.cursor.y)[term.cursor.x];
-    gp->utf8_value = (int)u;
   }
 
   if (IS_SET(MODE_INSERT) && term.cursor.x + width < term.col) {
     memmove(gp + width, gp, (term.col - term.cursor.x - width) * sizeof(Glyph));
     gp->mode &= ~ATTR_WIDE;
-    gp->utf8_value = (int)u;
   }
 
   if (term.cursor.x + width > term.col) {
@@ -2334,11 +2332,9 @@ check_control_code:
     else
       tmoveto(term.col - width, term.cursor.y);
     gp = &TLINE(term.cursor.y)[term.cursor.x];
-    gp->utf8_value = (int)u;
   }
 
   tsetchar(u, &term.cursor.attr, term.cursor.x, term.cursor.y);
-  term.cursor.attr.utf8_value = (int)u;
   term.lastc = u;
 
   if (width == 2) {
@@ -2347,12 +2343,9 @@ check_control_code:
       if (gp[1].mode == ATTR_WIDE && term.cursor.x + 2 < term.col) {
         gp[2].u = ' ';
         gp[2].mode &= ~ATTR_WDUMMY;
-        gp[2].utf8_value = (int)u;
       }
       gp[1].u = '\0';
       gp[1].mode = ATTR_WDUMMY;
-      gp[1].utf8_value = (int)u;
-      gp->utf8_value = (int)u;
     }
   }
   if (term.cursor.x + width < term.col) {
@@ -2393,6 +2386,7 @@ int twrite(const char *buf, int buflen, int show_ctrl) {
       }
     }
     tputc(u);
+    //putchar(u);
   }
   return n;
 }

@@ -1300,7 +1300,14 @@ int xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len,
 
   return numspecs;
 }
+void draw_text(Glyph* base, int len,
+                         int x, int y) {
 
+  for(int i = 0; i < len; i++){
+    gl_draw_char(base->u, x, y,32, 32);
+  }
+
+}
 void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
                          int x, int y) {
   int charlen = len * ((base.mode & ATTR_WIDE) ? 2 : 1);
@@ -1309,8 +1316,12 @@ void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
   Color *fg, *bg, *temp, revfg, revbg, truefg, truebg;
   XRenderColor colfg, colbg;
   XRectangle r;
+
+  char current_char = (char)base.utf8_value;
+  //putchar(base.utf8_value);
   
-  gl_draw_char(base.utf8_value, winx, winy,32, 32);
+  //gl_draw_char((int)base.u, winx-32, winy,32, 32);
+  draw_text(&base,len,winx,winy);
 
   /* Fallback on color display for attributes not supported by the font */
   if (base.mode & ATTR_ITALIC && base.mode & ATTR_BOLD) {
@@ -1555,33 +1566,42 @@ void xsettitle(char *p) {
 
 int xstartdraw(void) { return IS_SET(MODE_VISIBLE); }
 
-void xdrawline(Line line, int x1, int y1, int x2) {
-  int i, x, ox, numspecs;
+void xdrawline(Line line, int position_x, int position_y, int column) {
+  int i, current_x_position, old_x, numspecs;
   Glyph base, new;
   XftGlyphFontSpec *specs = xw.specbuf;
 
-  numspecs = xmakeglyphfontspecs(specs, &line[x1], x2 - x1, x1, y1);
-  i = ox = 0;
-  for (x = x1; x < x2 && i < numspecs; x++) {
-    new = line[x];
+  numspecs = xmakeglyphfontspecs(specs, &line[position_x], column - position_x,
+                                 position_x, position_y);
+  i = old_x = 0;
+  for (current_x_position = position_x;
+       current_x_position < column && i < numspecs; current_x_position++) {
+
+    new = line[current_x_position];
+
     if (new.mode == ATTR_WDUMMY)
       continue;
-    if (selected(x, y1))
+
+    if (selected(current_x_position, position_y))
       new.mode ^= ATTR_REVERSE;
+
     if (i > 0 && ATTRCMP(base, new)) {
-      xdrawglyphfontspecs(specs, base, i, ox, y1);
+      xdrawglyphfontspecs(specs, base, i, old_x, position_y);
       specs += i;
       numspecs -= i;
       i = 0;
     }
+
     if (i == 0) {
-      ox = x;
+      old_x = current_x_position;
       base = new;
     }
+
     i++;
   }
-  if (i > 0){
-    xdrawglyphfontspecs(specs, base, i, ox, y1);
+
+  if (i > 0) {
+    xdrawglyphfontspecs(specs, base, i, old_x, position_y);
   }
 }
 
