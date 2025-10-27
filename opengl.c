@@ -54,7 +54,7 @@ void gl_draw_char(char character, float x, float y, float width, float height) {
 
     glBindTexture(GL_TEXTURE_2D, font_texture_id);
 
-    float gray = 0.25;
+    float gray = 1;
     glColor3f(gray, gray, gray); 
 
     glBegin(GL_QUADS);

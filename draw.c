@@ -4,15 +4,15 @@
 #include "opengl.h"
 
 void drawregion(int x1, int y1, int x2, int y2) {
-  int y, L;
+  int y, line;
 
-  L = TLINEOFFSET(y1);
+  line = TLINEOFFSET(y1);
   for (y = y1; y < y2; y++) {
     if (term.dirty[y]) {
       term.dirty[y] = 0;
-      xdrawline(TSCREEN.buffer[L], x1, y, x2);
+      xdrawline(TSCREEN.buffer[line], x1, y, x2);
     }
-    L = (L + 1) % TSCREEN.size;
+    line = (line + 1) % TSCREEN.size;
   }
 }
 

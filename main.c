@@ -1309,6 +1309,8 @@ void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
   Color *fg, *bg, *temp, revfg, revbg, truefg, truebg;
   XRenderColor colfg, colbg;
   XRectangle r;
+  
+  gl_draw_char(base.utf8_value, winx, winy,32, 32);
 
   /* Fallback on color display for attributes not supported by the font */
   if (base.mode & ATTR_ITALIC && base.mode & ATTR_BOLD) {
@@ -1414,10 +1416,10 @@ void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
   r.width = width;
   XftDrawSetClipRectangles(xw.draw, winx, winy, &r, 1);
 
-  gl_draw_char(base.utf8_value, winx, winy,32, 32);
 
   /* Render the glyphs. */
   XftDrawGlyphFontSpec(xw.draw, fg, specs, len);
+  
 
   /* Render underline and strikethrough. */
   if (base.mode & ATTR_UNDERLINE) {
@@ -1580,7 +1582,6 @@ void xdrawline(Line line, int x1, int y1, int x2) {
   }
   if (i > 0){
     xdrawglyphfontspecs(specs, base, i, ox, y1);
-    //gl_draw_char('t', ox, y1, 32, 32);
   }
 }
 
@@ -1589,8 +1590,8 @@ void xfinishdraw(void) {
   //XCopyArea(xw.dpy, xw.buf, xw.win, dc.gc, 0, 0, win.w, win.h, 0, 0);
 
 
-  XSetForeground(xw.dpy, dc.gc,
-                 dc.col[IS_SET(MODE_REVERSE) ? defaultfg : defaultbg].pixel);
+  // XSetForeground(xw.dpy, dc.gc,
+  //                dc.col[IS_SET(MODE_REVERSE) ? defaultfg : defaultbg].pixel);
 }
 
 void xximspot(int x, int y) {
@@ -1879,11 +1880,11 @@ void run(void) {
     }
 
     glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
-   // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     draw();
 
-    XFlush(xw.dpy);
+    //XFlush(xw.dpy);
 
     gl_draw_char('d', 50, 50, 50, 50);
     glXSwapBuffers(xw.dpy, xw.win);

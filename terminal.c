@@ -149,7 +149,7 @@ static void treset(void);
 static void tscrollup(int, int);
 static void tscrolldown(int, int);
 static void tsetattr(const int *, int);
-static void tsetchar(Rune, const Glyph *, int, int);
+static void tsetchar(Rune, Glyph *, int, int);
 static void tsetdirt(int, int);
 static void tsetscroll(int, int);
 static void tswapscreen(void);
@@ -1114,7 +1114,8 @@ void tmoveto(int x, int y) {
   term.cursor.y = LIMIT(y, miny, maxy);
 }
 
-void tsetchar(Rune u, const Glyph *attr, int x, int y) {
+void tsetchar(Rune u, Glyph *attr, int x, int y) {
+  attr->utf8_value = (int)u;
   static const char *vt100_0[62] = {
       /* 0x41 - 0x7e */
       "↑", "↓", "→", "←", "█", "▚", "☃",      /* A - G */
@@ -1127,13 +1128,15 @@ void tsetchar(Rune u, const Glyph *attr, int x, int y) {
       "│", "≤", "≥", "π", "≠", "£", "·",      /* x - ~ */
   };
   Line line = TLINE(y);
+  line[x].utf8_value = (int)u;
 
   /*
    * The table is proudly stolen from rxvt.
    */
   if (term.trantbl[term.charset] == CS_GRAPHIC0 && BETWEEN(u, 0x41, 0x7e) &&
-      vt100_0[u - 0x41])
+      vt100_0[u - 0x41]){
     utf8decode(vt100_0[u - 0x41], &u, UTF_SIZ);
+  }
   
 
   if (line[x].mode & ATTR_WIDE) {
@@ -1149,7 +1152,7 @@ void tsetchar(Rune u, const Glyph *attr, int x, int y) {
   term.dirty[y] = 1;
   line[x] = *attr;
   line[x].u = u;
-  line[x].utf8_value = (int)u;
+  //line[x].utf8_value = (int)u;
 }
 
 void tclearregion(int x1, int y1, int x2, int y2) {
@@ -2209,6 +2212,8 @@ void tputc(Rune u) {
   int width, len;
   Glyph *gp;
 
+  int original_rune = u;
+
   control = ISCONTROL(u);
   if (u < 127 || !IS_SET(MODE_UTF8)) {
     c[0] = u;
@@ -2309,7 +2314,7 @@ check_control_code:
     selclear();
 
   gp = &TLINE(term.cursor.y)[term.cursor.x];
-  gp->utf8_value = (int)u;
+  gp->utf8_value = original_rune;
   if (IS_SET(MODE_WRAP) && (term.cursor.state & CURSOR_WRAPNEXT)) {
     gp->mode |= ATTR_WRAP;
     tnewline(1);
