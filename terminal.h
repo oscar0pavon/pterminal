@@ -119,9 +119,9 @@ typedef struct {
   LineBuffer screen[2]; /* screen and alternate screen */
   int linelen;          /* allocated line length */
   int *dirty;           /* dirtyness of lines */
-  TCursor c;            /* cursor */
-  int ocx;              /* old cursor col */
-  int ocy;              /* old cursor row */
+  TCursor cursor;            /* cursor */
+  int old_cursor_x;              /* old cursor col */
+  int old_cursor_y;              /* old cursor row */
   int top;              /* top    scroll limit */
   int bot;              /* bottom scroll limit */
   int mode;             /* terminal mode flags */
