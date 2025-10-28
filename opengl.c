@@ -1,4 +1,5 @@
 #include "opengl.h"
+#include <GL/gl.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <lodepng.h>
@@ -12,6 +13,18 @@ typedef struct UV{
 }UV;
 
 GLuint font_texture_id;
+
+void gl_draw_rect(PColor color,  float x, float y, float width, float height){
+    glColor4f(color.r, color.g, color.b,1.f); 
+
+    glBegin(GL_QUADS);
+        glVertex3f(x, y,-1);
+        glVertex3f(x + width, y,-1);
+        glVertex3f(x + width, y + height,-1);
+        glVertex3f(x, y + height,-1);
+    glEnd();
+
+}
 
 void gl_draw_char(char character, PColor color,  float x, float y, float width, float height){
 

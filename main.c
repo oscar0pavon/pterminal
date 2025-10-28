@@ -96,6 +96,7 @@ typedef struct RenderColor{
   Color* background;
   Color* foreground;
   Color truefg, truebg;
+  Color revfg, revbg;
   PColor gl_background_color;
   PColor gl_foreground_color;
 
@@ -1316,7 +1317,7 @@ int xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len,
 
 void get_color_from_glyph(Glyph* base, RenderColor* out){
 
-  Color *fg, *bg, *temp, revfg, revbg;
+  Color *fg, *bg, *temp;
   XRenderColor colfg, colbg;
   bool is_foreground_true_color = false;
   bool is_background_true_color = false;
@@ -1366,8 +1367,8 @@ void get_color_from_glyph(Glyph* base, RenderColor* out){
       colfg.green = ~fg->color.green;
       colfg.blue = ~fg->color.blue;
       colfg.alpha = fg->color.alpha;
-      XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colfg, &revfg);
-      fg = &revfg;
+      XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colfg, &out->revfg);
+      fg = &out->revfg;
     }
 
     if (bg == &drawing_context.colors[defaultbg]) {
@@ -1377,8 +1378,8 @@ void get_color_from_glyph(Glyph* base, RenderColor* out){
       colbg.green = ~bg->color.green;
       colbg.blue = ~bg->color.blue;
       colbg.alpha = bg->color.alpha;
-      XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colbg, &revbg);
-      bg = &revbg;
+      XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colbg, &out->revbg);
+      bg = &out->revbg;
     }
   }
 
@@ -1387,8 +1388,8 @@ void get_color_from_glyph(Glyph* base, RenderColor* out){
     colfg.green = fg->color.green / 2;
     colfg.blue = fg->color.blue / 2;
     colfg.alpha = fg->color.alpha;
-    XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colfg, &revfg);
-    fg = &revfg;
+    XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colfg, &out->revfg);
+    fg = &out->revfg;
   }
 
   if (base->mode & ATTR_REVERSE) {
@@ -1414,7 +1415,12 @@ void get_color_from_glyph(Glyph* base, RenderColor* out){
                       .b = bg->color.blue/div};
     out->gl_background_color = mycolor;
   }else{
-    div = 255.f;
+
+    if(bg->color.red > 255 || bg->color.blue > 255 || bg->color.green > 255){
+      div = 65525.f;
+    }else{
+      div = 255.f;
+    }
 
     PColor mycolor = {.r = bg->color.red/div,
                       .g = bg->color.green/div,
@@ -1625,7 +1631,6 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
   Glyph base, new;
   XftGlyphFontSpec *specs = xw.specbuf;
 
-  int line_char_count = 0;
   for(int i = 0; i < column - position_x; i++){
 
     RenderColor color;
@@ -1633,6 +1638,18 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
 
     int winx = ((i * 9.1)-position_x)-6;
     int winy = borderpx + position_y * win.ch;
+  
+
+    gl_draw_rect(color.gl_background_color, winx, winy, 24,24);
+  }
+  for(int i = 0; i < column - position_x; i++){
+
+    RenderColor color;
+    get_color_from_glyph(&line[i],&color);
+
+    int winx = ((i * 9.1)-position_x)-6;
+    int winy = borderpx + position_y * win.ch;
+  
     gl_draw_char(line[i].u, color.gl_foreground_color,  winx, winy, 24,24);
   }
 
@@ -1966,6 +1983,7 @@ void run(void) {
 
     //glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_COLOR_BUFFER_BIT);
 
     draw();
 
