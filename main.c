@@ -1627,15 +1627,13 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
 
   int line_char_count = 0;
   for(int i = 0; i < column - position_x; i++){
+
     RenderColor color;
     get_color_from_glyph(&line[i],&color);
 
-
-
-    int charlen = 32;
-    int winx = ((i * 8)-position_x)-4;
+    int winx = ((i * 9.1)-position_x)-6;
     int winy = borderpx + position_y * win.ch;
-    gl_draw_char(line[i].u, color.gl_foreground_color,  winx, winy, 22,22);
+    gl_draw_char(line[i].u, color.gl_foreground_color,  winx, winy, 24,24);
   }
 
   numspecs = xmakeglyphfontspecs(specs, &line[position_x], column - position_x,
@@ -1966,7 +1964,7 @@ void run(void) {
       }
     }
 
-    glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
+    //glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     draw();
