@@ -1308,6 +1308,12 @@ void draw_text(Glyph* base, int len,
   }
 
 }
+
+typedef struct RenderColor{
+  Color* background;
+  Color* foreground;
+}RenderColor;
+
 void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
                          int x, int y) {
   int charlen = len * ((base.mode & ATTR_WIDE) ? 2 : 1);
@@ -1914,7 +1920,9 @@ void run(void) {
 
     XFlush(xw.dpy);
 
-    glXSwapBuffers(xw.dpy, xw.win);
+    if(is_opengl)
+      glXSwapBuffers(xw.dpy, xw.win);
+
     drawing = 0;
   }
 }
@@ -1933,7 +1941,7 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 
-  is_opengl = true;
+  is_opengl = false;
 
   xw.l = xw.t = 0;
   xw.isfixed = False;
