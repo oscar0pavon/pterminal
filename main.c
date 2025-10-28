@@ -1312,57 +1312,49 @@ void draw_text(Glyph* base, int len,
 typedef struct RenderColor{
   Color* background;
   Color* foreground;
+  Color truefg, truebg;
+
 }RenderColor;
 
-void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
-                         int x, int y) {
-  int charlen = len * ((base.mode & ATTR_WIDE) ? 2 : 1);
-  int winx = borderpx + x * win.cw, winy = borderpx + y * win.ch,
-      width = charlen * win.cw;
-  Color *fg, *bg, *temp, revfg, revbg, truefg, truebg;
-  XRenderColor colfg, colbg;
-  XRectangle r;
+void get_color_from_glyph(Glyph* base, RenderColor* out){
 
-  char current_char = (char)base.utf8_value;
-  //putchar(base.utf8_value);
-  
-  //gl_draw_char((int)base.u, winx-32, winy,32, 32);
-  //draw_text(&base,len,winx,winy);
+  Color *fg, *bg, *temp, revfg, revbg;
+  XRenderColor colfg, colbg;
 
   /* Fallback on color display for attributes not supported by the font */
-  if (base.mode & ATTR_ITALIC && base.mode & ATTR_BOLD) {
+  if (base->mode & ATTR_ITALIC && base->mode & ATTR_BOLD) {
     if (dc.ibfont.badslant || dc.ibfont.badweight)
-      base.fg = defaultattr;
-  } else if ((base.mode & ATTR_ITALIC && dc.ifont.badslant) ||
-             (base.mode & ATTR_BOLD && dc.bfont.badweight)) {
-    base.fg = defaultattr;
+      base->fg = defaultattr;
+  } else if ((base->mode & ATTR_ITALIC && dc.ifont.badslant) ||
+             (base->mode & ATTR_BOLD && dc.bfont.badweight)) {
+    base->fg = defaultattr;
   }
 
-  if (IS_TRUECOL(base.fg)) {
+  if (IS_TRUECOL(base->fg)) {
     colfg.alpha = 0xffff;
-    colfg.red = TRUERED(base.fg);
-    colfg.green = TRUEGREEN(base.fg);
-    colfg.blue = TRUEBLUE(base.fg);
-    XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colfg, &truefg);
-    fg = &truefg;
+    colfg.red = TRUERED(base->fg);
+    colfg.green = TRUEGREEN(base->fg);
+    colfg.blue = TRUEBLUE(base->fg);
+    XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colfg, &out->truefg);
+    fg = &out->truefg;
   } else {
-    fg = &dc.col[base.fg];
+    fg = &dc.col[base->fg];
   }
 
-  if (IS_TRUECOL(base.bg)) {
+  if (IS_TRUECOL(base->bg)) {
     colbg.alpha = 0xffff;
-    colbg.green = TRUEGREEN(base.bg);
-    colbg.red = TRUERED(base.bg);
-    colbg.blue = TRUEBLUE(base.bg);
-    XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colbg, &truebg);
-    bg = &truebg;
+    colbg.green = TRUEGREEN(base->bg);
+    colbg.red = TRUERED(base->bg);
+    colbg.blue = TRUEBLUE(base->bg);
+    XftColorAllocValue(xw.dpy, xw.vis, xw.cmap, &colbg, &out->truebg);
+    bg = &out->truebg;
   } else {
-    bg = &dc.col[base.bg];
+    bg = &dc.col[base->bg];
   }
 
   /* Change basic system colors [0-7] to bright system colors [8-15] */
-  if ((base.mode & ATTR_BOLD_FAINT) == ATTR_BOLD && BETWEEN(base.fg, 0, 7))
-    fg = &dc.col[base.fg + 8];
+  if ((base->mode & ATTR_BOLD_FAINT) == ATTR_BOLD && BETWEEN(base->fg, 0, 7))
+    fg = &dc.col[base->fg + 8];
 
   if (IS_SET(MODE_REVERSE)) {
     if (fg == &dc.col[defaultfg]) {
@@ -1388,7 +1380,7 @@ void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
     }
   }
 
-  if ((base.mode & ATTR_BOLD_FAINT) == ATTR_FAINT) {
+  if ((base->mode & ATTR_BOLD_FAINT) == ATTR_FAINT) {
     colfg.red = fg->color.red / 2;
     colfg.green = fg->color.green / 2;
     colfg.blue = fg->color.blue / 2;
@@ -1397,17 +1389,37 @@ void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
     fg = &revfg;
   }
 
-  if (base.mode & ATTR_REVERSE) {
+  if (base->mode & ATTR_REVERSE) {
     temp = fg;
     fg = bg;
     bg = temp;
   }
 
-  if (base.mode & ATTR_BLINK && win.mode & MODE_BLINK)
+  if (base->mode & ATTR_BLINK && win.mode & MODE_BLINK)
     fg = bg;
 
-  if (base.mode & ATTR_INVISIBLE)
+  if (base->mode & ATTR_INVISIBLE)
     fg = bg;
+
+  out->foreground = fg;
+  out->background = bg;
+
+}
+
+void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
+                         int x, int y) {
+  int charlen = len * ((base.mode & ATTR_WIDE) ? 2 : 1);
+  int winx = borderpx + x * win.cw, winy = borderpx + y * win.ch,
+      width = charlen * win.cw;
+  XRectangle r;
+
+  //Color
+  Color *fg, *bg;
+  RenderColor color;
+  get_color_from_glyph(&base, &color);
+  fg = color.foreground;
+  bg = color.background;
+
 
   /* Intelligent cleaning up of the borders. */
   if (x == 0) {
