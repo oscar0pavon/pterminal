@@ -8,8 +8,12 @@ void drawregion(int position_x, int position_y, int column, int row) {
 
   line_number = TLINEOFFSET(position_y);
   for (i = position_y; i < row; i++) {
-    if (term.dirty[i]) {
-      term.dirty[i] = 0;
+    if (!is_opengl) {
+      if (term.dirty[i]) {
+        term.dirty[i] = 0;
+        xdrawline(TSCREEN.buffer[line_number], position_x, i, column);
+      }
+    }else{//always draw the buffer
       xdrawline(TSCREEN.buffer[line_number], position_x, i, column);
     }
     line_number = (line_number + 1) % TSCREEN.size;
@@ -44,7 +48,7 @@ void draw(void) {
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
 
-  xfinishdraw();
+  //xfinishdraw(); //only call when with draw with Xlib
 
   if (old_cursor_x != term.old_cursor_x || old_cursor_y != term.old_cursor_y)
     xximspot(term.old_cursor_x, term.old_cursor_y);

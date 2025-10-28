@@ -4,6 +4,8 @@
 #include <lodepng.h>
 #include <math.h>
 
+bool is_opengl = false;
+
 typedef struct UV{
     float x;
     float y;

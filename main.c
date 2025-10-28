@@ -29,7 +29,6 @@ char *argv0;
 #include <stdbool.h>
 #include "opengl.h"
 
-bool is_opengl = false;
 
 int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
@@ -1616,11 +1615,11 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
 
 void xfinishdraw(void) {
 
-  //XCopyArea(xw.dpy, xw.buf, xw.win, dc.gc, 0, 0, win.w, win.h, 0, 0);
+  XCopyArea(xw.dpy, xw.buf, xw.win, dc.gc, 0, 0, win.w, win.h, 0, 0);
 
 
-  // XSetForeground(xw.dpy, dc.gc,
-  //                dc.col[IS_SET(MODE_REVERSE) ? defaultfg : defaultbg].pixel);
+  XSetForeground(xw.dpy, dc.gc,
+                 dc.col[IS_SET(MODE_REVERSE) ? defaultfg : defaultbg].pixel);
 }
 
 void xximspot(int x, int y) {
@@ -1909,15 +1908,13 @@ void run(void) {
     }
 
     glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
-    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     draw();
 
-    //XFlush(xw.dpy);
+    XFlush(xw.dpy);
 
-    gl_draw_char('d', 50, 50, 50, 50);
     glXSwapBuffers(xw.dpy, xw.win);
-    // glXSwapBuffers(xw.dpy,xw.win);
     drawing = 0;
   }
 }
