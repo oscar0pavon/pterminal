@@ -32,6 +32,7 @@ char *argv0;
 
 int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
+
 /* types used in config.h */
 typedef struct {
   uint mod;
@@ -90,6 +91,13 @@ void kscrolldown(const Arg *);
 typedef XftDraw *Draw;
 typedef XftColor Color;
 typedef XftGlyphFontSpec GlyphFontSpec;
+
+typedef struct RenderColor{
+  Color* background;
+  Color* foreground;
+  Color truefg, truebg;
+
+}RenderColor;
 
 /* Purely graphic info */
 typedef struct {
@@ -157,6 +165,8 @@ typedef struct {
   Font font, bfont, ifont, ibfont;
   GC gc;
 } DC;
+
+void get_color_from_glyph(Glyph* base, RenderColor* out);
 
 static inline ushort sixd_to_16bit(int);
 static int xmakeglyphfontspecs(XftGlyphFontSpec *, const Glyph *, int, int,
@@ -1300,21 +1310,7 @@ int xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len,
 
   return numspecs;
 }
-void draw_text(Glyph* base, int len,
-                         int x, int y) {
 
-  for(int i = 0; i < len; i++){
-    gl_draw_char(base->u, x, y,32, 32);
-  }
-
-}
-
-typedef struct RenderColor{
-  Color* background;
-  Color* foreground;
-  Color truefg, truebg;
-
-}RenderColor;
 
 void get_color_from_glyph(Glyph* base, RenderColor* out){
 
@@ -1413,7 +1409,7 @@ void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
       width = charlen * win.cw;
   XRectangle r;
 
-  //Color
+
   Color *fg, *bg;
   RenderColor color;
   get_color_from_glyph(&base, &color);
@@ -1591,10 +1587,19 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
 
   int line_char_count = 0;
   for(int i = 0; i < column - position_x; i++){
+    RenderColor color;
+    get_color_from_glyph(&line[i],&color);
+
+
+    float div = 65535.f;
+    PColor mycolor = {.r = color.truefg.color.red/div,
+                      .g = color.truefg.color.green/div,
+                      .b = color.truefg.color.blue/div};
+
     int charlen = 32;
     int winx = ((i * 8)-position_x)-4;
     int winy = borderpx + position_y * win.ch;
-    gl_draw_char(line[i].u, winx, winy, 22,22);
+    gl_draw_char(line[i].u, mycolor,  winx, winy, 22,22);
   }
 
   numspecs = xmakeglyphfontspecs(specs, &line[position_x], column - position_x,
@@ -1953,7 +1958,7 @@ void usage(void) {
 
 int main(int argc, char *argv[]) {
 
-  is_opengl = false;
+  is_opengl = true;
 
   xw.l = xw.t = 0;
   xw.isfixed = False;

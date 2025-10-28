@@ -13,7 +13,7 @@ typedef struct UV{
 
 GLuint font_texture_id;
 
-void gl_draw_char(char character, float x, float y, float width, float height) {
+void gl_draw_char(char character, PColor color,  float x, float y, float width, float height){
 
     int ascii_value = (int)character;
 
@@ -56,8 +56,7 @@ void gl_draw_char(char character, float x, float y, float width, float height) {
 
     glBindTexture(GL_TEXTURE_2D, font_texture_id);
 
-    float gray = 1;
-    glColor3f(gray, gray, gray); 
+    glColor3f(color.r, color.g, color.b); 
 
     glBegin(GL_QUADS);
     glTexCoord2f(uv1.x, uv1.y);
