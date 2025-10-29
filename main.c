@@ -1525,10 +1525,10 @@ void xdrawglyph(Glyph g, int x, int y) {
   int winx = ((x * 9.1)+4);
   int winy = borderpx + y * win.ch;
 
-  gl_draw_rect(color.gl_background_color, winx, winy, 7, 24);
+  gl_draw_rect(color.gl_background_color, winx, winy, 7, 26);
 
 
-  gl_draw_char(g.u, color.gl_foreground_color, winx_char, winy, 24, 24);
+  gl_draw_char(g.u, color.gl_foreground_color, winx_char, winy, 24, 26);
 }
 
 void xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og) {
@@ -1587,7 +1587,7 @@ void xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og) {
       int winx = ((cx * 9.1));
       int winy = borderpx + cy * win.ch;
       PColor new_color = {.r = 1, .g = 1, .b =1};
-      gl_draw_rect(new_color, winx, winy-(win.ch-40), 10, 4);
+      gl_draw_rect(new_color, winx, winy-(win.ch-43), 10, 4);
       break;
     case 5: /* Blinking bar */
     case 6: /* Steady bar */
@@ -1660,7 +1660,7 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     int winy = borderpx + position_y * win.ch;
   
 
-    gl_draw_rect(color.gl_background_color, winx, winy, 24,24);
+    gl_draw_rect(color.gl_background_color, winx, winy, 24,26);
   }
   for(int i = 0; i < column - position_x; i++){
 
@@ -1670,7 +1670,7 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     int winx = ((i * 9.1)-position_x)-6;
     int winy = borderpx + position_y * win.ch;
   
-    gl_draw_char(line[i].u, color.gl_foreground_color,  winx, winy, 24,24);
+    gl_draw_char(line[i].u, color.gl_foreground_color,  winx, winy, 24,26);
   }
 
   numspecs = xmakeglyphfontspecs(specs, &line[position_x], column - position_x,
