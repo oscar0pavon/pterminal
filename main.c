@@ -1513,6 +1513,19 @@ void xdrawglyph(Glyph g, int x, int y) {
 
   numspecs = xmakeglyphfontspecs(&spec, &g, 1, x, y);
   xdrawglyphfontspecs(&spec, g, numspecs, x, y);
+
+  //Background
+  RenderColor color;
+  get_color_from_glyph(&g, &color);
+
+  int winx_char = ((x * 9.1))-6;
+  int winx = ((x * 9.1)+4);
+  int winy = borderpx + y * win.ch;
+
+  gl_draw_rect(color.gl_background_color, winx, winy, 7, 24);
+
+
+  gl_draw_char(g.u, color.gl_foreground_color, winx_char, winy, 24, 24);
 }
 
 void xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og) {
@@ -1568,6 +1581,10 @@ void xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og) {
       XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
                   borderpx + (cy + 1) * win.ch - cursorthickness, win.cw,
                   cursorthickness);
+      int winx = ((cx * 9.1));
+      int winy = borderpx + cy * win.ch;
+      PColor new_color = {.r = 1, .g = 1, .b =1};
+      gl_draw_rect(new_color, winx, winy-(win.ch-40), 10, 4);
       break;
     case 5: /* Blinking bar */
     case 6: /* Steady bar */
@@ -1636,7 +1653,7 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     RenderColor color;
     get_color_from_glyph(&line[i],&color);
 
-    int winx = ((i * 9.1)-position_x)-6;
+    int winx = ((i * 9.1));
     int winy = borderpx + position_y * win.ch;
   
 
