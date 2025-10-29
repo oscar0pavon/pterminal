@@ -699,6 +699,8 @@ void cresize(int width, int height) {
   tresize(col, row);
   xresize(col, row);
   ttyresize(win.tw, win.th);
+  set_ortho_projection(win.w, win.h); 
+  glViewport(0, 0, win.w, win.h);
 }
 
 void xresize(int col, int row) {
@@ -1120,6 +1122,7 @@ void xinit(int cols, int rows) {
 
     glXMakeCurrent(xw.dpy, xw.win, xw.gl_context);
     set_ortho_projection(win.w, win.h); 
+    glViewport(0, 0, win.w, win.h);
     load_texture(&font_texture_id, "/root/pterminal/font1.png");
   }
 
