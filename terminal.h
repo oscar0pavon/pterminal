@@ -7,6 +7,7 @@
 #include <stddef.h>
 
 #include "types.h"
+#include "macros.h"
 
 #include "draw.h"
 
@@ -20,14 +21,25 @@ enum term_mode {
   MODE_UTF8 = 1 << 6,
 };
 
+typedef struct {
+  int mode;
+  int type;
+  int snap;
+  /*
+   * Selection variables:
+   * nb – normalized coordinates of the beginning of the selection
+   * ne – normalized coordinates of the end of the selection
+   * ob – original coordinates of the beginning of the selection
+   * oe – original coordinates of the end of the selection
+   */
+  struct {
+    int x, y;
+  } nb, ne, ob, oe;
+
+  int alt;
+} Selection;
+
 /* macros */
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
-#define MAX(a, b) ((a) < (b) ? (b) : (a))
-#define LEN(a) (sizeof(a) / sizeof(a)[0])
-#define BETWEEN(x, a, b) ((a) <= (x) && (x) <= (b))
-#define DIVCEIL(n, d) (((n) + ((d) - 1)) / (d))
-#define DEFAULT(a, b) (a) = (a) ? (a) : (b)
-#define LIMIT(x, a, b) (x) = (x) < (a) ? (a) : (x) > (b) ? (b) : (x)
 #define ATTRCMP(a, b)                                                          \
   ((a).mode != (b).mode || (a).fg != (b).fg || (a).bg != (b).bg)
 #define TIMEDIFF(t1, t2)                                                       \
@@ -67,11 +79,6 @@ enum glyph_attribute {
   ATTR_BOLD_FAINT = ATTR_BOLD | ATTR_FAINT,
 };
 
-enum selection_mode { SEL_IDLE = 0, SEL_EMPTY = 1, SEL_READY = 2 };
-
-enum selection_type { SEL_REGULAR = 1, SEL_RECTANGULAR = 2 };
-
-enum selection_snap { SNAP_WORD = 1, SNAP_LINE = 2 };
 
 
 typedef uint_least32_t Rune;
@@ -160,6 +167,13 @@ void *xmalloc(size_t);
 void *xrealloc(void *, size_t);
 char *xstrdup(const char *);
 
+void ttysend(const Arg *);
+
+void kscrollup(const Arg *);
+void kscrolldown(const Arg *);
+
+void tsetdirt(int, int);
+
 void get_color_from_glyph(Glyph* base, RenderColor* out);
 void xdrawcursor(int, int, Glyph, int, int, Glyph);
 void xdrawline(Line, int, int, int);
@@ -178,5 +192,7 @@ extern unsigned int tabspaces;
 extern unsigned int defaultfg;
 extern unsigned int defaultbg;
 extern unsigned int defaultcs;
+
+extern Selection sel;
 
 #endif

@@ -71,23 +71,6 @@ enum escape_state {
 };
 
 
-typedef struct {
-  int mode;
-  int type;
-  int snap;
-  /*
-   * Selection variables:
-   * nb – normalized coordinates of the beginning of the selection
-   * ne – normalized coordinates of the end of the selection
-   * ob – original coordinates of the beginning of the selection
-   * oe – original coordinates of the end of the selection
-   */
-  struct {
-    int x, y;
-  } nb, ne, ob, oe;
-
-  int alt;
-} Selection;
 
 
 
@@ -150,7 +133,6 @@ static void tscrollup(int, int);
 static void tscrolldown(int, int);
 static void tsetattr(const int *, int);
 static void tsetchar(Rune, Glyph *, int, int);
-static void tsetdirt(int, int);
 static void tsetscroll(int, int);
 static void tswapscreen(void);
 static void tsetmode(int, int, const int *, int);
@@ -183,7 +165,7 @@ static ssize_t xwrite(int, const char *, size_t);
 
 /* Globals */
 Term term;
-static Selection sel;
+Selection sel;
 static CSIEscape csiescseq;
 static STREscape strescseq;
 static int iofd = 1;
@@ -227,14 +209,6 @@ void *xrealloc(void *p, size_t len) {
   return p;
 }
 
-char *xstrdup(const char *s) {
-  char *p;
-
-  if ((p = strdup(s)) == NULL)
-    die("strdup: %s\n", strerror(errno));
-
-  return p;
-}
 
 size_t utf8decode(const char *c, Rune *u, size_t clen) {
   size_t i, j, len, type;
@@ -557,13 +531,6 @@ char *getsel(void) {
   return str;
 }
 
-void selclear(void) {
-  if (sel.ob.x == -1)
-    return;
-  sel.mode = SEL_IDLE;
-  sel.ob.x = -1;
-  tsetdirt(sel.nb.y, sel.ne.y);
-}
 
 void die(const char *errstr, ...) {
   va_list ap;
