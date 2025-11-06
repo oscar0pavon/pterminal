@@ -69,7 +69,7 @@ typedef struct {
 /* Purely graphic info */
 typedef struct {
   int tty_width, tty_height; /* tty width and height */
-  int width, hight;   /* window width and height */
+  int width, height;   /* window width and height */
   int character_height;     /* char height */
   int character_width;     /* char width  */
   int mode;   /* window state/mode flags */

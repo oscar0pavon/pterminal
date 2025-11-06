@@ -24,7 +24,7 @@ void xresize(int col, int row) {
   terminal_window.tty_width = col * terminal_window.character_width;
   terminal_window.tty_height = row * terminal_window.character_height;
 
-  xclear(0, 0, terminal_window.width, terminal_window.hight);
+  xclear(0, 0, terminal_window.width, terminal_window.height);
 }
 
 void cresize(int width, int height) {
@@ -33,10 +33,10 @@ void cresize(int width, int height) {
   if (width != 0)
     terminal_window.width = width;
   if (height != 0)
-    terminal_window.hight = height;
+    terminal_window.height = height;
 
   col = terminal_window.width / terminal_window.character_width;
-  row = terminal_window.hight / terminal_window.character_height;
+  row = terminal_window.height / terminal_window.character_height;
 
   col = MAX(1, col);
   row = MAX(1, row);
@@ -45,14 +45,14 @@ void cresize(int width, int height) {
   xresize(col, row);
   ttyresize(terminal_window.tty_width, terminal_window.tty_height);
 
-  set_ortho_projection(terminal_window.width, terminal_window.hight);
-  glViewport(0, 0, terminal_window.width, terminal_window.hight);
+  set_ortho_projection(terminal_window.width, terminal_window.height);
+  glViewport(0, 0, terminal_window.width, terminal_window.height);
 
 }
 
 void resize(XEvent *e) {
   if (e->xconfigure.width == terminal_window.width &&
-      e->xconfigure.height == terminal_window.hight)
+      e->xconfigure.height == terminal_window.height)
     return;
 
   cresize(e->xconfigure.width, e->xconfigure.height);

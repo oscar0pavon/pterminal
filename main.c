@@ -197,7 +197,7 @@ void xhints(void) {
   sizeh = XAllocSizeHints();
 
   sizeh->flags = PSize | PResizeInc | PBaseSize | PMinSize;
-  sizeh->height = terminal_window.hight;
+  sizeh->height = terminal_window.height;
   sizeh->width = terminal_window.width;
   sizeh->height_inc = terminal_window.character_height;
   sizeh->width_inc = terminal_window.character_width;
@@ -208,7 +208,7 @@ void xhints(void) {
   if (xw.isfixed) {
     sizeh->flags |= PMaxSize;
     sizeh->min_width = sizeh->max_width = terminal_window.width;
-    sizeh->min_height = sizeh->max_height = terminal_window.hight;
+    sizeh->min_height = sizeh->max_height = terminal_window.height;
   }
   if (xw.gm & (XValue | YValue)) {
     sizeh->flags |= USPosition | PWinGravity;
@@ -290,32 +290,27 @@ void xinit(int cols, int rows) {
   xw.screen = XDefaultScreen(xw.display);
   xw.vis = XDefaultVisual(xw.display, xw.screen);
 
-  //OpenGL
-  if (is_opengl) {
-
-    xw.visual_info = glXChooseVisual(xw.display, xw.screen, gl_attributes);
-    if (!xw.visual_info)
-      die("can't create glx visual\n");
-  }
-
-  /* font */
-  if (!FcInit())
-    die("could not init fontconfig.\n");
-
+  xw.visual_info = glXChooseVisual(xw.display, xw.screen, gl_attributes);
+  if (!xw.visual_info)
+    die("can't create glx visual\n");
 
   xw.cmap = XCreateColormap(xw.display,
                             RootWindow(xw.display, xw.visual_info->screen),
                             xw.visual_info->visual, AllocNone);
 
   xloadcols();
+  
+  terminal_window.character_height = 32;
+  terminal_window.character_width = 16;
 
   /* adjust fixed window geometry */
-  terminal_window.width = 2 * borderpx + cols * terminal_window.character_width;
-  terminal_window.hight = 2 * borderpx + rows * terminal_window.character_height;
+  terminal_window.width = cols * terminal_window.character_width;
+  terminal_window.height = rows * terminal_window.character_height;
+
   if (xw.gm & XNegative)
     xw.left_offset += DisplayWidth(xw.display, xw.screen) - terminal_window.width - 2;
   if (xw.gm & YNegative)
-    xw.top_offset += DisplayHeight(xw.display, xw.screen) - terminal_window.hight - 2;
+    xw.top_offset += DisplayHeight(xw.display, xw.screen) - terminal_window.height - 2;
 
   /* Events */
   xw.attrs.background_pixel = drawing_context.colors[defaultbg].pixel;
@@ -325,6 +320,7 @@ void xinit(int cols, int rows) {
                         ExposureMask | VisibilityChangeMask |
                         StructureNotifyMask | ButtonMotionMask |
                         ButtonPressMask | ButtonReleaseMask;
+
   xw.attrs.colormap = xw.cmap;
 
   root = XRootWindow(xw.display, xw.screen);
@@ -333,9 +329,13 @@ void xinit(int cols, int rows) {
 
   xw.vis = xw.visual_info->visual;
 
+  printf("Teminal window width %i\n",terminal_window.width);
+  printf("Teminal window height %i\n",terminal_window.height);
+
   xw.win = XCreateWindow(
-      xw.display, root, xw.left_offset, xw.top_offset, terminal_window.width, terminal_window.hight, 0,
-      XDefaultDepth(xw.display, xw.screen), InputOutput, xw.vis,
+      xw.display, root, xw.left_offset, xw.top_offset, terminal_window.width,
+      terminal_window.height, 0, XDefaultDepth(xw.display, xw.screen),
+      InputOutput, xw.vis,
       CWBackPixel | CWBorderPixel | CWBitGravity | CWEventMask | CWColormap,
       &xw.attrs);
 
@@ -346,8 +346,8 @@ void xinit(int cols, int rows) {
   }
 
   glXMakeCurrent(xw.display, xw.win, xw.gl_context);
-  set_ortho_projection(terminal_window.width, terminal_window.hight);
-  glViewport(0, 0, terminal_window.width, terminal_window.hight);
+  set_ortho_projection(terminal_window.width, terminal_window.height);
+  glViewport(0, 0, terminal_window.width, terminal_window.height);
   load_texture(&font_texture_id, "/root/pterminal/font1.png");
 
   if (parent != root)
@@ -403,8 +403,6 @@ void xinit(int cols, int rows) {
   if (xsel.xtarget == None)
     xsel.xtarget = XA_STRING;
 
-  terminal_window.character_height = 32;
-  terminal_window.character_width = 16;
 }
 
 
@@ -546,7 +544,7 @@ void cmessage(XEvent *e) {
 
 void run(void) {
   XEvent ev;
-  int w = terminal_window.width, h = terminal_window.hight;
+  int w = terminal_window.width, h = terminal_window.height;
   fd_set rfd;
   int xfd = XConnectionNumber(xw.display), ttyfd, xev, drawing;
   struct timespec seltv, *tv, now, lastblink, trigger;
@@ -726,8 +724,11 @@ run:
   setlocale(LC_CTYPE, "");
   XSetLocaleModifiers("");
   cols = MAX(cols, 1);
+  printf("Columns %i\n", cols);
   rows = MAX(rows, 1);
+  printf("Rows %i\n", rows);
   tnew(cols, rows);
+  printf("now terminal col %i\n", term.col);
   xinit(cols, rows);
   xsetenv();
   selinit();
