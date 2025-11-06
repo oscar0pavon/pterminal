@@ -293,7 +293,7 @@ void xinit(int cols, int rows) {
   xloadcols();
   
   terminal_window.character_height = 24;
-  terminal_window.character_width = 16;
+  terminal_window.character_width = 9;
 
   /* adjust fixed window geometry */
   terminal_window.width = cols * terminal_window.character_width;
@@ -628,15 +628,11 @@ void run(void) {
       }
     }
 
-    //glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //glClear(GL_COLOR_BUFFER_BIT);
 
     draw();
 
     //XFlush(xw.display);
 
-    glXSwapBuffers(xw.display, xw.win);
 
     drawing = 0;
   }

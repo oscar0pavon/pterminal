@@ -71,7 +71,7 @@ typedef struct {
   int tty_width, tty_height; /* tty width and height */
   int width, height;   /* window width and height */
   int character_height;     /* char height */
-  int character_width;     /* char width  */
+  float character_width;     /* char width  */
   int mode;   /* window state/mode flags */
   int cursor; /* cursor style */
 } TermWindow;
