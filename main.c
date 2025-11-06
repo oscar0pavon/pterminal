@@ -103,21 +103,6 @@ typedef struct {
 } XWindow;
 
 
-/* Font structure */
-#define Font Font_
-typedef struct {
-  int height;
-  int width;
-  int ascent;
-  int descent;
-  int badslant;
-  int badweight;
-  short lbearing;
-  short rbearing;
-  XftFont *match;
-  FcFontSet *set;
-  FcPattern *pattern;
-} Font;
 
 /* Drawing Context */
 typedef struct {
@@ -130,9 +115,6 @@ typedef struct {
 void get_color_from_glyph(Glyph* base, RenderColor* out);
 
 static inline ushort sixd_to_16bit(int);
-static int xmakeglyphfontspecs(XftGlyphFontSpec *, const Glyph *, int, int,
-                               int);
-static void xdrawglyphfontspecs(const XftGlyphFontSpec *, Glyph, int, int, int);
 static void xdrawglyph(Glyph, int, int);
 static void xclear(int, int, int, int);
 static int xgeommasktogravity(int);
@@ -146,9 +128,6 @@ static void xresize(int, int);
 static void xhints(void);
 static int xloadcolor(int, const char *, Color *);
 static int xloadfont(Font *, FcPattern *);
-static void xloadfonts(const char *, double);
-static void xunloadfont(Font *);
-static void xunloadfonts(void);
 static void xsetenv(void);
 static void xseturgency(int);
 static int evcol(XEvent *);
@@ -275,8 +254,8 @@ void zoom(const Arg *arg) {
 }
 
 void zoomabs(const Arg *arg) {
-  xunloadfonts();
-  xloadfonts(usedfont, arg->f);
+  //xunloadfonts();
+  //xloadfonts(usedfont, arg->f);
   cresize(0, 0);
   redraw();
   xhints();
@@ -801,162 +780,6 @@ int xgeommasktogravity(int mask) {
   return SouthEastGravity;
 }
 
-int xloadfont(Font *f, FcPattern *pattern) {
-  FcPattern *configured;
-  FcPattern *match;
-  FcResult result;
-  XGlyphInfo extents;
-  int wantattr, haveattr;
-
-  /*
-   * Manually configure instead of calling XftMatchFont
-   * so that we can use the configured pattern for
-   * "missing glyph" lookups.
-   */
-  configured = FcPatternDuplicate(pattern);
-  if (!configured)
-    return 1;
-
-  FcConfigSubstitute(NULL, configured, FcMatchPattern);
-  XftDefaultSubstitute(xw.dpy, xw.scr, configured);
-
-  match = FcFontMatch(NULL, configured, &result);
-  if (!match) {
-    FcPatternDestroy(configured);
-    return 1;
-  }
-
-  if (!(f->match = XftFontOpenPattern(xw.dpy, match))) {
-    FcPatternDestroy(configured);
-    FcPatternDestroy(match);
-    return 1;
-  }
-
-  if ((XftPatternGetInteger(pattern, "slant", 0, &wantattr) ==
-       XftResultMatch)) {
-    /*
-     * Check if xft was unable to find a font with the appropriate
-     * slant but gave us one anyway. Try to mitigate.
-     */
-    if ((XftPatternGetInteger(f->match->pattern, "slant", 0, &haveattr) !=
-         XftResultMatch) ||
-        haveattr < wantattr) {
-      f->badslant = 1;
-      fputs("font slant does not match\n", stderr);
-    }
-  }
-
-  if ((XftPatternGetInteger(pattern, "weight", 0, &wantattr) ==
-       XftResultMatch)) {
-    if ((XftPatternGetInteger(f->match->pattern, "weight", 0, &haveattr) !=
-         XftResultMatch) ||
-        haveattr != wantattr) {
-      f->badweight = 1;
-      fputs("font weight does not match\n", stderr);
-    }
-  }
-
-  XftTextExtentsUtf8(xw.dpy, f->match, (const FcChar8 *)ascii_printable,
-                     strlen(ascii_printable), &extents);
-
-  f->set = NULL;
-  f->pattern = configured;
-
-  f->ascent = f->match->ascent;
-  f->descent = f->match->descent;
-  f->lbearing = 0;
-  f->rbearing = f->match->max_advance_width;
-
-  f->height = f->ascent + f->descent;
-  f->width = DIVCEIL(extents.xOff, strlen(ascii_printable));
-
-  return 0;
-}
-
-void xloadfonts(const char *fontstr, double fontsize) {
-  FcPattern *pattern;
-  double fontval;
-
-  if (fontstr[0] == '-')
-    pattern = XftXlfdParse(fontstr, False, False);
-  else
-    pattern = FcNameParse((const FcChar8 *)fontstr);
-
-  if (!pattern)
-    die("can't open font %s\n", fontstr);
-
-  if (fontsize > 1) {
-    FcPatternDel(pattern, FC_PIXEL_SIZE);
-    FcPatternDel(pattern, FC_SIZE);
-    FcPatternAddDouble(pattern, FC_PIXEL_SIZE, (double)fontsize);
-    usedfontsize = fontsize;
-  } else {
-    if (FcPatternGetDouble(pattern, FC_PIXEL_SIZE, 0, &fontval) ==
-        FcResultMatch) {
-      usedfontsize = fontval;
-    } else if (FcPatternGetDouble(pattern, FC_SIZE, 0, &fontval) ==
-               FcResultMatch) {
-      usedfontsize = -1;
-    } else {
-      /*
-       * Default font size is 12, if none given. This is to
-       * have a known usedfontsize value.
-       */
-      FcPatternAddDouble(pattern, FC_PIXEL_SIZE, 12);
-      usedfontsize = 12;
-    }
-    defaultfontsize = usedfontsize;
-  }
-
-  if (xloadfont(&drawing_context.font, pattern))
-    die("can't open font %s\n", fontstr);
-
-  if (usedfontsize < 0) {
-    FcPatternGetDouble(drawing_context.font.match->pattern, FC_PIXEL_SIZE, 0, &fontval);
-    usedfontsize = fontval;
-    if (fontsize == 0)
-      defaultfontsize = fontval;
-  }
-
-  /* Setting character width and height. */
-  win.cw = ceilf(drawing_context.font.width * cwscale);
-  win.ch = ceilf(drawing_context.font.height * chscale);
-
-  FcPatternDel(pattern, FC_SLANT);
-  FcPatternAddInteger(pattern, FC_SLANT, FC_SLANT_ITALIC);
-  if (xloadfont(&drawing_context.ifont, pattern))
-    die("can't open font %s\n", fontstr);
-
-  FcPatternDel(pattern, FC_WEIGHT);
-  FcPatternAddInteger(pattern, FC_WEIGHT, FC_WEIGHT_BOLD);
-  if (xloadfont(&drawing_context.ibfont, pattern))
-    die("can't open font %s\n", fontstr);
-
-  FcPatternDel(pattern, FC_SLANT);
-  FcPatternAddInteger(pattern, FC_SLANT, FC_SLANT_ROMAN);
-  if (xloadfont(&drawing_context.bfont, pattern))
-    die("can't open font %s\n", fontstr);
-
-  FcPatternDestroy(pattern);
-}
-
-void xunloadfont(Font *f) {
-  XftFontClose(xw.dpy, f->match);
-  FcPatternDestroy(f->pattern);
-  if (f->set)
-    FcFontSetDestroy(f->set);
-}
-
-void xunloadfonts(void) {
-  /* Free the loaded fonts in the font cache.  */
-  while (frclen > 0)
-    XftFontClose(xw.dpy, frc[--frclen].font);
-
-  xunloadfont(&drawing_context.font);
-  xunloadfont(&drawing_context.bfont);
-  xunloadfont(&drawing_context.ifont);
-  xunloadfont(&drawing_context.ibfont);
-}
 
 int ximopen(Display *dpy) {
   XIMCallback imdestroy = {.client_data = NULL, .callback = ximdestroy};
@@ -1026,7 +849,6 @@ void xinit(int cols, int rows) {
     die("could not init fontconfig.\n");
 
   usedfont = (opt_font == NULL) ? font : opt_font;
-  xloadfonts(usedfont, 0);
 
   /* colors */
   if (!is_opengl)
@@ -1148,132 +970,11 @@ void xinit(int cols, int rows) {
   xsel.xtarget = XInternAtom(xw.dpy, "UTF8_STRING", 0);
   if (xsel.xtarget == None)
     xsel.xtarget = XA_STRING;
+
+  win.ch = 32;
+  win.cw = 16;
 }
 
-int xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len,
-                        int x, int y) {
-  float winx = borderpx + x * win.cw, winy = borderpx + y * win.ch, xp, yp;
-  ushort mode, prevmode = USHRT_MAX;
-  Font *font = &drawing_context.font;
-  int frcflags = FRC_NORMAL;
-  float runewidth = win.cw;
-  Rune rune;
-  FT_UInt glyphidx;
-  FcResult fcres;
-  FcPattern *fcpattern, *fontpattern;
-  FcFontSet *fcsets[] = {NULL};
-  FcCharSet *fccharset;
-  int i, f, numspecs = 0;
-
-  for (i = 0, xp = winx, yp = winy + font->ascent; i < len; ++i) {
-    /* Fetch rune and mode for current glyph. */
-    rune = glyphs[i].u;
-    mode = glyphs[i].mode;
-
-    /* Skip dummy wide-character spacing. */
-    if (mode == ATTR_WDUMMY)
-      continue;
-
-    /* Determine font for glyph if different from previous glyph. */
-    if (prevmode != mode) {
-      prevmode = mode;
-      font = &drawing_context.font;
-      frcflags = FRC_NORMAL;
-      runewidth = win.cw * ((mode & ATTR_WIDE) ? 2.0f : 1.0f);
-      if ((mode & ATTR_ITALIC) && (mode & ATTR_BOLD)) {
-        font = &drawing_context.ibfont;
-        frcflags = FRC_ITALICBOLD;
-      } else if (mode & ATTR_ITALIC) {
-        font = &drawing_context.ifont;
-        frcflags = FRC_ITALIC;
-      } else if (mode & ATTR_BOLD) {
-        font = &drawing_context.bfont;
-        frcflags = FRC_BOLD;
-      }
-      yp = winy + font->ascent;
-    }
-
-    /* Lookup character index with default font. */
-    glyphidx = XftCharIndex(xw.dpy, font->match, rune);
-    if (glyphidx) {
-      specs[numspecs].font = font->match;
-      specs[numspecs].glyph = glyphidx;
-      specs[numspecs].x = (short)xp;
-      specs[numspecs].y = (short)yp;
-      xp += runewidth;
-      numspecs++;
-      continue;
-    }
-
-    /* Fallback on font cache, search the font cache for match. */
-    for (f = 0; f < frclen; f++) {
-      glyphidx = XftCharIndex(xw.dpy, frc[f].font, rune);
-      /* Everything correct. */
-      if (glyphidx && frc[f].flags == frcflags)
-        break;
-      /* We got a default font for a not found glyph. */
-      if (!glyphidx && frc[f].flags == frcflags && frc[f].unicodep == rune) {
-        break;
-      }
-    }
-
-    /* Nothing was found. Use fontconfig to find matching font. */
-    if (f >= frclen) {
-      if (!font->set)
-        font->set = FcFontSort(0, font->pattern, 1, 0, &fcres);
-      fcsets[0] = font->set;
-
-      /*
-       * Nothing was found in the cache. Now use
-       * some dozen of Fontconfig calls to get the
-       * font for one single character.
-       *
-       * Xft and fontconfig are design failures.
-       */
-      fcpattern = FcPatternDuplicate(font->pattern);
-      fccharset = FcCharSetCreate();
-
-      FcCharSetAddChar(fccharset, rune);
-      FcPatternAddCharSet(fcpattern, FC_CHARSET, fccharset);
-      FcPatternAddBool(fcpattern, FC_SCALABLE, 1);
-
-      FcConfigSubstitute(0, fcpattern, FcMatchPattern);
-      FcDefaultSubstitute(fcpattern);
-
-      fontpattern = FcFontSetMatch(0, fcsets, 1, fcpattern, &fcres);
-
-      /* Allocate memory for the new cache entry. */
-      if (frclen >= frccap) {
-        frccap += 16;
-        frc = xrealloc(frc, frccap * sizeof(Fontcache));
-      }
-
-      frc[frclen].font = XftFontOpenPattern(xw.dpy, fontpattern);
-      if (!frc[frclen].font)
-        die("XftFontOpenPattern failed seeking fallback font: %s\n",
-            strerror(errno));
-      frc[frclen].flags = frcflags;
-      frc[frclen].unicodep = rune;
-
-      glyphidx = XftCharIndex(xw.dpy, frc[frclen].font, rune);
-
-      f = frclen;
-      frclen++;
-
-      FcPatternDestroy(fcpattern);
-      FcCharSetDestroy(fccharset);
-    }
-
-    specs[numspecs].font = frc[f].font;
-    specs[numspecs].glyph = glyphidx;
-    specs[numspecs].x = (short)xp;
-    specs[numspecs].y = (short)yp;
-    xp += runewidth;
-    numspecs++;
-  }
-
-  return numspecs;
-}
 
 
 void get_color_from_glyph(Glyph* base, RenderColor* out){
@@ -1283,14 +984,6 @@ void get_color_from_glyph(Glyph* base, RenderColor* out){
   bool is_foreground_true_color = false;
   bool is_background_true_color = false;
 
-  /* Fallback on color display for attributes not supported by the font */
-  if (base->mode & ATTR_ITALIC && base->mode & ATTR_BOLD) {
-    if (drawing_context.ibfont.badslant || drawing_context.ibfont.badweight)
-      base->fg = defaultattr;
-  } else if ((base->mode & ATTR_ITALIC && drawing_context.ifont.badslant) ||
-             (base->mode & ATTR_BOLD && drawing_context.bfont.badweight)) {
-    base->fg = defaultattr;
-  }
 
   if (IS_TRUECOL(base->fg)) {
     colfg.alpha = 0xffff;
@@ -1409,72 +1102,8 @@ void get_color_from_glyph(Glyph* base, RenderColor* out){
 
 }
 
-void xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len,
-                         int x, int y) {
-  int charlen = len * ((base.mode & ATTR_WIDE) ? 2 : 1);
-  int winx = borderpx + x * win.cw, winy = borderpx + y * win.ch,
-      width = charlen * win.cw;
-  XRectangle r;
-
-
-  Color *fg, *bg;
-  RenderColor color;
-  get_color_from_glyph(&base, &color);
-  fg = color.foreground;
-  bg = color.background;
-
-
-  /* Intelligent cleaning up of the borders. */
-  if (x == 0) {
-    xclear(0, (y == 0) ? 0 : winy, borderpx,
-           winy + win.ch + ((winy + win.ch >= borderpx + win.th) ? win.h : 0));
-  }
-  if (winx + width >= borderpx + win.tw) {
-    xclear(winx + width, (y == 0) ? 0 : winy, win.w,
-           ((winy + win.ch >= borderpx + win.th) ? win.h : (winy + win.ch)));
-  }
-  if (y == 0)
-    xclear(winx, 0, winx + width, borderpx);
-  if (winy + win.ch >= borderpx + win.th)
-    xclear(winx, winy + win.ch, winx + width, win.h);
-
-  /* Clean up the region we want to draw to. */
-  XftDrawRect(xw.draw, bg, winx, winy, width, win.ch);
-
-  /* Set the clip region because Xft is sometimes dirty. */
-  r.x = 0;
-  r.y = 0;
-  r.height = win.ch;
-  r.width = width;
-  XftDrawSetClipRectangles(xw.draw, winx, winy, &r, 1);
-
-
-  /* Render the glyphs. */
-  XftDrawGlyphFontSpec(xw.draw, fg, specs, len);
-  
-
-  /* Render underline and strikethrough. */
-  if (base.mode & ATTR_UNDERLINE) {
-    XftDrawRect(xw.draw, fg, winx, winy + drawing_context.font.ascent * chscale + 1, width,
-                1);
-  }
-
-  if (base.mode & ATTR_STRUCK) {
-    XftDrawRect(xw.draw, fg, winx, winy + 2 * drawing_context.font.ascent * chscale / 3,
-                width, 1);
-  }
-
-  /* Reset clip to none. */
-  XftDrawSetClip(xw.draw, 0);
-}
 
 void xdrawglyph(Glyph g, int x, int y) {
-  int numspecs;
-  XftGlyphFontSpec spec;
-
-  numspecs = xmakeglyphfontspecs(&spec, &g, 1, x, y);
-  xdrawglyphfontspecs(&spec, g, numspecs, x, y);
-
   //Background
   RenderColor color;
   get_color_from_glyph(&g, &color);
@@ -1631,38 +1260,6 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     gl_draw_char(line[i].u, color.gl_foreground_color,  winx, winy, 24,26);
   }
 
-  numspecs = xmakeglyphfontspecs(specs, &line[position_x], column - position_x,
-                                 position_x, position_y);
-  i = old_x = 0;
-  for (current_x_position = position_x;
-       current_x_position < column && i < numspecs; current_x_position++) {
-
-    new = line[current_x_position];
-
-    if (new.mode == ATTR_WDUMMY)
-      continue;
-
-    if (selected(current_x_position, position_y))
-      new.mode ^= ATTR_REVERSE;
-
-    if (i > 0 && ATTRCMP(base, new)) {
-      xdrawglyphfontspecs(specs, base, i, old_x, position_y);
-      specs += i;
-      numspecs -= i;
-      i = 0;
-    }
-
-    if (i == 0) {
-      old_x = current_x_position;
-      base = new;
-    }
-
-    i++;
-  }
-
-  if (i > 0) {
-    xdrawglyphfontspecs(specs, base, i, old_x, position_y);
-  }
 }
 
 void xfinishdraw(void) {
