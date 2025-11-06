@@ -1,6 +1,6 @@
 #include "draw.h"
 #include "terminal.h"
-#include "win.h"
+#include "window.h"
 #include "opengl.h"
 
 DC drawing_context;
@@ -275,4 +275,40 @@ void xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og) {
     // XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
     //             borderpx + (cy + 1) * win.ch - 1, win.cw, 1);
   }
+}
+
+int xstartdraw(void) { return IS_WINDOSET(MODE_VISIBLE); }
+
+void xdrawline(Line line, int position_x, int position_y, int column) {
+  int i, current_x_position, old_x, numspecs;
+  Glyph base, new;
+
+  for(int i = 0; i < column - position_x; i++){
+
+    RenderColor color;
+    get_color_from_glyph(&line[i],&color);
+
+    int winx = ((i * 9.1));
+    int winy = borderpx + position_y * win.character_height;
+  
+
+    gl_draw_rect(color.gl_background_color, winx, winy, 24,26);
+  }
+  for(int i = 0; i < column - position_x; i++){
+
+    RenderColor color;
+    get_color_from_glyph(&line[i],&color);
+
+    int winx = ((i * 9.1)-position_x)-6;
+    int winy = borderpx + position_y * win.character_height;
+  
+    gl_draw_char(line[i].u, color.gl_foreground_color,  winx, winy, 24,26);
+  }
+
+}
+
+void xfinishdraw(void) {
+
+  // XSetForeground(xw.display, drawing_context.gc,
+  //                drawing_context.colors[IS_WINDOSET(MODE_REVERSE) ? defaultfg : defaultbg].pixel);
 }

@@ -1,5 +1,5 @@
 #include "mouse.h"
-#include "win.h"
+#include "window.h"
 #include "macros.h"
 #include "draw.h"
 #include "types.h"

@@ -172,11 +172,14 @@ void ttysend(const Arg *);
 void kscrollup(const Arg *);
 void kscrolldown(const Arg *);
 
-void tsetdirt(int, int);
 
 void get_color_from_glyph(Glyph* base, RenderColor* out);
 void xdrawcursor(int, int, Glyph, int, int, Glyph);
 void xdrawline(Line, int, int, int);
+
+void tfulldirt(void);
+void tsetdirt(int top, int bot);
+void tsetdirtattr(int attr);
 
 /* config.h globals */
 extern Term term;

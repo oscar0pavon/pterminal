@@ -13,7 +13,7 @@
 
 char *argv0;
 #include "arg.h"
-#include "win.h"
+#include "window.h"
 #include "draw.h"
 #include "terminal.h"
 
@@ -30,11 +30,6 @@ int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 
 
-/* function definitions used in config.h */
-static void numlock(const Arg *);
-static void zoom(const Arg *);
-static void zoomabs(const Arg *);
-static void zoomreset(const Arg *);
 
 /* config.h for applying patches and the configuration. */
 #include "config.h"
@@ -48,16 +43,12 @@ static void zoomreset(const Arg *);
 
 static inline ushort sixd_to_16bit(int);
 static void xdrawglyph(Glyph, int, int);
-static void xclear(int, int, int, int);
 static int xgeommasktogravity(int);
 static int ximopen(Display *);
 static void ximinstantiate(Display *, XPointer, XPointer);
 static void ximdestroy(XIM, XPointer, XPointer);
 static int xicdestroy(XIC, XPointer, XPointer);
 static void xinit(int, int);
-static void cresize(int, int);
-static void xresize(int, int);
-static void xhints(void);
 static int xloadcolor(int, const char *, Color *);
 static int xloadfont(Font *, FcPattern *);
 static void xsetenv(void);
@@ -65,16 +56,12 @@ static void xseturgency(int);
 static int evcol(XEvent *);
 static int evrow(XEvent *);
 
-static void expose(XEvent *);
 static void visibility(XEvent *);
 static void unmap(XEvent *);
-static void kpress(XEvent *);
 static void cmessage(XEvent *);
-static void resize(XEvent *);
 static void focus(XEvent *);
 static uint buttonmask(uint);
 static int mouseaction(XEvent *, uint);
-static char *kmap(KeySym, uint);
 
 static void run(void);
 static void usage(void);
@@ -105,10 +92,6 @@ static void (*handler[LASTEvent])(XEvent *) = {
     [SelectionRequest] = selrequest,
 };
 
-/* Globals */
-XWindow xw;
-XSelection xsel;
-TermWindow win;
 
 /* Font Ring Cache */
 enum { FRC_NORMAL, FRC_ITALIC, FRC_BOLD, FRC_ITALICBOLD };
@@ -125,63 +108,12 @@ static char *opt_title = NULL;
 
 
 
-void numlock(const Arg *dummy) { win.mode ^= MODE_NUMLOCK; }
 
-void zoom(const Arg *arg) {
-  Arg larg;
-
-//  larg.f = usedfontsize + arg->f;
-  zoomabs(&larg);
-}
-
-void zoomabs(const Arg *arg) {
-  //xunloadfonts();
-  //xloadfonts(usedfont, arg->f);
-  cresize(0, 0);
-  redraw();
-  xhints();
-}
-
-void zoomreset(const Arg *arg) {
-  Arg larg;
-
-  // if (defaultfontsize > 0) {
-  //   larg.f = defaultfontsize;
-  //   zoomabs(&larg);
-  // }
-}
 
 void ttysend(const Arg *arg) { ttywrite(arg->s, strlen(arg->s), 1); }
 
 
 
-void cresize(int width, int height) {
-  int col, row;
-
-  if (width != 0)
-    win.width = width;
-  if (height != 0)
-    win.hight = height;
-
-  col = (win.width - 2 * borderpx) / win.character_width;
-  row = (win.hight - 2 * borderpx) / win.character_height;
-  col = MAX(1, col);
-  row = MAX(1, row);
-
-  tresize(col, row);
-  xresize(col, row);
-  ttyresize(win.tw, win.th);
-  set_ortho_projection(win.width, win.hight); 
-  glViewport(0, 0, win.width, win.hight);
-}
-
-void xresize(int col, int row) {
-  win.tw = col * win.character_width;
-  win.th = row * win.character_height;
-
-  xclear(0, 0, win.width, win.hight);
-
-}
 
 ushort sixd_to_16bit(int x) { return x == 0 ? 0 : 0x3737 + 0x2828 * x; }
 
@@ -255,12 +187,6 @@ int xsetcolorname(int x, const char *name) {
   return 0;
 }
 
-/*
- * Absolute coordinates.
- */
-void xclear(int x1, int y1, int x2, int y2) {
-
-}
 
 void xhints(void) {
   XClassHint class = {opt_name ? opt_name : termname,
@@ -521,42 +447,6 @@ void xsettitle(char *p) {
   XFree(prop.value);
 }
 
-int xstartdraw(void) { return IS_WINDOSET(MODE_VISIBLE); }
-
-void xdrawline(Line line, int position_x, int position_y, int column) {
-  int i, current_x_position, old_x, numspecs;
-  Glyph base, new;
-
-  for(int i = 0; i < column - position_x; i++){
-
-    RenderColor color;
-    get_color_from_glyph(&line[i],&color);
-
-    int winx = ((i * 9.1));
-    int winy = borderpx + position_y * win.character_height;
-  
-
-    gl_draw_rect(color.gl_background_color, winx, winy, 24,26);
-  }
-  for(int i = 0; i < column - position_x; i++){
-
-    RenderColor color;
-    get_color_from_glyph(&line[i],&color);
-
-    int winx = ((i * 9.1)-position_x)-6;
-    int winy = borderpx + position_y * win.character_height;
-  
-    gl_draw_char(line[i].u, color.gl_foreground_color,  winx, winy, 24,26);
-  }
-
-}
-
-void xfinishdraw(void) {
-
-
-  XSetForeground(xw.display, drawing_context.gc,
-                 drawing_context.colors[IS_WINDOSET(MODE_REVERSE) ? defaultfg : defaultbg].pixel);
-}
 
 void xximspot(int x, int y) {
   if (xw.ime.xic == NULL)
@@ -568,7 +458,6 @@ void xximspot(int x, int y) {
   XSetICValues(xw.ime.xic, XNPreeditAttributes, xw.ime.spotlist, NULL);
 }
 
-void expose(XEvent *ev) { redraw(); }
 
 void visibility(XEvent *ev) {
   XVisibilityEvent *e = &ev->xvisibility;
@@ -635,91 +524,6 @@ void focus(XEvent *ev) {
 }
 
 
-char *kmap(KeySym k, uint state) {
-  Key *kp;
-  int i;
-
-  /* Check for mapped keys out of X11 function keys. */
-  for (i = 0; i < LEN(mappedkeys); i++) {
-    if (mappedkeys[i] == k)
-      break;
-  }
-  if (i == LEN(mappedkeys)) {
-    if ((k & 0xFFFF) < 0xFD00)
-      return NULL;
-  }
-
-  for (kp = key; kp < key + LEN(key); kp++) {
-    if (kp->k != k)
-      continue;
-
-    if (!match(kp->mask, state))
-      continue;
-
-    if (IS_WINDOSET(MODE_APPKEYPAD) ? kp->appkey < 0 : kp->appkey > 0)
-      continue;
-    if (IS_WINDOSET(MODE_NUMLOCK) && kp->appkey == 2)
-      continue;
-
-    if (IS_WINDOSET(MODE_APPCURSOR) ? kp->appcursor < 0 : kp->appcursor > 0)
-      continue;
-
-    return kp->s;
-  }
-
-  return NULL;
-}
-
-void kpress(XEvent *ev) {
-  XKeyEvent *e = &ev->xkey;
-  KeySym ksym = NoSymbol;
-  char buf[64], *customkey;
-  int len;
-  Rune c;
-  Status status;
-  Shortcut *bp;
-
-  if (IS_WINDOSET(MODE_KBDLOCK))
-    return;
-
-  if (xw.ime.xic) {
-    len = XmbLookupString(xw.ime.xic, e, buf, sizeof buf, &ksym, &status);
-    if (status == XBufferOverflow)
-      return;
-  } else {
-    len = XLookupString(e, buf, sizeof buf, &ksym, NULL);
-  }
-  /* 1. shortcuts */
-  for (bp = shortcuts; bp < shortcuts + LEN(shortcuts); bp++) {
-    if (ksym == bp->keysym && match(bp->mod, e->state)) {
-      bp->func(&(bp->arg));
-      return;
-    }
-  }
-
-  /* 2. custom keys from config.h */
-  if ((customkey = kmap(ksym, e->state))) {
-    ttywrite(customkey, strlen(customkey), 1);
-    return;
-  }
-
-  /* 3. composed string from input method */
-  if (len == 0)
-    return;
-  if (len == 1 && e->state & Mod1Mask) {
-    if (IS_WINDOSET(MODE_8BIT)) {
-      if (*buf < 0177) {
-        c = *buf | 0x80;
-        len = utf8encode(c, buf);
-      }
-    } else {
-      buf[1] = buf[0];
-      buf[0] = '\033';
-      len = 2;
-    }
-  }
-  ttywrite(buf, len, 1);
-}
 
 void cmessage(XEvent *e) {
   /*
@@ -739,12 +543,6 @@ void cmessage(XEvent *e) {
   }
 }
 
-void resize(XEvent *e) {
-  if (e->xconfigure.width == win.width && e->xconfigure.height == win.hight)
-    return;
-
-  cresize(e->xconfigure.width, e->xconfigure.height);
-}
 
 void run(void) {
   XEvent ev;
@@ -846,10 +644,9 @@ void run(void) {
 
     draw();
 
-    XFlush(xw.display);
+    //XFlush(xw.display);
 
-    if(is_opengl)
-      glXSwapBuffers(xw.display, xw.win);
+    glXSwapBuffers(xw.display, xw.win);
 
     drawing = 0;
   }
