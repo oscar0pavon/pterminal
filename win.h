@@ -66,9 +66,9 @@ typedef struct {
 /* Purely graphic info */
 typedef struct {
   int tw, th; /* tty width and height */
-  int w, h;   /* window width and height */
-  int ch;     /* char height */
-  int cw;     /* char width  */
+  int width, hight;   /* window width and height */
+  int character_height;     /* char height */
+  int character_width;     /* char width  */
   int mode;   /* window state/mode flags */
   int cursor; /* cursor style */
 } TermWindow;
@@ -84,7 +84,7 @@ typedef XftDraw *Draw;
 
 
 typedef struct {
-  Display *dpy;
+  Display *display;
   Colormap cmap;
   Window win;
   //OpenGL
@@ -102,9 +102,9 @@ typedef struct {
   Draw draw;
   Visual *vis;
   XSetWindowAttributes attrs;
-  int scr;
+  int screen;
   int isfixed; /* is fixed geometry? */
-  int l, t;    /* left and top offset */
+  int left_offset, top_offset;    /* left and top offset */
   int gm;      /* geometry mask */
 } XWindow;
 
