@@ -1,4 +1,5 @@
 /* See LICENSE for license details. */
+#include "terminal.h"
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -17,7 +18,6 @@
 #include <unistd.h>
 #include <wchar.h>
 
-#include "terminal.h"
 #include "win.h"
 #include "draw.h"
 

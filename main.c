@@ -1,10 +1,4 @@
 /* See LICENSE for license details. */
-#include <X11/XKBlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xft/Xft.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/cursorfont.h>
 #include <errno.h>
 #include <libgen.h>
 #include <limits.h>
@@ -14,12 +8,14 @@
 #include <stdio.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 
 char *argv0;
 #include "arg.h"
-#include "terminal.h"
 #include "win.h"
 #include "draw.h"
+#include "terminal.h"
 
 //OpenGL
 #include <GL/gl.h>
@@ -61,58 +57,10 @@ void kscrolldown(const Arg *);
 #define TRUEGREEN(x) (((x) & 0xff00))
 #define TRUEBLUE(x) (((x) & 0xff) << 8)
 
-typedef XftDraw *Draw;
-typedef XftColor Color;
-typedef XftGlyphFontSpec GlyphFontSpec;
-
-typedef struct RenderColor{
-  Color* background;
-  Color* foreground;
-  Color truefg, truebg;
-  Color revfg, revbg;
-  PColor gl_background_color;
-  PColor gl_foreground_color;
-
-}RenderColor;
-
-
-typedef struct {
-  Display *dpy;
-  Colormap cmap;
-  Window win;
-  Drawable buf;
-  //OpenGL
-  GLXContext gl_context;
-  XVisualInfo* visual_info;
-
-  GlyphFontSpec *specbuf; /* font spec buffer used for rendering */
-  Atom xembed, wmdeletewin, netwmname, netwmiconname, netwmpid;
-  struct {
-    XIM xim;
-    XIC xic;
-    XPoint spot;
-    XVaNestedList spotlist;
-  } ime;
-  Draw draw;
-  Visual *vis;
-  XSetWindowAttributes attrs;
-  int scr;
-  int isfixed; /* is fixed geometry? */
-  int l, t;    /* left and top offset */
-  int gm;      /* geometry mask */
-} XWindow;
 
 
 
-/* Drawing Context */
-typedef struct {
-  Color *colors;
-  size_t collen;
-  Font font, bfont, ifont, ibfont;
-  GC gc;
-} DC;
 
-void get_color_from_glyph(Glyph* base, RenderColor* out);
 
 static inline ushort sixd_to_16bit(int);
 static void xdrawglyph(Glyph, int, int);
@@ -644,14 +592,8 @@ void xresize(int col, int row) {
   win.tw = col * win.cw;
   win.th = row * win.ch;
 
-  XFreePixmap(xw.dpy, xw.buf);
-  xw.buf =
-      XCreatePixmap(xw.dpy, xw.win, win.w, win.h, DefaultDepth(xw.dpy, xw.scr));
-  XftDrawChange(xw.draw, xw.buf);
   xclear(0, 0, win.w, win.h);
 
-  /* resize to new width */
-  xw.specbuf = xrealloc(xw.specbuf, col * sizeof(GlyphFontSpec));
 }
 
 ushort sixd_to_16bit(int x) { return x == 0 ? 0 : 0x3737 + 0x2828 * x; }
@@ -730,8 +672,7 @@ int xsetcolorname(int x, const char *name) {
  * Absolute coordinates.
  */
 void xclear(int x1, int y1, int x2, int y2) {
-  XftDrawRect(xw.draw, &drawing_context.colors[IS_WINDOSET(MODE_REVERSE) ? defaultfg : defaultbg],
-              x1, y1, x2 - x1, y2 - y1);
+
 }
 
 void xhints(void) {
@@ -912,16 +853,7 @@ void xinit(int cols, int rows) {
   memset(&gcvalues, 0, sizeof(gcvalues));
   gcvalues.graphics_exposures = False;
   drawing_context.gc = XCreateGC(xw.dpy, xw.win, GCGraphicsExposures, &gcvalues);
-  xw.buf =
-      XCreatePixmap(xw.dpy, xw.win, win.w, win.h, DefaultDepth(xw.dpy, xw.scr));
-  XSetForeground(xw.dpy, drawing_context.gc, drawing_context.colors[defaultbg].pixel);
-  XFillRectangle(xw.dpy, xw.buf, drawing_context.gc, 0, 0, win.w, win.h);
 
-  /* font spec buffer */
-  xw.specbuf = xmalloc(cols * sizeof(GlyphFontSpec));
-
-  /* Xft rendering context */
-  xw.draw = XftDrawCreate(xw.dpy, xw.buf, xw.vis, xw.cmap);
 
   /* input methods */
   if (!ximopen(xw.dpy)) {
@@ -1168,9 +1100,9 @@ void xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og) {
       break;
     case 3: /* Blinking Underline */
     case 4: /* Steady Underline */
-      XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
-                  borderpx + (cy + 1) * win.ch - cursorthickness, win.cw,
-                  cursorthickness);
+      // XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
+      //             borderpx + (cy + 1) * win.ch - cursorthickness, win.cw,
+      //             cursorthickness);
       int winx = ((cx * 9.1));
       int winy = borderpx + cy * win.ch;
       PColor new_color = {.r = 1, .g = 1, .b =1};
@@ -1178,19 +1110,19 @@ void xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og) {
       break;
     case 5: /* Blinking bar */
     case 6: /* Steady bar */
-      XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
-                  borderpx + cy * win.ch, cursorthickness, win.ch);
+      // XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
+      //             borderpx + cy * win.ch, cursorthickness, win.ch);
       break;
     }
   } else {
-    XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
-                borderpx + cy * win.ch, win.cw - 1, 1);
-    XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
-                borderpx + cy * win.ch, 1, win.ch - 1);
-    XftDrawRect(xw.draw, &drawcol, borderpx + (cx + 1) * win.cw - 1,
-                borderpx + cy * win.ch, 1, win.ch - 1);
-    XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
-                borderpx + (cy + 1) * win.ch - 1, win.cw, 1);
+    // XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
+    //             borderpx + cy * win.ch, win.cw - 1, 1);
+    // XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
+    //             borderpx + cy * win.ch, 1, win.ch - 1);
+    // XftDrawRect(xw.draw, &drawcol, borderpx + (cx + 1) * win.cw - 1,
+    //             borderpx + cy * win.ch, 1, win.ch - 1);
+    // XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
+    //             borderpx + (cy + 1) * win.ch - 1, win.cw, 1);
   }
 }
 
@@ -1236,7 +1168,6 @@ int xstartdraw(void) { return IS_WINDOSET(MODE_VISIBLE); }
 void xdrawline(Line line, int position_x, int position_y, int column) {
   int i, current_x_position, old_x, numspecs;
   Glyph base, new;
-  XftGlyphFontSpec *specs = xw.specbuf;
 
   for(int i = 0; i < column - position_x; i++){
 
@@ -1263,8 +1194,6 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
 }
 
 void xfinishdraw(void) {
-
-  XCopyArea(xw.dpy, xw.buf, xw.win, drawing_context.gc, 0, 0, win.w, win.h, 0, 0);
 
 
   XSetForeground(xw.dpy, drawing_context.gc,

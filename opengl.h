@@ -1,7 +1,6 @@
 #ifndef OPENGL_H
 #define OPENGL_H
 
-#include "terminal.h"
 #include <GL/gl.h>
 #include <stdbool.h>
 

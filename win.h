@@ -3,8 +3,17 @@
 #define XWINDOW_H
 
 #include <X11/X.h>
+#include <X11/Xlib.h>
 #include <X11/keysym.h>
+#include <X11/XKBlib.h>
+#include <X11/Xatom.h>
+#include <X11/Xutil.h>
+#include <X11/cursorfont.h>
+#include <X11/Xft//Xft.h>
+#include <GL/glx.h>
 #include <time.h>
+
+#include "types.h"
 
 enum win_mode {
 	MODE_VISIBLE     = 1 << 0,
@@ -71,10 +80,37 @@ typedef struct {
   struct timespec tclick2;
 } XSelection;
 
+typedef XftDraw *Draw;
+
+
+typedef struct {
+  Display *dpy;
+  Colormap cmap;
+  Window win;
+  //OpenGL
+  GLXContext gl_context;
+  XVisualInfo* visual_info;
+
+  Atom xembed, wmdeletewin, netwmname, netwmiconname, netwmpid;
+  struct {
+    XIM xim;
+    XIC xic;
+    XPoint spot;
+    XVaNestedList spotlist;
+  } ime;
+
+  Draw draw;
+  Visual *vis;
+  XSetWindowAttributes attrs;
+  int scr;
+  int isfixed; /* is fixed geometry? */
+  int l, t;    /* left and top offset */
+  int gm;      /* geometry mask */
+} XWindow;
+
+
 void xbell(void);
 void xclipcopy(void);
-void xdrawcursor(int, int, Glyph, int, int, Glyph);
-void xdrawline(Line, int, int, int);
 void xfinishdraw(void);
 void xloadcols(void);
 int xsetcolorname(int, const char *);

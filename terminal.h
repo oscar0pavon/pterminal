@@ -6,6 +6,10 @@
 #include <sys/types.h>
 #include <stddef.h>
 
+#include "types.h"
+
+#include "draw.h"
+
 enum term_mode {
   MODE_WRAP = 1 << 0,
   MODE_INSERT = 1 << 1,
@@ -69,10 +73,6 @@ enum selection_type { SEL_REGULAR = 1, SEL_RECTANGULAR = 2 };
 
 enum selection_snap { SNAP_WORD = 1, SNAP_LINE = 2 };
 
-typedef unsigned char uchar;
-typedef unsigned int uint;
-typedef unsigned long ulong;
-typedef unsigned short ushort;
 
 typedef uint_least32_t Rune;
 
@@ -87,13 +87,6 @@ typedef struct {
 
 typedef Glyph *Line;
 
-typedef union {
-  int i;
-  uint ui;
-  float f;
-  const void *v;
-  const char *s;
-} Arg;
 
 
 typedef struct {
@@ -166,6 +159,10 @@ size_t utf8encode(Rune, char *);
 void *xmalloc(size_t);
 void *xrealloc(void *, size_t);
 char *xstrdup(const char *);
+
+void get_color_from_glyph(Glyph* base, RenderColor* out);
+void xdrawcursor(int, int, Glyph, int, int, Glyph);
+void xdrawline(Line, int, int, int);
 
 /* config.h globals */
 extern Term term;
