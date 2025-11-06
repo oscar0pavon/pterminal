@@ -208,11 +208,13 @@ void xdrawglyph(PGlyph g, int x, int y) {
 
 void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
                  PGlyph og) {
+
   Color drawcol;
 
   /* remove the old cursor */
   if (selected(old_x, old_y))
     og.mode ^= ATTR_REVERSE;
+
   xdrawglyph(og, old_x, old_y);
 
   if (IS_WINDOSET(MODE_HIDE))
@@ -300,7 +302,7 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     int winy = position_y * terminal_window.character_height;
 
     gl_draw_rect(color.gl_background_color, winx, winy, 24,
-                 terminal_window.character_height);
+                 terminal_window.character_height+4);
   }
   // Text / Foreground
   for (int i = 0; i < column - position_x; i++) {

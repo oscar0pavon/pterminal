@@ -27,6 +27,8 @@ void xclear(int x1, int y1, int x2, int y2) {
   // XftDrawRect(xw.draw,
   // 		&dc.col[IS_SET(MODE_REVERSE)? defaultfg : defaultbg],
   // 		x1, y1, x2-x1, y2-y1);
+  glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);//TODO get colors
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void xresize(int col, int row) {

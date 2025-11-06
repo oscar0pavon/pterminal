@@ -2440,7 +2440,6 @@ void tresize(int col, int row) {
   /* update terminal size */
   term.col = col;
   term.row = row;
-  printf("terminal col: %i\n",term.col);
   term.linelen = linelen;
   /* reset scrolling region */
   tsetscroll(0, row - 1);
