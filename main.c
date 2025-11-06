@@ -97,14 +97,6 @@ static void (*handler[LASTEvent])(XEvent *) = {
 enum { FRC_NORMAL, FRC_ITALIC, FRC_BOLD, FRC_ITALICBOLD };
 
 
-static char *opt_class = NULL;
-static char **opt_cmd = NULL;
-static char *opt_embed = NULL;
-static char *opt_font = NULL;
-static char *opt_io = NULL;
-static char *opt_line = NULL;
-static char *opt_name = NULL;
-static char *opt_title = NULL;
 
 
 
@@ -300,7 +292,7 @@ void xinit(int cols, int rows) {
 
   xloadcols();
   
-  terminal_window.character_height = 32;
+  terminal_window.character_height = 24;
   terminal_window.character_width = 16;
 
   /* adjust fixed window geometry */
@@ -707,7 +699,7 @@ int main(int argc, char *argv[]) {
     opt_embed = EARGF(usage());
     break;
   case 'v':
-    die("%s " VERSION "\n", argv0);
+    die("%s\n", argv0);
     break;
   default:
     usage();

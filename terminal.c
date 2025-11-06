@@ -1,4 +1,5 @@
 /* See LICENSE for license details. */
+#define _XOPEN_SOURCE 700
 #include "terminal.h"
 #include <ctype.h>
 #include <errno.h>
@@ -7,7 +8,6 @@
 #include <pwd.h>
 #include <signal.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -16,12 +16,15 @@
 #include <sys/wait.h>
 #include <termios.h>
 #include <unistd.h>
+#include <stdio.h>
 #include <wchar.h>
+#include <pty.h>
+
 
 #include "window.h"
 #include "draw.h"
 
-#include <pty.h>
+
 
 /* Arbitrary sizes */
 #define UTF_INVALID 0xFFFD
@@ -32,15 +35,6 @@
 #define STR_ARG_SIZ ESC_ARG_SIZ
 
 
-enum term_mode {
-  MODE_WRAP = 1 << 0,
-  MODE_INSERT = 1 << 1,
-  MODE_ALTSCREEN = 1 << 2,
-  MODE_CRLF = 1 << 3,
-  MODE_ECHO = 1 << 4,
-  MODE_PRINT = 1 << 5,
-  MODE_UTF8 = 1 << 6,
-};
 
 enum cursor_movement { CURSOR_SAVE, CURSOR_LOAD };
 

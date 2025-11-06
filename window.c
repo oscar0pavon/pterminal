@@ -8,6 +8,15 @@ XWindow xw;
 XSelection xsel;
 TermWindow terminal_window;
 
+char *opt_class = NULL;
+char **opt_cmd = NULL;
+char *opt_embed = NULL;
+char *opt_font = NULL;
+char *opt_io = NULL;
+char *opt_line = NULL;
+char *opt_name = NULL;
+char *opt_title = NULL;
+
 void expose(XEvent *ev) { redraw(); }
 
 /*

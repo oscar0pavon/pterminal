@@ -2,7 +2,6 @@
 # See LICENSE file for copyright and license details.
 .POSIX:
 
-VERSION = 0.9.2
 
 CC = cc
 
@@ -13,8 +12,7 @@ INCS = -I$(X11INC) -I/usr/include/freetype2
 
 LIBS = -L/usr/lib -lm -lrt -lX11 -lutil -lXft -lfreetype -lfontconfig -lGL -llodepng -lm
 
-STCPPFLAGS = -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=600
-STCFLAGS = $(INCS) $(STCPPFLAGS) $(CPPFLAGS) $(CFLAGS) -g
+STCFLAGS = $(INCS) $(CFLAGS) -g
 STLDFLAGS = $(LIBS) $(LDFLAGS)
 
 

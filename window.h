@@ -115,6 +115,15 @@ extern XWindow xw;
 extern XSelection xsel;
 extern TermWindow terminal_window;
 
+extern char *opt_class;
+extern char **opt_cmd;
+extern char *opt_embed;
+extern char *opt_font;
+extern char *opt_io;
+extern char *opt_line;
+extern char *opt_name;
+extern char *opt_title;
+
 void xbell(void);
 void xclipcopy(void);
 void xfinishdraw(void);
