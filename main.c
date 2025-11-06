@@ -13,7 +13,6 @@
 #include <signal.h>
 #include <stdio.h>
 #include <sys/select.h>
-#include <time.h>
 #include <unistd.h>
 
 char *argv0;
@@ -76,15 +75,6 @@ typedef struct RenderColor{
 
 }RenderColor;
 
-/* Purely graphic info */
-typedef struct {
-  int tw, th; /* tty width and height */
-  int w, h;   /* window width and height */
-  int ch;     /* char height */
-  int cw;     /* char width  */
-  int mode;   /* window state/mode flags */
-  int cursor; /* cursor style */
-} TermWindow;
 
 typedef struct {
   Display *dpy;
@@ -112,12 +102,6 @@ typedef struct {
   int gm;      /* geometry mask */
 } XWindow;
 
-typedef struct {
-  Atom xtarget;
-  char *primary, *clipboard;
-  struct timespec tclick1;
-  struct timespec tclick2;
-} XSelection;
 
 /* Font structure */
 #define Font Font_

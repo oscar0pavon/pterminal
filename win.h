@@ -4,6 +4,7 @@
 
 #include <X11/X.h>
 #include <X11/keysym.h>
+#include <time.h>
 
 enum win_mode {
 	MODE_VISIBLE     = 1 << 0,
@@ -52,6 +53,23 @@ typedef struct {
   signed char appkey;    /* application keypad */
   signed char appcursor; /* application cursor */
 } Key;
+
+/* Purely graphic info */
+typedef struct {
+  int tw, th; /* tty width and height */
+  int w, h;   /* window width and height */
+  int ch;     /* char height */
+  int cw;     /* char width  */
+  int mode;   /* window state/mode flags */
+  int cursor; /* cursor style */
+} TermWindow;
+
+typedef struct {
+  Atom xtarget;
+  char *primary, *clipboard;
+  struct timespec tclick1;
+  struct timespec tclick2;
+} XSelection;
 
 void xbell(void);
 void xclipcopy(void);
