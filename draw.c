@@ -60,7 +60,7 @@ void draw(void) {
     xximspot(term.old_cursor_x, term.old_cursor_y);
 }
 
-void get_color_from_glyph(Glyph* base, RenderColor* out){
+void get_color_from_glyph(PGlyph* base, RenderColor* out){
 
   Color *fg, *bg, *temp;
   XRenderColor colfg, colbg;
@@ -186,7 +186,7 @@ void get_color_from_glyph(Glyph* base, RenderColor* out){
 }
 
 
-void xdrawglyph(Glyph g, int x, int y) {
+void xdrawglyph(PGlyph g, int x, int y) {
   //Background
   RenderColor color;
   get_color_from_glyph(&g, &color);
@@ -201,7 +201,7 @@ void xdrawglyph(Glyph g, int x, int y) {
   gl_draw_char(g.u, color.gl_foreground_color, winx_char, winy, 24, 26);
 }
 
-void xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og) {
+void xdrawcursor(int cx, int cy, PGlyph g, int ox, int oy, PGlyph og) {
   Color drawcol;
 
   /* remove the old cursor */
@@ -281,7 +281,7 @@ int xstartdraw(void) { return IS_WINDOSET(MODE_VISIBLE); }
 
 void xdrawline(Line line, int position_x, int position_y, int column) {
   int i, current_x_position, old_x, numspecs;
-  Glyph base, new;
+  PGlyph base, new;
 
   for(int i = 0; i < column - position_x; i++){
 

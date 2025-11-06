@@ -83,21 +83,20 @@ enum glyph_attribute {
 
 typedef uint_least32_t Rune;
 
-#define Glyph Glyph_
-typedef struct {
+typedef struct PGlyph{
   Rune u;      /* character code */
   ushort mode; /* attribute flags */
   uint32_t fg; /* foreground  */
   uint32_t bg; /* background  */
   uint16_t utf8_value;
-} Glyph;
+} PGlyph;
 
-typedef Glyph *Line;
+typedef PGlyph *Line;
 
 
 
 typedef struct {
-  Glyph attr; /* current char attributes */
+  PGlyph attr; /* current char attributes */
   int x;
   int y;
   char state;
@@ -173,8 +172,8 @@ void kscrollup(const Arg *);
 void kscrolldown(const Arg *);
 
 
-void get_color_from_glyph(Glyph* base, RenderColor* out);
-void xdrawcursor(int, int, Glyph, int, int, Glyph);
+void get_color_from_glyph(PGlyph* base, RenderColor* out);
+void xdrawcursor(int, int, PGlyph, int, int, PGlyph);
 void xdrawline(Line, int, int, int);
 
 void tfulldirt(void);
