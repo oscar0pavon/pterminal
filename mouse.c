@@ -88,14 +88,14 @@ void selpaste(const Arg *dummy) {
 }
 int evcol(XEvent *e) {
   int x = e->xbutton.x - borderpx;
-  LIMIT(x, 0, win.tw - 1);
-  return x / win.character_width;
+  LIMIT(x, 0, terminal_window.tty_width - 1);
+  return x / terminal_window.character_width;
 }
 
 int evrow(XEvent *e) {
   int y = e->xbutton.y - borderpx;
-  LIMIT(y, 0, win.th - 1);
-  return y / win.character_height;
+  LIMIT(y, 0, terminal_window.tty_height - 1);
+  return y / terminal_window.character_height;
 }
 
 void mousesel(XEvent *e, int done) {

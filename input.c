@@ -317,7 +317,7 @@ char *kmap(KeySym k, uint state) {
   return NULL;
 }
 
-void numlock(const Arg *dummy) { win.mode ^= MODE_NUMLOCK; }
+void numlock(const Arg *dummy) { terminal_window.mode ^= MODE_NUMLOCK; }
 
 void kpress(XEvent *ev) {
   XKeyEvent *e = &ev->xkey;

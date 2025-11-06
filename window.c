@@ -1,12 +1,12 @@
 #include "window.h"
 #include "opengl.h"
-#include "types.h"
 #include "terminal.h"
+#include "types.h"
 
 /* Globals */
 XWindow xw;
 XSelection xsel;
-TermWindow win;
+TermWindow terminal_window;
 
 void expose(XEvent *ev) { redraw(); }
 
@@ -15,44 +15,44 @@ void expose(XEvent *ev) { redraw(); }
  */
 void xclear(int x1, int y1, int x2, int y2) {
 
-	// XftDrawRect(xw.draw,
-	// 		&dc.col[IS_SET(MODE_REVERSE)? defaultfg : defaultbg],
-	// 		x1, y1, x2-x1, y2-y1);
+  // XftDrawRect(xw.draw,
+  // 		&dc.col[IS_SET(MODE_REVERSE)? defaultfg : defaultbg],
+  // 		x1, y1, x2-x1, y2-y1);
 }
 
-void xresize(int col, int row)
-{
-	win.tw = col * win.character_width;
-	win.th = row * win.character_height;
+void xresize(int col, int row) {
+  terminal_window.tty_width = col * terminal_window.character_width;
+  terminal_window.tty_height = row * terminal_window.character_height;
 
-	xclear(0, 0, win.width, win.hight);
-
+  xclear(0, 0, terminal_window.width, terminal_window.hight);
 }
 
-void cresize(int width, int height)
-{
-	int col, row;
+void cresize(int width, int height) {
+  int col, row;
 
-	if (width != 0)
-		win.width = width;
-	if (height != 0)
-		win.hight = height;
+  if (width != 0)
+    terminal_window.width = width;
+  if (height != 0)
+    terminal_window.hight = height;
 
-	col = (win.width - 2 * borderpx) / win.character_width;
-	row = (win.hight - 2 * borderpx) / win.character_height;
-	col = MAX(1, col);
-	row = MAX(1, row);
+  col = terminal_window.width / terminal_window.character_width;
+  row = terminal_window.hight / terminal_window.character_height;
 
-	tresize(col, row);
-	xresize(col, row);
-	ttyresize(win.tw, win.th);
-  
-  set_ortho_projection(win.width, win.hight);
-  glViewport(0,0,win.width,win.hight);
+  col = MAX(1, col);
+  row = MAX(1, row);
+
+  tresize(col, row);
+  xresize(col, row);
+  ttyresize(terminal_window.tty_width, terminal_window.tty_height);
+
+  set_ortho_projection(terminal_window.width, terminal_window.hight);
+  glViewport(0, 0, terminal_window.width, terminal_window.hight);
+
 }
 
 void resize(XEvent *e) {
-  if (e->xconfigure.width == win.width && e->xconfigure.height == win.hight)
+  if (e->xconfigure.width == terminal_window.width &&
+      e->xconfigure.height == terminal_window.hight)
     return;
 
   cresize(e->xconfigure.width, e->xconfigure.height);
@@ -66,13 +66,13 @@ void redraw(void) {
 void zoom(const Arg *arg) {
   Arg larg;
 
-//  larg.f = usedfontsize + arg->f;
+  //  larg.f = usedfontsize + arg->f;
   zoomabs(&larg);
 }
 
 void zoomabs(const Arg *arg) {
-  //xunloadfonts();
-  //xloadfonts(usedfont, arg->f);
+  // xunloadfonts();
+  // xloadfonts(usedfont, arg->f);
   cresize(0, 0);
   redraw();
   xhints();

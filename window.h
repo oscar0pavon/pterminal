@@ -16,7 +16,7 @@
 #include "types.h"
 
 /* macros */
-#define IS_WINDOSET(flag) ((win.mode & (flag)) != 0)
+#define IS_WINDOSET(flag) ((terminal_window.mode & (flag)) != 0)
 
 enum win_mode {
 	MODE_VISIBLE     = 1 << 0,
@@ -68,7 +68,7 @@ typedef struct {
 
 /* Purely graphic info */
 typedef struct {
-  int tw, th; /* tty width and height */
+  int tty_width, tty_height; /* tty width and height */
   int width, hight;   /* window width and height */
   int character_height;     /* char height */
   int character_width;     /* char width  */
@@ -113,7 +113,7 @@ typedef struct {
 
 extern XWindow xw;
 extern XSelection xsel;
-extern TermWindow win;
+extern TermWindow terminal_window;
 
 void xbell(void);
 void xclipcopy(void);

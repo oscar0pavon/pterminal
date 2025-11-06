@@ -197,18 +197,18 @@ void xhints(void) {
   sizeh = XAllocSizeHints();
 
   sizeh->flags = PSize | PResizeInc | PBaseSize | PMinSize;
-  sizeh->height = win.hight;
-  sizeh->width = win.width;
-  sizeh->height_inc = win.character_height;
-  sizeh->width_inc = win.character_width;
+  sizeh->height = terminal_window.hight;
+  sizeh->width = terminal_window.width;
+  sizeh->height_inc = terminal_window.character_height;
+  sizeh->width_inc = terminal_window.character_width;
   sizeh->base_height = 2 * borderpx;
   sizeh->base_width = 2 * borderpx;
-  sizeh->min_height = win.character_height + 2 * borderpx;
-  sizeh->min_width = win.character_width + 2 * borderpx;
+  sizeh->min_height = terminal_window.character_height + 2 * borderpx;
+  sizeh->min_width = terminal_window.character_width + 2 * borderpx;
   if (xw.isfixed) {
     sizeh->flags |= PMaxSize;
-    sizeh->min_width = sizeh->max_width = win.width;
-    sizeh->min_height = sizeh->max_height = win.hight;
+    sizeh->min_width = sizeh->max_width = terminal_window.width;
+    sizeh->min_height = sizeh->max_height = terminal_window.hight;
   }
   if (xw.gm & (XValue | YValue)) {
     sizeh->flags |= USPosition | PWinGravity;
@@ -310,12 +310,12 @@ void xinit(int cols, int rows) {
   xloadcols();
 
   /* adjust fixed window geometry */
-  win.width = 2 * borderpx + cols * win.character_width;
-  win.hight = 2 * borderpx + rows * win.character_height;
+  terminal_window.width = 2 * borderpx + cols * terminal_window.character_width;
+  terminal_window.hight = 2 * borderpx + rows * terminal_window.character_height;
   if (xw.gm & XNegative)
-    xw.left_offset += DisplayWidth(xw.display, xw.screen) - win.width - 2;
+    xw.left_offset += DisplayWidth(xw.display, xw.screen) - terminal_window.width - 2;
   if (xw.gm & YNegative)
-    xw.top_offset += DisplayHeight(xw.display, xw.screen) - win.hight - 2;
+    xw.top_offset += DisplayHeight(xw.display, xw.screen) - terminal_window.hight - 2;
 
   /* Events */
   xw.attrs.background_pixel = drawing_context.colors[defaultbg].pixel;
@@ -334,7 +334,7 @@ void xinit(int cols, int rows) {
   xw.vis = xw.visual_info->visual;
 
   xw.win = XCreateWindow(
-      xw.display, root, xw.left_offset, xw.top_offset, win.width, win.hight, 0,
+      xw.display, root, xw.left_offset, xw.top_offset, terminal_window.width, terminal_window.hight, 0,
       XDefaultDepth(xw.display, xw.screen), InputOutput, xw.vis,
       CWBackPixel | CWBorderPixel | CWBitGravity | CWEventMask | CWColormap,
       &xw.attrs);
@@ -346,8 +346,8 @@ void xinit(int cols, int rows) {
   }
 
   glXMakeCurrent(xw.display, xw.win, xw.gl_context);
-  set_ortho_projection(win.width, win.hight);
-  glViewport(0, 0, win.width, win.hight);
+  set_ortho_projection(terminal_window.width, terminal_window.hight);
+  glViewport(0, 0, terminal_window.width, terminal_window.hight);
   load_texture(&font_texture_id, "/root/pterminal/font1.png");
 
   if (parent != root)
@@ -389,7 +389,7 @@ void xinit(int cols, int rows) {
   XChangeProperty(xw.display, xw.win, xw.netwmpid, XA_CARDINAL, 32, PropModeReplace,
                   (uchar *)&thispid, 1);
 
-  win.mode = MODE_NUMLOCK;
+  terminal_window.mode = MODE_NUMLOCK;
   resettitle();
   xhints();
   XMapWindow(xw.display, xw.win);
@@ -403,8 +403,8 @@ void xinit(int cols, int rows) {
   if (xsel.xtarget == None)
     xsel.xtarget = XA_STRING;
 
-  win.character_height = 32;
-  win.character_width = 16;
+  terminal_window.character_height = 32;
+  terminal_window.character_width = 16;
 }
 
 
@@ -452,8 +452,8 @@ void xximspot(int x, int y) {
   if (xw.ime.xic == NULL)
     return;
 
-  xw.ime.spot.x = borderpx + x * win.character_width;
-  xw.ime.spot.y = borderpx + (y + 1) * win.character_height;
+  xw.ime.spot.x = borderpx + x * terminal_window.character_width;
+  xw.ime.spot.y = borderpx + (y + 1) * terminal_window.character_height;
 
   XSetICValues(xw.ime.xic, XNPreeditAttributes, xw.ime.spotlist, NULL);
 }
@@ -462,10 +462,10 @@ void xximspot(int x, int y) {
 void visibility(XEvent *ev) {
   XVisibilityEvent *e = &ev->xvisibility;
 
-  MODBIT(win.mode, e->state != VisibilityFullyObscured, MODE_VISIBLE);
+  MODBIT(terminal_window.mode, e->state != VisibilityFullyObscured, MODE_VISIBLE);
 }
 
-void unmap(XEvent *ev) { win.mode &= ~MODE_VISIBLE; }
+void unmap(XEvent *ev) { terminal_window.mode &= ~MODE_VISIBLE; }
 
 void xsetpointermotion(int set) {
   MODBIT(xw.attrs.event_mask, set, PointerMotionMask);
@@ -473,16 +473,16 @@ void xsetpointermotion(int set) {
 }
 
 void xsetmode(int set, unsigned int flags) {
-  int mode = win.mode;
-  MODBIT(win.mode, set, flags);
-  if ((win.mode & MODE_REVERSE) != (mode & MODE_REVERSE))
+  int mode = terminal_window.mode;
+  MODBIT(terminal_window.mode, set, flags);
+  if ((terminal_window.mode & MODE_REVERSE) != (mode & MODE_REVERSE))
     redraw();
 }
 
 int xsetcursor(int cursor) {
   if (!BETWEEN(cursor, 0, 7)) /* 7: st extension */
     return 1;
-  win.cursor = cursor;
+  terminal_window.cursor = cursor;
   return 0;
 }
 
@@ -510,14 +510,14 @@ void focus(XEvent *ev) {
   if (ev->type == FocusIn) {
     if (xw.ime.xic)
       XSetICFocus(xw.ime.xic);
-    win.mode |= MODE_FOCUSED;
+    terminal_window.mode |= MODE_FOCUSED;
     xseturgency(0);
     if (IS_WINDOSET(MODE_FOCUS))
       ttywrite("\033[I", 3, 0);
   } else {
     if (xw.ime.xic)
       XUnsetICFocus(xw.ime.xic);
-    win.mode &= ~MODE_FOCUSED;
+    terminal_window.mode &= ~MODE_FOCUSED;
     if (IS_WINDOSET(MODE_FOCUS))
       ttywrite("\033[O", 3, 0);
   }
@@ -532,10 +532,10 @@ void cmessage(XEvent *e) {
    */
   if (e->xclient.message_type == xw.xembed && e->xclient.format == 32) {
     if (e->xclient.data.l[1] == XEMBED_FOCUS_IN) {
-      win.mode |= MODE_FOCUSED;
+      terminal_window.mode |= MODE_FOCUSED;
       xseturgency(0);
     } else if (e->xclient.data.l[1] == XEMBED_FOCUS_OUT) {
-      win.mode &= ~MODE_FOCUSED;
+      terminal_window.mode &= ~MODE_FOCUSED;
     }
   } else if (e->xclient.data.l[0] == xw.wmdeletewin) {
     ttyhangup();
@@ -546,7 +546,7 @@ void cmessage(XEvent *e) {
 
 void run(void) {
   XEvent ev;
-  int w = win.width, h = win.hight;
+  int w = terminal_window.width, h = terminal_window.hight;
   fd_set rfd;
   int xfd = XConnectionNumber(xw.display), ttyfd, xev, drawing;
   struct timespec seltv, *tv, now, lastblink, trigger;
@@ -630,8 +630,8 @@ void run(void) {
       timeout = blinktimeout - TIMEDIFF(now, lastblink);
       if (timeout <= 0) {
         if (-timeout > blinktimeout) /* start visible */
-          win.mode |= MODE_BLINK;
-        win.mode ^= MODE_BLINK;
+          terminal_window.mode |= MODE_BLINK;
+        terminal_window.mode ^= MODE_BLINK;
         tsetdirtattr(ATTR_BLINK);
         lastblink = now;
         timeout = blinktimeout;
