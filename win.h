@@ -2,6 +2,9 @@
 #ifndef XWINDOW_H
 #define XWINDOW_H
 
+#include <X11/X.h>
+#include <X11/keysym.h>
+
 enum win_mode {
 	MODE_VISIBLE     = 1 << 0,
 	MODE_FOCUSED     = 1 << 1,
@@ -24,6 +27,31 @@ enum win_mode {
 	MODE_MOUSE       = MODE_MOUSEBTN|MODE_MOUSEMOTION|MODE_MOUSEX10\
 	                  |MODE_MOUSEMANY,
 };
+
+/* types used in config.h */
+typedef struct {
+  uint mod;
+  KeySym keysym;
+  void (*func)(const Arg *);
+  const Arg arg;
+} Shortcut;
+
+typedef struct {
+  uint mod;
+  uint button;
+  void (*func)(const Arg *);
+  const Arg arg;
+  uint release;
+} MouseShortcut;
+
+typedef struct {
+  KeySym k;
+  uint mask;
+  char *s;
+  /* three-valued logic variables: 0 indifferent, 1 on, -1 off */
+  signed char appkey;    /* application keypad */
+  signed char appcursor; /* application cursor */
+} Key;
 
 void xbell(void);
 void xclipcopy(void);

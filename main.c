@@ -5,7 +5,6 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/cursorfont.h>
-#include <X11/keysym.h>
 #include <errno.h>
 #include <libgen.h>
 #include <limits.h>
@@ -32,31 +31,6 @@ char *argv0;
 
 int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
-
-/* types used in config.h */
-typedef struct {
-  uint mod;
-  KeySym keysym;
-  void (*func)(const Arg *);
-  const Arg arg;
-} Shortcut;
-
-typedef struct {
-  uint mod;
-  uint button;
-  void (*func)(const Arg *);
-  const Arg arg;
-  uint release;
-} MouseShortcut;
-
-typedef struct {
-  KeySym k;
-  uint mask;
-  char *s;
-  /* three-valued logic variables: 0 indifferent, 1 on, -1 off */
-  signed char appkey;    /* application keypad */
-  signed char appcursor; /* application cursor */
-} Key;
 
 /* X modifiers */
 #define XK_ANY_MOD UINT_MAX
