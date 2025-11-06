@@ -15,6 +15,9 @@
 
 #include "types.h"
 
+/* macros */
+#define IS_WINDOSET(flag) ((win.mode & (flag)) != 0)
+
 enum win_mode {
 	MODE_VISIBLE     = 1 << 0,
 	MODE_FOCUSED     = 1 << 1,
@@ -108,6 +111,9 @@ typedef struct {
   int gm;      /* geometry mask */
 } XWindow;
 
+extern XWindow xw;
+extern XSelection xsel;
+extern TermWindow win;
 
 void xbell(void);
 void xclipcopy(void);

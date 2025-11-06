@@ -7,7 +7,6 @@
  */
 #include <X11/X.h>
 static char *font = "mono:pixelsize=15:antialias=true:autohint=true";
-static int borderpx = 2;
 
 /*
  * What program is execed by st depends of these precedence rules:
@@ -133,7 +132,7 @@ static const char *colorname[] = {
 unsigned int defaultfg = 258;
 unsigned int defaultbg = 259;
 unsigned int defaultcs = 256;
-static unsigned int defaultrcs = 257;
+
 
 /*
  * Default shape of cursor
