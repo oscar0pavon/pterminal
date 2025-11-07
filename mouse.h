@@ -22,4 +22,10 @@ void clipcopy(const Arg *);
 
 void clippaste(const Arg *);
 
+int evcol(XEvent *);
+int evrow(XEvent *);
+
+uint buttonmask(uint);
+int mouseaction(XEvent *, uint);
+
 #endif

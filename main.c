@@ -34,6 +34,7 @@ int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 
 static inline ushort sixd_to_16bit(int);
+
 static void xdrawglyph(Glyph, int, int);
 static int xgeommasktogravity(int);
 static int ximopen(Display *);
@@ -41,14 +42,7 @@ static void ximinstantiate(Display *, XPointer, XPointer);
 static void ximdestroy(XIM, XPointer, XPointer);
 static int xicdestroy(XIC, XPointer, XPointer);
 static void xinit(int, int);
-static int xloadcolor(int, const char *, Color *);
-static int xloadfont(Font *, FcPattern *);
 static void xsetenv(void);
-static int evcol(XEvent *);
-static int evrow(XEvent *);
-
-static uint buttonmask(uint);
-static int mouseaction(XEvent *, uint);
 
 static void run(void);
 static void usage(void);
