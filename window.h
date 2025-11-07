@@ -72,6 +72,7 @@ typedef struct {
   int width, height;   /* window width and height */
   int character_height;     /* char height */
   float character_width;     /* char width  */
+  float character_gl_width;
   int mode;   /* window state/mode flags */
   int cursor; /* cursor style */
 } TermWindow;

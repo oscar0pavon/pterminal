@@ -37,6 +37,6 @@ install: pterminal
 	cp -f pterminal /bin
 
 test: all
-	./pterminal -c "pterminal-test" -t "pterminal" -g 80x20
+	./pterminal -c "pterminal-test" -t "pterminal" -g 100x30
 
 .PHONY: all clean install

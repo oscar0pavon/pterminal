@@ -202,19 +202,18 @@ void xdrawglyph(PGlyph g, int x, int y) {
   gl_draw_rect(color.gl_background_color, winx, winy, 7,
                terminal_window.character_height);
 
-  gl_draw_char(g.u, color.gl_foreground_color, winx_char, winy, 24,
+  gl_draw_char(g.u, color.gl_foreground_color, winx_char, winy,
+               terminal_window.character_gl_width,
                terminal_window.character_height);
 }
 
 void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
                  PGlyph og) {
-
   Color drawcol;
 
   /* remove the old cursor */
   if (selected(old_x, old_y))
     og.mode ^= ATTR_REVERSE;
-
   xdrawglyph(og, old_x, old_y);
 
   if (IS_WINDOSET(MODE_HIDE))
@@ -301,8 +300,9 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     int winx = ((i * terminal_window.character_width));
     int winy = position_y * terminal_window.character_height;
 
-    gl_draw_rect(color.gl_background_color, winx, winy, 24,
-                 terminal_window.character_height+4);
+    gl_draw_rect(color.gl_background_color, winx, winy,
+                 terminal_window.character_gl_width,
+                 terminal_window.character_height);
   }
   // Text / Foreground
   for (int i = 0; i < column - position_x; i++) {
@@ -310,10 +310,11 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     RenderColor color;
     get_color_from_glyph(&line[i], &color);
 
-    int winx = ((i * terminal_window.character_width) - position_x) - 6;
+    int winx = ((i * terminal_window.character_width)) - 6;
     int winy = position_y * terminal_window.character_height;
 
-    gl_draw_char(line[i].u, color.gl_foreground_color, winx, winy, 24,
+    gl_draw_char(line[i].u, color.gl_foreground_color, winx, winy,
+                 terminal_window.character_gl_width,
                  terminal_window.character_height);
   }
 }
