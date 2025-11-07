@@ -22,23 +22,15 @@ char *argv0;
 #include <GL/glx.h>
 #include <stdbool.h>
 #include "opengl.h"
+#include "events.h"
 
 #include "mouse.h"
 #include "input.h"
 
 int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
-
-
-
 /* config.h for applying patches and the configuration. */
 #include "config.h"
-
-/* XEMBED messages */
-#define XEMBED_FOCUS_IN 4
-#define XEMBED_FOCUS_OUT 5
-
-
 
 
 static inline ushort sixd_to_16bit(int);
@@ -52,14 +44,9 @@ static void xinit(int, int);
 static int xloadcolor(int, const char *, Color *);
 static int xloadfont(Font *, FcPattern *);
 static void xsetenv(void);
-static void xseturgency(int);
 static int evcol(XEvent *);
 static int evrow(XEvent *);
 
-static void visibility(XEvent *);
-static void unmap(XEvent *);
-static void cmessage(XEvent *);
-static void focus(XEvent *);
 static uint buttonmask(uint);
 static int mouseaction(XEvent *, uint);
 
@@ -97,15 +84,7 @@ static void (*handler[LASTEvent])(XEvent *) = {
 enum { FRC_NORMAL, FRC_ITALIC, FRC_BOLD, FRC_ITALICBOLD };
 
 
-
-
-
-
-
 void ttysend(const Arg *arg) { ttywrite(arg->s, strlen(arg->s), 1); }
-
-
-
 
 ushort sixd_to_16bit(int x) { return x == 0 ? 0 : 0x3737 + 0x2828 * x; }
 
@@ -399,8 +378,6 @@ void xinit(int cols, int rows) {
 }
 
 
-
-
 void xsetenv(void) {
   char buf[sizeof(long) * 8 + 1];
 
@@ -450,14 +427,6 @@ void xximspot(int x, int y) {
 }
 
 
-void visibility(XEvent *ev) {
-  XVisibilityEvent *e = &ev->xvisibility;
-
-  MODBIT(terminal_window.mode, e->state != VisibilityFullyObscured, MODE_VISIBLE);
-}
-
-void unmap(XEvent *ev) { terminal_window.mode &= ~MODE_VISIBLE; }
-
 void xsetpointermotion(int set) {
   MODBIT(xw.attrs.event_mask, set, PointerMotionMask);
   XChangeWindowAttributes(xw.display, xw.win, CWEventMask, &xw.attrs);
@@ -477,61 +446,12 @@ int xsetcursor(int cursor) {
   return 0;
 }
 
-void xseturgency(int add) {
-  XWMHints *h = XGetWMHints(xw.display, xw.win);
-
-  MODBIT(h->flags, add, XUrgencyHint);
-  XSetWMHints(xw.display, xw.win, h);
-  XFree(h);
-}
 
 void xbell(void) {
   if (!(IS_WINDOSET(MODE_FOCUSED)))
     xseturgency(1);
   if (bellvolume)
     XkbBell(xw.display, xw.win, bellvolume, (Atom)NULL);
-}
-
-void focus(XEvent *ev) {
-  XFocusChangeEvent *e = &ev->xfocus;
-
-  if (e->mode == NotifyGrab)
-    return;
-
-  if (ev->type == FocusIn) {
-    if (xw.ime.xic)
-      XSetICFocus(xw.ime.xic);
-    terminal_window.mode |= MODE_FOCUSED;
-    xseturgency(0);
-    if (IS_WINDOSET(MODE_FOCUS))
-      ttywrite("\033[I", 3, 0);
-  } else {
-    if (xw.ime.xic)
-      XUnsetICFocus(xw.ime.xic);
-    terminal_window.mode &= ~MODE_FOCUSED;
-    if (IS_WINDOSET(MODE_FOCUS))
-      ttywrite("\033[O", 3, 0);
-  }
-}
-
-
-
-void cmessage(XEvent *e) {
-  /*
-   * See xembed specs
-   *  http://standards.freedesktop.org/xembed-spec/xembed-spec-latest.html
-   */
-  if (e->xclient.message_type == xw.xembed && e->xclient.format == 32) {
-    if (e->xclient.data.l[1] == XEMBED_FOCUS_IN) {
-      terminal_window.mode |= MODE_FOCUSED;
-      xseturgency(0);
-    } else if (e->xclient.data.l[1] == XEMBED_FOCUS_OUT) {
-      terminal_window.mode &= ~MODE_FOCUSED;
-    }
-  } else if (e->xclient.data.l[0] == xw.wmdeletewin) {
-    ttyhangup();
-    exit(0);
-  }
 }
 
 

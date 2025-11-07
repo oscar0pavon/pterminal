@@ -11,4 +11,6 @@
 #define DEFAULT(a, b) (a) = (a) ? (a) : (b)
 #define LIMIT(x, a, b) (x) = (x) < (a) ? (a) : (x) > (b) ? (b) : (x)
 
+#define MODBIT(x, set, bit) ((set) ? ((x) |= (bit)) : ((x) &= ~(bit)))
+
 #endif
