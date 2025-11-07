@@ -192,15 +192,18 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
 }
 
 void xdrawglyph(PGlyph g, int x, int y) {
-  // Background
+  
   RenderColor color;
   get_color_from_glyph(&g, &color);
 
-  int winx_char = ((x * terminal_window.character_width)) - 6;
-  int winx = ((x * terminal_window.character_width) + 4);
+  float char_center = terminal_window.character_width / 2; 
+  int winx_char = (x * terminal_window.character_width) - char_center;
+
+  int winx = x * terminal_window.character_width;
   int winy = y * terminal_window.character_height;
 
-  gl_draw_rect(color.gl_background_color, winx, winy, 7,
+  gl_draw_rect(color.gl_background_color, winx, winy,
+               terminal_window.character_width,
                terminal_window.character_height);
 
   gl_draw_char(g.u, color.gl_foreground_color, winx_char, winy,
@@ -249,9 +252,6 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
   /* draw the new one */
   if (IS_WINDOSET(MODE_FOCUSED)) {
     switch (terminal_window.cursor) {
-    case 7:         /* st extension */
-      g.u = 0x2603; /* snowman (U+2603) */
-                    /* FALLTHROUGH */
     case 0:         /* Blinking Block */
     case 1:         /* Blinking Block (Default) */
     case 2:         /* Steady Block */
@@ -310,7 +310,9 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     RenderColor color;
     get_color_from_glyph(&line[i], &color);
 
-    int winx = ((i * terminal_window.character_width)) - 6;
+    float char_center = terminal_window.character_width / 2; 
+    int winx = ((i * terminal_window.character_width)) - char_center;
+
     int winy = position_y * terminal_window.character_height;
 
     gl_draw_char(line[i].u, color.gl_foreground_color, winx, winy,
