@@ -7,6 +7,7 @@ DC drawing_context;
 
 int borderpx = 2;
 unsigned int defaultrcs = 257;
+unsigned int cursorthickness = 2;
 
 void drawregion(int position_x, int position_y, int column, int row) {
   int i, line_number;
@@ -258,14 +259,13 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
       break;
     case 3: /* Blinking Underline */
     case 4: /* Steady Underline */
-      // XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
-      //             borderpx + (cy + 1) * win.ch - cursorthickness, win.cw,
-      //             cursorthickness);
-      int winx = ((cursor_x * terminal_window.character_width));
-      int winy = cursor_y * terminal_window.character_height;
+
+      int winx = cursor_x * terminal_window.character_width;
+      int winy = (cursor_y + 1) * terminal_window.character_height;
       PColor new_color = {.r = 1, .g = 1, .b = 1};
       gl_draw_rect(new_color, winx,
-                   winy - (terminal_window.character_height - 43), 10, 4);
+                   winy, terminal_window.character_width, cursorthickness);
+
       break;
     case 5: /* Blinking bar */
     case 6: /* Steady bar */

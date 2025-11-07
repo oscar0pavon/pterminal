@@ -37,4 +37,9 @@ extern unsigned int defaultrcs;
 void draw(void);
 
 
+/*
+ * thickness of underline and bar cursors
+ */
+extern unsigned int cursorthickness;
+
 #endif
