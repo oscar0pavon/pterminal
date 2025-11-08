@@ -2,6 +2,7 @@
 #include "terminal.h"
 #include "window.h"
 #include "opengl.h"
+#include <X11/extensions/Xrender.h>
 
 DC drawing_context;
 
@@ -79,7 +80,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
     colfg.red = TRUERED(base->fg);
     colfg.green = TRUEGREEN(base->fg);
     colfg.blue = TRUEBLUE(base->fg);
-    XftColorAllocValue(xw.display, xw.vis, xw.cmap, &colfg, &out->truefg);
+    memcpy(&out->truefg.color,&colfg,sizeof(XRenderColor));
     fg = &out->truefg;
     is_foreground_true_color = true;
   } else {
@@ -91,7 +92,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
     colbg.green = TRUEGREEN(base->bg);
     colbg.red = TRUERED(base->bg);
     colbg.blue = TRUEBLUE(base->bg);
-    XftColorAllocValue(xw.display, xw.vis, xw.cmap, &colbg, &out->truebg);
+    memcpy(&out->truebg.color,&colbg,sizeof(XRenderColor));
     bg = &out->truebg;
     is_background_true_color = true;
   } else {
@@ -110,7 +111,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
       colfg.green = ~fg->color.green;
       colfg.blue = ~fg->color.blue;
       colfg.alpha = fg->color.alpha;
-      XftColorAllocValue(xw.display, xw.vis, xw.cmap, &colfg, &out->revfg);
+      memcpy(&out->revfg.color,&colbg,sizeof(XRenderColor));
       fg = &out->revfg;
     }
 
@@ -121,7 +122,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
       colbg.green = ~bg->color.green;
       colbg.blue = ~bg->color.blue;
       colbg.alpha = bg->color.alpha;
-      XftColorAllocValue(xw.display, xw.vis, xw.cmap, &colbg, &out->revbg);
+      memcpy(&out->revbg.color,&colbg,sizeof(XRenderColor));
       bg = &out->revbg;
     }
   }
@@ -131,7 +132,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
     colfg.green = fg->color.green / 2;
     colfg.blue = fg->color.blue / 2;
     colfg.alpha = fg->color.alpha;
-    XftColorAllocValue(xw.display, xw.vis, xw.cmap, &colfg, &out->revfg);
+    memcpy(&out->revfg.color,&colfg,sizeof(XRenderColor));
     fg = &out->revfg;
   }
 
