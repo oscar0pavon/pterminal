@@ -12,4 +12,6 @@ Rune utf8decodebyte(char, size_t *);
 char utf8encodebyte(Rune, size_t);
 size_t utf8validate(Rune *, size_t);
 
+int get_texture_atlas_index(unsigned int unicode_char);
+
 #endif

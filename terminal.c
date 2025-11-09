@@ -2225,6 +2225,9 @@ check_control_code:
     glyph_pointer = &TLINE(term.cursor.y)[term.cursor.x];
   }
   
+  if(u > 127) {
+    printf("hex value: %X\n",u);
+  }
   tsetchar(u, &term.cursor.attr, term.cursor.x, term.cursor.y);
   term.lastc = u;
 

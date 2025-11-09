@@ -3,6 +3,8 @@
 #include "window.h"
 #include "opengl.h"
 #include <X11/extensions/Xrender.h>
+#include <stdio.h>
+#include "utf8.h"
 
 DC drawing_context;
 
@@ -14,16 +16,13 @@ void drawregion(int position_x, int position_y, int column, int row) {
   int i, line_number;
 
   line_number = TLINEOFFSET(position_y);
+
   for (i = position_y; i < row; i++) {
-    if (!is_opengl) {
-      if (term.dirty[i]) {
-        term.dirty[i] = 0;
-        xdrawline(TSCREEN.buffer[line_number], position_x, i, column);
-      }
-    }else{//always draw the buffer
-      xdrawline(TSCREEN.buffer[line_number], position_x, i, column);
-    }
+
+    xdrawline(TSCREEN.buffer[line_number], position_x, i, column);
+
     line_number = (line_number + 1) % TSCREEN.size;
+
   }
 }
 
@@ -192,7 +191,16 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
 
     int winy = position_y * terminal_window.character_height;
 
-    gl_draw_char(line[i].u, color.gl_foreground_color, winx, winy,
+    uint8_t ascii_value;
+    if(line[i].u > 127){
+      //printf("for draw hex value: %X\n",line[i].u);
+     ascii_value = get_texture_atlas_index(line[i].u);
+     printf("ascii value: %i %c\n",ascii_value,(char)ascii_value);
+    }else{
+      ascii_value = line[i].u;
+    }
+
+    gl_draw_char(ascii_value, color.gl_foreground_color, winx, winy,
                  terminal_window.character_gl_width,
                  terminal_window.character_height);
   }
