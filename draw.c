@@ -5,6 +5,7 @@
 #include <X11/extensions/Xrender.h>
 #include <stdio.h>
 #include "utf8.h"
+#include "selection.h"
 
 DC drawing_context;
 

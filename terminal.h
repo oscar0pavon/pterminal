@@ -154,14 +154,7 @@ void resettitle(void);
 
 void redraw(void);
 
-void selclear(void);
-void selinit(void);
-void selstart(int, int, int);
-void selextend(int, int, int, int);
-int selected(int, int);
-char *getsel(void);
 
-size_t utf8encode(Rune, char *);
 
 void *xmalloc(size_t);
 void *xrealloc(void *, size_t);
@@ -173,8 +166,6 @@ void kscrollup(const Arg *);
 void kscrolldown(const Arg *);
 
 
-void xdrawcursor(int, int, PGlyph, int, int, PGlyph);
-void xdrawline(Line, int, int, int);
 
 void tfulldirt(void);
 void tsetdirt(int top, int bot);

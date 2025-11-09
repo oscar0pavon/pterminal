@@ -4,6 +4,7 @@
 #include "window.h"
 #include "terminal.h"
 #include "mouse.h"
+#include "utf8.h"
 
 
 

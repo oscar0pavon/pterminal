@@ -27,6 +27,7 @@ char *argv0;
 #include "mouse.h"
 #include "input.h"
 #include "color.h"
+#include "selection.h"
 
 int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 

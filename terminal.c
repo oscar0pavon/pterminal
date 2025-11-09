@@ -230,11 +230,6 @@ char *base64dec(const char *src) {
   return result;
 }
 
-void selinit(void) {
-  sel.mode = SEL_IDLE;
-  sel.snap = 0;
-  sel.original_beginning.x = -1;
-}
 
 int tlinelen(int y) {
   int i = term.col;

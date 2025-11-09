@@ -14,4 +14,6 @@ size_t utf8validate(Rune *, size_t);
 
 int get_texture_atlas_index(unsigned int unicode_char);
 
+size_t utf8encode(Rune, char *);
+
 #endif

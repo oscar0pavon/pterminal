@@ -1,11 +1,13 @@
 #include "mouse.h"
+#include <errno.h>
+
 #include "window.h"
 #include "macros.h"
 #include "draw.h"
 #include "types.h"
 #include "input.h"
 #include "terminal.h"
-#include <errno.h>
+#include "selection.h"
 
 
 

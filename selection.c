@@ -2,6 +2,12 @@
 #include "terminal.h"
 #include "utf8.h"
 
+void selinit(void) {
+  sel.mode = SEL_IDLE;
+  sel.snap = 0;
+  sel.original_beginning.x = -1;
+}
+
 void selstart(int col, int row, int snap) {
   selclear();
   sel.mode = SEL_EMPTY;
