@@ -22,11 +22,11 @@
 
 #include "window.h"
 
+#include "utf8.h"
+
 
 
 /* Arbitrary sizes */
-#define UTF_INVALID 0xFFFD
-#define UTF_SIZ 4
 #define ESC_BUF_SIZ (128 * UTF_SIZ)
 #define ESC_ARG_SIZ 16
 #define STR_BUF_SIZ ESC_BUF_SIZ
@@ -144,10 +144,6 @@ static void selnormalize(void);
 static void selscroll(int, int);
 static void selsnap(int *, int *, int);
 
-static size_t utf8decode(const char *, Rune *, size_t);
-static Rune utf8decodebyte(char, size_t *);
-static char utf8encodebyte(Rune, size_t);
-static size_t utf8validate(Rune *, size_t);
 
 static char *base64dec(const char *);
 static char base64dec_getc(const char **);
@@ -163,11 +159,6 @@ static int iofd = 1;
 static int cmdfd;
 static pid_t pid;
 
-static const uchar utfbyte[UTF_SIZ + 1] = {0x80, 0, 0xC0, 0xE0, 0xF0};
-static const uchar utfmask[UTF_SIZ + 1] = {0xC0, 0x80, 0xE0, 0xF0, 0xF8};
-static const Rune utfmin[UTF_SIZ + 1] = {0, 0, 0x80, 0x800, 0x10000};
-static const Rune utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF,
-                                         0x10FFFF};
 
 ssize_t xwrite(int fd, const char *s, size_t len) {
   size_t aux = len;
@@ -201,63 +192,6 @@ void *xrealloc(void *p, size_t len) {
 }
 
 
-size_t utf8decode(const char *c, Rune *u, size_t clen) {
-  size_t i, j, len, type;
-  Rune udecoded;
-
-  *u = UTF_INVALID;
-  if (!clen)
-    return 0;
-  udecoded = utf8decodebyte(c[0], &len);
-  if (!BETWEEN(len, 1, UTF_SIZ))
-    return 1;
-  for (i = 1, j = 1; i < clen && j < len; ++i, ++j) {
-    udecoded = (udecoded << 6) | utf8decodebyte(c[i], &type);
-    if (type != 0)
-      return j;
-  }
-  if (j < len)
-    return 0;
-  *u = udecoded;
-  utf8validate(u, len);
-
-  return len;
-}
-
-Rune utf8decodebyte(char c, size_t *i) {
-  for (*i = 0; *i < LEN(utfmask); ++(*i))
-    if (((uchar)c & utfmask[*i]) == utfbyte[*i])
-      return (uchar)c & ~utfmask[*i];
-
-  return 0;
-}
-
-size_t utf8encode(Rune u, char *c) {
-  size_t len, i;
-
-  len = utf8validate(&u, 0);
-  if (len > UTF_SIZ)
-    return 0;
-
-  for (i = len - 1; i != 0; --i) {
-    c[i] = utf8encodebyte(u, 0);
-    u >>= 6;
-  }
-  c[0] = utf8encodebyte(u, len);
-
-  return len;
-}
-
-char utf8encodebyte(Rune u, size_t i) { return utfbyte[i] | (u & ~utfmask[i]); }
-
-size_t utf8validate(Rune *u, size_t i) {
-  if (!BETWEEN(*u, utfmin[i], utfmax[i]) || BETWEEN(*u, 0xD800, 0xDFFF))
-    *u = UTF_INVALID;
-  for (i = 1; *u > utfmax[i]; ++i)
-    ;
-
-  return i;
-}
 
 char base64dec_getc(const char **src) {
   while (**src && !isprint((unsigned char)**src))
@@ -2290,7 +2224,7 @@ check_control_code:
       tmoveto(term.col - width, term.cursor.y);
     glyph_pointer = &TLINE(term.cursor.y)[term.cursor.x];
   }
-
+  
   tsetchar(u, &term.cursor.attr, term.cursor.x, term.cursor.y);
   term.lastc = u;
 
