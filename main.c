@@ -197,7 +197,7 @@ void xinit(int cols, int rows) {
   
   terminal_window.character_height = 24;
   terminal_window.character_gl_width = 24;
-  terminal_window.character_width = 12;
+  terminal_window.character_width = 10;
 
   /* adjust fixed window geometry */
   terminal_window.width = cols * terminal_window.character_width;

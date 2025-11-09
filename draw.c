@@ -156,8 +156,12 @@ void xdrawglyph(PGlyph glyph, int x, int y) {
                terminal_window.character_width,
                terminal_window.character_height);
 
+  float offset = (terminal_window.character_gl_width / 2) -
+                 terminal_window.character_width;
+
   float char_center = terminal_window.character_width / 2;
-  float winx = (x * terminal_window.character_width) - char_center;
+
+  float winx = ((x * terminal_window.character_width) - char_center) - offset;
 
   uint8_t ascii_value;
   if (glyph.u > 127) {
