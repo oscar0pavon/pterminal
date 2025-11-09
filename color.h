@@ -17,8 +17,6 @@ typedef struct PColor{
 
 typedef XftColor Color;
 typedef struct RenderColor{
-  Color* background;
-  Color* foreground;
   Color truefg, truebg;
   Color revfg, revbg;
   PColor gl_background_color;

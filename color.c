@@ -123,8 +123,6 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
 
   Color *fg, *bg, *temp;
   XRenderColor colfg, colbg;
-  bool is_foreground_true_color = false;
-  bool is_background_true_color = false;
 
 
   if (IS_TRUECOL(base->fg)) {
@@ -134,7 +132,6 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
     colfg.blue = TRUEBLUE(base->fg);
     memcpy(&out->truefg.color,&colfg,sizeof(XRenderColor));
     fg = &out->truefg;
-    is_foreground_true_color = true;
   } else {
     fg = &drawing_context.colors[base->fg];
   }
@@ -146,7 +143,6 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
     colbg.blue = TRUEBLUE(base->bg);
     memcpy(&out->truebg.color,&colbg,sizeof(XRenderColor));
     bg = &out->truebg;
-    is_background_true_color = true;
   } else {
     bg = &drawing_context.colors[base->bg];
   }
@@ -200,46 +196,31 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
   if (base->mode & ATTR_INVISIBLE)
     fg = bg;
 
-
-  //opengl convertion
+  // opengl convertion
   float div;
-  if(is_background_true_color){
 
-    div = 65535.f;
-    PColor mycolor = {.r = bg->color.red/div,
-                      .g = bg->color.green/div,
-                      .b = bg->color.blue/div};
-    out->gl_background_color = mycolor;
-  }else{
-
-    if(bg->color.red > 255 || bg->color.blue > 255 || bg->color.green > 255){
-      div = 65525.f;
-    }else{
-      div = 255.f;
-    }
-
-    PColor mycolor = {.r = bg->color.red/div,
-                      .g = bg->color.green/div,
-                      .b = bg->color.blue/div};
-    out->gl_background_color = mycolor;
-  }
-  if(is_foreground_true_color){
-
-    div = 65535.f;
-    PColor mycolor = {.r = fg->color.red/div,
-                      .g = fg->color.green/div,
-                      .b = fg->color.blue/div};
-    out->gl_foreground_color = mycolor;
-  }else{
+  if (bg->color.red > 255 || bg->color.blue > 255 || bg->color.green > 255) {
+    div = 65525.f;
+  } else {
     div = 255.f;
-
-    PColor mycolor = {.r = fg->color.red/div,
-                      .g = fg->color.green/div,
-                      .b = fg->color.blue/div};
-    out->gl_foreground_color = mycolor;
   }
 
-  out->foreground = fg;
-  out->background = bg;
+  PColor background = {.r = bg->color.red / div,
+                       .g = bg->color.green / div,
+                       .b = bg->color.blue / div};
+
+  if (fg->color.red > 255 || fg->color.blue > 255 || fg->color.green > 255) {
+    div = 65525.f;
+  } else {
+    div = 255.f;
+  }
+
+  PColor foreground = {.r = fg->color.red / div,
+                       .g = fg->color.green / div,
+                       .b = fg->color.blue / div};
+
+  
+  out->gl_background_color = background;
+  out->gl_foreground_color = foreground;
 
 }
