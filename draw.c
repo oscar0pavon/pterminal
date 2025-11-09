@@ -145,7 +145,13 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
 int xstartdraw(void) { return IS_WINDOSET(MODE_VISIBLE); }
 
 void xdrawglyph(PGlyph glyph, int x, int y) {
-  
+
+  if (selected(x, y))
+    glyph.mode ^= ATTR_REVERSE;
+  else if (glyph.mode & ATTR_REVERSE) {
+    glyph.mode ^= ATTR_REVERSE;
+  }
+
   RenderColor color;
   get_color_from_glyph(&glyph, &color);
 
@@ -178,6 +184,7 @@ void xdrawglyph(PGlyph glyph, int x, int y) {
 void xdrawline(Line line, int position_x, int position_y, int column) {
 
   for (int i = 0; i < column; i++) {
+
     xdrawglyph(line[i],i,position_y);
   }
 }
