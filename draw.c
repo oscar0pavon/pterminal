@@ -67,25 +67,6 @@ void draw(void) {
 }
 
 
-void xdrawglyph(PGlyph g, int x, int y) {
-  
-  RenderColor color;
-  get_color_from_glyph(&g, &color);
-
-  float char_center = terminal_window.character_width / 2; 
-  int winx_char = (x * terminal_window.character_width) - char_center;
-
-  int winx = x * terminal_window.character_width;
-  int winy = y * terminal_window.character_height;
-
-  gl_draw_rect(color.gl_background_color, winx, winy,
-               terminal_window.character_width,
-               terminal_window.character_height);
-
-  gl_draw_char(g.u, color.gl_foreground_color, winx_char, winy,
-               terminal_window.character_gl_width,
-               terminal_window.character_height);
-}
 
 void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
                  PGlyph og) {
@@ -163,44 +144,37 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
 
 int xstartdraw(void) { return IS_WINDOSET(MODE_VISIBLE); }
 
-void xdrawline(Line line, int position_x, int position_y, int column) {
-  int i, current_x_position, old_x, numspecs;
-  PGlyph base, new;
+void xdrawglyph(PGlyph glyph, int x, int y) {
+  
+  RenderColor color;
+  get_color_from_glyph(&glyph, &color);
 
-  // text background
-  for (int i = 0; i < column - position_x; i++) {
+  int winy = y * terminal_window.character_height;
+  int background_x = x * terminal_window.character_width;
 
-    RenderColor color;
-    get_color_from_glyph(&line[i], &color);
+  gl_draw_rect(color.gl_background_color, background_x, winy,
+               terminal_window.character_width,
+               terminal_window.character_height);
 
-    int winx = ((i * terminal_window.character_width));
-    int winy = position_y * terminal_window.character_height;
+  float char_center = terminal_window.character_width / 2;
+  float winx = (x * terminal_window.character_width) - char_center;
 
-    gl_draw_rect(color.gl_background_color, winx, winy,
-                 terminal_window.character_gl_width,
-                 terminal_window.character_height);
+  uint8_t ascii_value;
+  if (glyph.u > 127) {
+    ascii_value = get_texture_atlas_index(glyph.u);
+  } else {
+    ascii_value = glyph.u;
   }
-  // Text / Foreground
-  for (int i = 0; i < column - position_x; i++) {
 
-    RenderColor color;
-    get_color_from_glyph(&line[i], &color);
+  gl_draw_char(ascii_value, color.gl_foreground_color, winx, winy,
+               terminal_window.character_gl_width,
+               terminal_window.character_height);
+}
 
-    float char_center = terminal_window.character_width / 2; 
-    int winx = ((i * terminal_window.character_width)) - char_center;
+void xdrawline(Line line, int position_x, int position_y, int column) {
 
-    int winy = position_y * terminal_window.character_height;
-
-    uint8_t ascii_value;
-    if(line[i].u > 127){
-     ascii_value = get_texture_atlas_index(line[i].u);
-    }else{
-      ascii_value = line[i].u;
-    }
-
-    gl_draw_char(ascii_value, color.gl_foreground_color, winx, winy,
-                 terminal_window.character_gl_width,
-                 terminal_window.character_height);
+  for (int i = 0; i < column; i++) {
+    xdrawglyph(line[i],i,position_y);
   }
 }
 

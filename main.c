@@ -36,7 +36,6 @@ int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 static inline ushort sixd_to_16bit(int);
 
-static void xdrawglyph(Glyph, int, int);
 static int xgeommasktogravity(int);
 static int ximopen(Display *);
 static void ximinstantiate(Display *, XPointer, XPointer);
@@ -197,8 +196,8 @@ void xinit(int cols, int rows) {
   xloadcols();
   
   terminal_window.character_height = 24;
-  terminal_window.character_width = 10;
   terminal_window.character_gl_width = 24;
+  terminal_window.character_width = 12;
 
   /* adjust fixed window geometry */
   terminal_window.width = cols * terminal_window.character_width;

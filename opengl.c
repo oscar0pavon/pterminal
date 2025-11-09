@@ -25,14 +25,23 @@ void gl_draw_rect(PColor color,  float x, float y, float width, float height){
         glVertex3f(x + width, y + height,-1);
         glVertex3f(x, y + height,-1);
     glEnd();
-
+ 
+    //debug grid red border line
+    // glColor4f(1, 0, 0,1.f); 
+    // glLineWidth(1);
+    // glBegin(GL_LINE_LOOP);
+    //     glVertex3f(x, y,-1);
+    //     glVertex3f(x + width, y,-1);
+    //     glVertex3f(x + width, y + height,-1);
+    //     glVertex3f(x, y + height,-1);
+    // glEnd();
 }
 
 void gl_draw_char(uint8_t character, PColor color, float x, float y,
                   float width, float height) {
 
-  int char_x = character % 16;
-  int char_y = floor(character / 16);
+  float char_x = character % 16;
+  float char_y = floor((float)character / 16);
 
   float char_size_x = 32.f / 512.f;
   float char_size_y = 32.f / 512.f;
@@ -43,8 +52,8 @@ void gl_draw_char(uint8_t character, PColor color, float x, float y,
   UV uv4;
 
   // button left
-  uv1.x = (float)char_x * char_size_x;
-  uv1.y = (float)char_y * char_size_y;
+  uv1.x = char_x * char_size_x;
+  uv1.y = char_y * char_size_y;
 
   // button right
   uv2.x = (char_x + 1) * char_size_x;

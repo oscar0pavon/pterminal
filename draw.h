@@ -21,6 +21,7 @@ extern unsigned int defaultrcs;
 
 void draw(void);
 
+void xdrawglyph(PGlyph glyph, int x, int y);
 
 /*
  * thickness of underline and bar cursors
