@@ -9,7 +9,6 @@
 #include "types.h"
 #include "macros.h"
 
-#include "draw.h"
 
 enum term_mode {
   MODE_WRAP = 1 << 0,
@@ -171,7 +170,6 @@ void kscrollup(const Arg *);
 void kscrolldown(const Arg *);
 
 
-void get_color_from_glyph(PGlyph* base, RenderColor* out);
 void xdrawcursor(int, int, PGlyph, int, int, PGlyph);
 void xdrawline(Line, int, int, int);
 

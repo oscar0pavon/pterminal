@@ -20,9 +20,7 @@
 #include <wchar.h>
 #include <pty.h>
 
-
 #include "window.h"
-#include "draw.h"
 
 
 
@@ -1112,7 +1110,6 @@ void tsetchar(Rune u, PGlyph *attr, int x, int y) {
   term.dirty[y] = 1;
   line[x] = *attr;
   line[x].u = u;
-  //putchar(line[x].u);
 }
 
 void tclearregion(int x1, int y1, int x2, int y2) {
@@ -2170,7 +2167,7 @@ void tputc(Rune u) {
   char c[UTF_SIZ];
   int control;
   int width, len;
-  PGlyph *gp;
+  PGlyph *glyph_pointer;
 
   int original_rune = u;
 
@@ -2274,16 +2271,16 @@ check_control_code:
   if (selected(term.cursor.x, term.cursor.y))
     selclear();
 
-  gp = &TLINE(term.cursor.y)[term.cursor.x];
+  glyph_pointer = &TLINE(term.cursor.y)[term.cursor.x];
   if (IS_SET(MODE_WRAP) && (term.cursor.state & CURSOR_WRAPNEXT)) {
-    gp->mode |= ATTR_WRAP;
+    glyph_pointer->mode |= ATTR_WRAP;
     tnewline(1);
-    gp = &TLINE(term.cursor.y)[term.cursor.x];
+    glyph_pointer = &TLINE(term.cursor.y)[term.cursor.x];
   }
 
   if (IS_SET(MODE_INSERT) && term.cursor.x + width < term.col) {
-    memmove(gp + width, gp, (term.col - term.cursor.x - width) * sizeof(PGlyph));
-    gp->mode &= ~ATTR_WIDE;
+    memmove(glyph_pointer + width, glyph_pointer, (term.col - term.cursor.x - width) * sizeof(PGlyph));
+    glyph_pointer->mode &= ~ATTR_WIDE;
   }
 
   if (term.cursor.x + width > term.col) {
@@ -2291,21 +2288,21 @@ check_control_code:
       tnewline(1);
     else
       tmoveto(term.col - width, term.cursor.y);
-    gp = &TLINE(term.cursor.y)[term.cursor.x];
+    glyph_pointer = &TLINE(term.cursor.y)[term.cursor.x];
   }
 
   tsetchar(u, &term.cursor.attr, term.cursor.x, term.cursor.y);
   term.lastc = u;
 
   if (width == 2) {
-    gp->mode |= ATTR_WIDE;
+    glyph_pointer->mode |= ATTR_WIDE;
     if (term.cursor.x + 1 < term.col) {
-      if (gp[1].mode == ATTR_WIDE && term.cursor.x + 2 < term.col) {
-        gp[2].u = ' ';
-        gp[2].mode &= ~ATTR_WDUMMY;
+      if (glyph_pointer[1].mode == ATTR_WIDE && term.cursor.x + 2 < term.col) {
+        glyph_pointer[2].u = ' ';
+        glyph_pointer[2].mode &= ~ATTR_WDUMMY;
       }
-      gp[1].u = '\0';
-      gp[1].mode = ATTR_WDUMMY;
+      glyph_pointer[1].u = '\0';
+      glyph_pointer[1].mode = ATTR_WDUMMY;
     }
   }
   if (term.cursor.x + width < term.col) {
@@ -2346,7 +2343,6 @@ int twrite(const char *buf, int buflen, int show_ctrl) {
       }
     }
     tputc(u);
-    //putchar(u);
   }
   return n;
 }

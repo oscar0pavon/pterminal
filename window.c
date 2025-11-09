@@ -2,6 +2,7 @@
 #include "opengl.h"
 #include "terminal.h"
 #include "types.h"
+#include "draw.h"
 
 /* Globals */
 XWindow xw;

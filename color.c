@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "color.h"
 #include "types.h"
 #include "window.h"
@@ -116,4 +117,129 @@ int xsetcolorname(int x, const char *name) {
   drawing_context.colors[x] = ncolor;
 
   return 0;
+}
+
+void get_color_from_glyph(PGlyph* base, RenderColor* out){
+
+  Color *fg, *bg, *temp;
+  XRenderColor colfg, colbg;
+  bool is_foreground_true_color = false;
+  bool is_background_true_color = false;
+
+
+  if (IS_TRUECOL(base->fg)) {
+    colfg.alpha = 0xffff;
+    colfg.red = TRUERED(base->fg);
+    colfg.green = TRUEGREEN(base->fg);
+    colfg.blue = TRUEBLUE(base->fg);
+    memcpy(&out->truefg.color,&colfg,sizeof(XRenderColor));
+    fg = &out->truefg;
+    is_foreground_true_color = true;
+  } else {
+    fg = &drawing_context.colors[base->fg];
+  }
+
+  if (IS_TRUECOL(base->bg)) {
+    colbg.alpha = 0xffff;
+    colbg.green = TRUEGREEN(base->bg);
+    colbg.red = TRUERED(base->bg);
+    colbg.blue = TRUEBLUE(base->bg);
+    memcpy(&out->truebg.color,&colbg,sizeof(XRenderColor));
+    bg = &out->truebg;
+    is_background_true_color = true;
+  } else {
+    bg = &drawing_context.colors[base->bg];
+  }
+
+  /* Change basic system colors [0-7] to bright system colors [8-15] */
+  if ((base->mode & ATTR_BOLD_FAINT) == ATTR_BOLD && BETWEEN(base->fg, 0, 7))
+    fg = &drawing_context.colors[base->fg + 8];
+
+  if (IS_WINDOSET(MODE_REVERSE)) {
+    if (fg == &drawing_context.colors[defaultfg]) {
+      fg = &drawing_context.colors[defaultbg];
+    } else {
+      colfg.red = ~fg->color.red;
+      colfg.green = ~fg->color.green;
+      colfg.blue = ~fg->color.blue;
+      colfg.alpha = fg->color.alpha;
+      memcpy(&out->revfg.color,&colbg,sizeof(XRenderColor));
+      fg = &out->revfg;
+    }
+
+    if (bg == &drawing_context.colors[defaultbg]) {
+      bg = &drawing_context.colors[defaultfg];
+    } else {
+      colbg.red = ~bg->color.red;
+      colbg.green = ~bg->color.green;
+      colbg.blue = ~bg->color.blue;
+      colbg.alpha = bg->color.alpha;
+      memcpy(&out->revbg.color,&colbg,sizeof(XRenderColor));
+      bg = &out->revbg;
+    }
+  }
+
+  if ((base->mode & ATTR_BOLD_FAINT) == ATTR_FAINT) {
+    colfg.red = fg->color.red / 2;
+    colfg.green = fg->color.green / 2;
+    colfg.blue = fg->color.blue / 2;
+    colfg.alpha = fg->color.alpha;
+    memcpy(&out->revfg.color,&colfg,sizeof(XRenderColor));
+    fg = &out->revfg;
+  }
+
+  if (base->mode & ATTR_REVERSE) {
+    temp = fg;
+    fg = bg;
+    bg = temp;
+  }
+
+  if (base->mode & ATTR_BLINK && terminal_window.mode & MODE_BLINK)
+    fg = bg;
+
+  if (base->mode & ATTR_INVISIBLE)
+    fg = bg;
+
+
+  //opengl convertion
+  float div;
+  if(is_background_true_color){
+
+    div = 65535.f;
+    PColor mycolor = {.r = bg->color.red/div,
+                      .g = bg->color.green/div,
+                      .b = bg->color.blue/div};
+    out->gl_background_color = mycolor;
+  }else{
+
+    if(bg->color.red > 255 || bg->color.blue > 255 || bg->color.green > 255){
+      div = 65525.f;
+    }else{
+      div = 255.f;
+    }
+
+    PColor mycolor = {.r = bg->color.red/div,
+                      .g = bg->color.green/div,
+                      .b = bg->color.blue/div};
+    out->gl_background_color = mycolor;
+  }
+  if(is_foreground_true_color){
+
+    div = 65535.f;
+    PColor mycolor = {.r = fg->color.red/div,
+                      .g = fg->color.green/div,
+                      .b = fg->color.blue/div};
+    out->gl_foreground_color = mycolor;
+  }else{
+    div = 255.f;
+
+    PColor mycolor = {.r = fg->color.red/div,
+                      .g = fg->color.green/div,
+                      .b = fg->color.blue/div};
+    out->gl_foreground_color = mycolor;
+  }
+
+  out->foreground = fg;
+  out->background = bg;
+
 }

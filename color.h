@@ -3,6 +3,7 @@
 
 #include <GL/gl.h>
 #include <X11/Xft/Xft.h>
+#include "terminal.h"
 
 #define TRUERED(x) (((x) & 0xff0000) >> 8)
 #define TRUEGREEN(x) (((x) & 0xff00))
@@ -24,6 +25,8 @@ typedef struct RenderColor{
   PColor gl_foreground_color;
 
 }RenderColor;
+
+void get_color_from_glyph(PGlyph* base, RenderColor* out);
 
 extern const char *colorname[];
 
