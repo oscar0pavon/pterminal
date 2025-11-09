@@ -193,9 +193,7 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
 
     uint8_t ascii_value;
     if(line[i].u > 127){
-      //printf("for draw hex value: %X\n",line[i].u);
      ascii_value = get_texture_atlas_index(line[i].u);
-     printf("ascii value: %i %c\n",ascii_value,(char)ascii_value);
     }else{
       ascii_value = line[i].u;
     }

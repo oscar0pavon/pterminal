@@ -1,5 +1,43 @@
 #include "utf8.h"
-#include <stdio.h>
+
+// Array containing the 32 Unicode code points for the CP437 indices 0-31
+static const uint16_t cp437_control_map[32] = {
+    // Indices 0-15
+    0x0020, // 0: NUL (Null character, often renders as a space)
+    0x263A, // 1: SOH (Start of Heading, renders as ☺ White smiling face)
+    0x263B, // 2: STX (Start of Text, renders as ☻ Black smiling face)
+    0x2665, // 3: ETX (End of Text, renders as ♥ Black heart suit)
+    0x2666, // 4: EOT (End of Transmission, renders as ♦ Black diamond suit)
+    0x2663, // 5: ENQ (Enquiry, renders as ♣ Black club suit)
+    0x2660, // 6: ACK (Acknowledge, renders as ♠ Black spade suit)
+    0x2022, // 7: BEL (Bell, renders as • Bullet)
+    0x25D8, // 8: BS (Backspace, renders as ◘ Inverse bullet)
+    0x25CB, // 9: HT (Horizontal Tab, renders as ○ White circle)
+    0x25D9, // 10: LF (Line Feed, renders as ◙ Inverse white circle)
+    0x2642, // 11: VT (Vertical Tab, renders as ♂ Male sign)
+    0x2640, // 12: FF (Form Feed, renders as ♀ Female sign)
+    0x266A, // 13: CR (Carriage Return, renders as ♪ Eighth note)
+    0x266B, // 14: SO (Shift Out, renders as ♫ Beamed eighth notes)
+    0x263C, // 15: SI (Shift In, renders as ☼ White sun with rays)
+    
+    // Indices 16-31
+    0x25BA, // 16: DLE (Data Link Escape, renders as ► Black right-pointing pointer)
+    0x25C4, // 17: DC1 (Device Control 1, renders as ◄ Black left-pointing pointer)
+    0x2195, // 18: DC2 (Device Control 2, renders as ↕ Up down arrow)
+    0x203C, // 19: DC3 (Device Control 3, renders as ‼ Double exclamation mark)
+    0x00B6, // 20: DC4 (Device Control 4, renders as ¶ Pilcrow sign)
+    0x00A7, // 21: NAK (Negative Acknowledge, renders as § Section sign)
+    0x25AC, // 22: SYN (Synchronous Idle, renders as ▬ Black rectangle)
+    0x2194, // 23: ETB (End of Trans. Block, renders as ↨ Up down arrow with base)
+    0x2191, // 24: CAN (Cancel, renders as ↑ Upwards arrow)
+    0x2193, // 25: EM (End of Medium, renders as ↓ Downwards arrow)
+    0x2192, // 26: SUB (Substitute, renders as → Rightwards arrow)
+    0x2190, // 27: ESC (Escape, renders as ← Leftwards arrow)
+    0x221F, // 28: FS (File Separator, renders as ∟ Right angle)
+    0x2194, // 29: GS (Group Separator, renders as ↔ Left right arrow)
+    0x25B2, // 30: RS (Record Separator, renders as ▲ Black up-pointing triangle)
+    0x25BC  // 31: US (Unit Separator, renders as ▼ Black down-pointing triangle)
+};
 
 // Array containing the 128 Unicode code points used in the extended CP437 range (128-255)
 static const uint16_t cp437_extended_map[128] = {
@@ -43,6 +81,13 @@ static const Rune utfmax[UTF_SIZ + 1] = {0x10FFFF, 0x7F, 0x7FF, 0xFFFF,
                                          0x10FFFF};
 
 int get_texture_atlas_index(unsigned int unicode_char) {
+
+  for (int i = 0; i < 32; i++) {
+    if (cp437_control_map[i] == unicode_char) {
+      return 0 + i;
+    }
+  }
+
   for (int i = 0; i < 128; i++) {
     if (cp437_extended_map[i] == unicode_char) {
       return 127 + i;
