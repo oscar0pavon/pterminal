@@ -3,12 +3,8 @@
 
 #include <GL/gl.h>
 #include <stdbool.h>
+#include "color.h"
 
-typedef struct PColor{
-  GLfloat r;
-  GLfloat g;
-  GLfloat b;
-} PColor;
 
 extern GLuint font_texture_id;
 
