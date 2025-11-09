@@ -21,23 +21,6 @@ enum term_mode {
   MODE_UTF8 = 1 << 6,
 };
 
-typedef struct {
-  int mode;
-  int type;
-  int snap;
-  /*
-   * Selection variables:
-   * nb – normalized coordinates of the beginning of the selection
-   * ne – normalized coordinates of the end of the selection
-   * ob – original coordinates of the beginning of the selection
-   * oe – original coordinates of the end of the selection
-   */
-  struct {
-    int x, y;
-  } beginning_normalized, end_normalized, original_beginning, original_end;
-
-  int alt;
-} Selection;
 
 /* macros */
 #define ATTRCMP(a, b)                                                          \
@@ -186,6 +169,5 @@ extern unsigned int defaultfg;
 extern unsigned int defaultbg;
 extern unsigned int defaultcs;
 
-extern Selection sel;
 
 #endif

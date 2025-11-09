@@ -397,11 +397,11 @@ void selrequest(XEvent *e) {
 }
 
 void selclear(void) {
-  if (sel.original_beginning.x == -1)
+  if (selection.original_beginning.x == -1)
     return;
-  sel.mode = SEL_IDLE;
-  sel.original_beginning.x = -1;
-  tsetdirt(sel.beginning_normalized.y, sel.end_normalized.y);
+  selection.mode = SEL_IDLE;
+  selection.original_beginning.x = -1;
+  tsetdirt(selection.beginning_normalized.y, selection.end_normalized.y);
 }
 
 void setsel(char *str, Time t) {

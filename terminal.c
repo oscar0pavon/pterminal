@@ -5,9 +5,11 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <pty.h>
 #include <pwd.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
@@ -16,8 +18,6 @@
 #include <sys/wait.h>
 #include <termios.h>
 #include <unistd.h>
-#include <stdio.h>
-#include <pty.h>
 
 #include "window.h"
 
@@ -25,14 +25,11 @@
 
 #include "selection.h"
 
-
 /* Arbitrary sizes */
 #define ESC_BUF_SIZ (128 * UTF_SIZ)
 #define ESC_ARG_SIZ 16
 #define STR_BUF_SIZ ESC_BUF_SIZ
 #define STR_ARG_SIZ ESC_ARG_SIZ
-
-
 
 enum cursor_movement { CURSOR_SAVE, CURSOR_LOAD };
 
@@ -61,10 +58,6 @@ enum escape_state {
   ESC_TEST = 32,    /* Enter in test mode */
   ESC_UTF8 = 64,
 };
-
-
-
-
 
 /* CSI Escape sequence structs */
 /* ESC '[' [[ [<priv>] <arg> [;]] <mode> [<mode>]] */
@@ -139,8 +132,6 @@ static void drawregion(int, int, int, int);
 static void clearline(Line, PGlyph, int, int);
 static Line ensureline(Line);
 
-
-
 static char *base64dec(const char *);
 static char base64dec_getc(const char **);
 
@@ -148,13 +139,11 @@ static ssize_t xwrite(int, const char *, size_t);
 
 /* Globals */
 Term term;
-Selection sel;
 static CSIEscape csiescseq;
 static STREscape strescseq;
 static int iofd = 1;
 static int cmdfd;
 static pid_t pid;
-
 
 ssize_t xwrite(int fd, const char *s, size_t len) {
   size_t aux = len;
@@ -186,8 +175,6 @@ void *xrealloc(void *p, size_t len) {
 
   return p;
 }
-
-
 
 char base64dec_getc(const char **src) {
   while (**src && !isprint((unsigned char)**src))
@@ -230,7 +217,6 @@ char *base64dec(const char *src) {
   return result;
 }
 
-
 int tlinelen(int y) {
   int i = term.col;
   Line line = TLINE(y);
@@ -243,8 +229,6 @@ int tlinelen(int y) {
 
   return i;
 }
-
-
 
 void die(const char *errstr, ...) {
   va_list ap;
@@ -716,16 +700,20 @@ void tscrollup(int orig, int n) {
 }
 
 void selscroll(int orig, int n) {
-  if (sel.original_beginning.x == -1 || sel.alt != IS_SET(MODE_ALTSCREEN))
+  if (selection.original_beginning.x == -1 ||
+      selection.alt != IS_SET(MODE_ALTSCREEN))
     return;
 
-  if (BETWEEN(sel.beginning_normalized.y, orig, term.bot) != BETWEEN(sel.end_normalized.y, orig, term.bot)) {
+  if (BETWEEN(selection.beginning_normalized.y, orig, term.bot) !=
+      BETWEEN(selection.end_normalized.y, orig, term.bot)) {
     selclear();
-  } else if (BETWEEN(sel.beginning_normalized.y, orig, term.bot)) {
-    sel.original_beginning.y += n;
-    sel.original_end.y += n;
-    if (sel.original_beginning.y < term.top || sel.original_beginning.y > term.bot || sel.original_end.y < term.top ||
-        sel.original_end.y > term.bot) {
+  } else if (BETWEEN(selection.beginning_normalized.y, orig, term.bot)) {
+    selection.original_beginning.y += n;
+    selection.original_end.y += n;
+    if (selection.original_beginning.y < term.top ||
+        selection.original_beginning.y > term.bot ||
+        selection.original_end.y < term.top ||
+        selection.original_end.y > term.bot) {
       selclear();
     } else {
       selnormalize();
@@ -809,16 +797,15 @@ void tsetchar(Rune u, PGlyph *attr, int x, int y) {
       "│", "≤", "≥", "π", "≠", "£", "·",      /* x - ~ */
   };
   Line line = TLINE(y);
-  //line[x].utf8_value = u;
+  // line[x].utf8_value = u;
 
   /*
    * The table is proudly stolen from rxvt.
    */
   if (term.trantbl[term.charset] == CS_GRAPHIC0 && BETWEEN(u, 0x41, 0x7e) &&
-      vt100_0[u - 0x41]){
+      vt100_0[u - 0x41]) {
     utf8decode(vt100_0[u - 0x41], &u, UTF_SIZ);
   }
-  
 
   if (line[x].mode & ATTR_WIDE) {
     if (x + 1 < term.col) {
@@ -1332,7 +1319,8 @@ void csihandle(void) {
     break;
   case 'X': /* ECH -- Erase <n> char */
     DEFAULT(csiescseq.arg[0], 1);
-    tclearregion(term.cursor.x, term.cursor.y, term.cursor.x + csiescseq.arg[0] - 1, term.cursor.y);
+    tclearregion(term.cursor.x, term.cursor.y,
+                 term.cursor.x + csiescseq.arg[0] - 1, term.cursor.y);
     break;
   case 'P': /* DCH -- Delete <n> char */
     DEFAULT(csiescseq.arg[0], 1);
@@ -1358,8 +1346,8 @@ void csihandle(void) {
       ttywrite("\033[0n", sizeof("\033[0n") - 1, 0);
       break;
     case 6: /* Report Cursor Position (CPR) "<row>;<column>R" */
-      len =
-          snprintf(buf, sizeof(buf), "\033[%i;%iR", term.cursor.y + 1, term.cursor.x + 1);
+      len = snprintf(buf, sizeof(buf), "\033[%i;%iR", term.cursor.y + 1,
+                     term.cursor.x + 1);
       ttywrite(buf, len, 0);
       break;
     default:
@@ -2002,7 +1990,8 @@ check_control_code:
   }
 
   if (IS_SET(MODE_INSERT) && term.cursor.x + width < term.col) {
-    memmove(glyph_pointer + width, glyph_pointer, (term.col - term.cursor.x - width) * sizeof(PGlyph));
+    memmove(glyph_pointer + width, glyph_pointer,
+            (term.col - term.cursor.x - width) * sizeof(PGlyph));
     glyph_pointer->mode &= ~ATTR_WIDE;
   }
 
@@ -2013,7 +2002,7 @@ check_control_code:
       tmoveto(term.col - width, term.cursor.y);
     glyph_pointer = &TLINE(term.cursor.y)[term.cursor.x];
   }
-  
+
   tsetchar(u, &term.cursor.attr, term.cursor.x, term.cursor.y);
   term.lastc = u;
 
@@ -2110,13 +2099,15 @@ void tresize(int col, int row) {
       if (term.screen[0].buffer[i]) {
         term.screen[0].buffer[i] =
             xrealloc(term.screen[0].buffer[i], linelen * sizeof(PGlyph));
-        clearline(term.screen[0].buffer[i], term.cursor.attr, term.linelen, linelen);
+        clearline(term.screen[0].buffer[i], term.cursor.attr, term.linelen,
+                  linelen);
       }
     }
     for (i = 0; i < minrow; ++i) {
       term.screen[1].buffer[i] =
           xrealloc(term.screen[1].buffer[i], linelen * sizeof(PGlyph));
-      clearline(term.screen[1].buffer[i], term.cursor.attr, term.linelen, linelen);
+      clearline(term.screen[1].buffer[i], term.cursor.attr, term.linelen,
+                linelen);
     }
   }
   /* Allocate all visible lines for regular line buffer */
@@ -2168,4 +2159,3 @@ void tresize(int col, int row) {
 }
 
 void resettitle(void) { xsettitle(NULL); }
-

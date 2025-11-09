@@ -2,100 +2,112 @@
 #include "terminal.h"
 #include "utf8.h"
 
+Selection selection;
+
 void selinit(void) {
-  sel.mode = SEL_IDLE;
-  sel.snap = 0;
-  sel.original_beginning.x = -1;
+  selection.mode = SEL_IDLE;
+  selection.snap = 0;
+  selection.original_beginning.x = -1;
 }
 
 void selstart(int col, int row, int snap) {
   selclear();
-  sel.mode = SEL_EMPTY;
-  sel.type = SEL_REGULAR;
-  sel.alt = IS_SET(MODE_ALTSCREEN);
-  sel.snap = snap;
-  sel.original_end.x = sel.original_beginning.x = col;
-  sel.original_end.y = sel.original_beginning.y = row;
+  selection.mode = SEL_EMPTY;
+  selection.type = SEL_REGULAR;
+  selection.alt = IS_SET(MODE_ALTSCREEN);
+  selection.snap = snap;
+  selection.original_end.x = selection.original_beginning.x = col;
+  selection.original_end.y = selection.original_beginning.y = row;
   selnormalize();
 
-  if (sel.snap != 0)
-    sel.mode = SEL_READY;
-  tsetdirt(sel.beginning_normalized.y, sel.end_normalized.y);
+  if (selection.snap != 0)
+    selection.mode = SEL_READY;
+  tsetdirt(selection.beginning_normalized.y, selection.end_normalized.y);
 }
 
 void selextend(int col, int row, int type, int done) {
   int oldey, oldex, oldsby, oldsey, oldtype;
 
-  if (sel.mode == SEL_IDLE)
+  if (selection.mode == SEL_IDLE)
     return;
-  if (done && sel.mode == SEL_EMPTY) {
+  if (done && selection.mode == SEL_EMPTY) {
     selclear();
     return;
   }
 
-  oldey = sel.original_end.y;
-  oldex = sel.original_end.x;
-  oldsby = sel.beginning_normalized.y;
-  oldsey = sel.end_normalized.y;
-  oldtype = sel.type;
+  oldey = selection.original_end.y;
+  oldex = selection.original_end.x;
+  oldsby = selection.beginning_normalized.y;
+  oldsey = selection.end_normalized.y;
+  oldtype = selection.type;
 
-  sel.original_end.x = col;
-  sel.original_end.y = row;
+  selection.original_end.x = col;
+  selection.original_end.y = row;
   selnormalize();
-  sel.type = type;
+  selection.type = type;
 
-  if (oldey != sel.original_end.y || oldex != sel.original_end.x || oldtype != sel.type ||
-      sel.mode == SEL_EMPTY)
-    tsetdirt(MIN(sel.beginning_normalized.y, oldsby), MAX(sel.end_normalized.y, oldsey));
+  if (oldey != selection.original_end.y || oldex != selection.original_end.x ||
+      oldtype != selection.type || selection.mode == SEL_EMPTY)
+    tsetdirt(MIN(selection.beginning_normalized.y, oldsby),
+             MAX(selection.end_normalized.y, oldsey));
 
-  sel.mode = done ? SEL_IDLE : SEL_READY;
+  selection.mode = done ? SEL_IDLE : SEL_READY;
 }
 
 void selnormalize(void) {
   int i;
 
-  if (sel.type == SEL_REGULAR &&
-      sel.original_beginning.y != sel.original_end.y) {
-    sel.beginning_normalized.x = sel.original_beginning.y < sel.original_end.y
-                                     ? sel.original_beginning.x
-                                     : sel.original_end.x;
-    sel.end_normalized.x = sel.original_beginning.y < sel.original_end.y
-                               ? sel.original_end.x
-                               : sel.original_beginning.x;
+  if (selection.type == SEL_REGULAR &&
+      selection.original_beginning.y != selection.original_end.y) {
+    selection.beginning_normalized.x =
+        selection.original_beginning.y < selection.original_end.y
+            ? selection.original_beginning.x
+            : selection.original_end.x;
+    selection.end_normalized.x =
+        selection.original_beginning.y < selection.original_end.y
+            ? selection.original_end.x
+            : selection.original_beginning.x;
   } else {
-    sel.beginning_normalized.x =
-        MIN(sel.original_beginning.x, sel.original_end.x);
-    sel.end_normalized.x = MAX(sel.original_beginning.x, sel.original_end.x);
+    selection.beginning_normalized.x =
+        MIN(selection.original_beginning.x, selection.original_end.x);
+    selection.end_normalized.x =
+        MAX(selection.original_beginning.x, selection.original_end.x);
   }
-  sel.beginning_normalized.y =
-      MIN(sel.original_beginning.y, sel.original_end.y);
-  sel.end_normalized.y = MAX(sel.original_beginning.y, sel.original_end.y);
+  selection.beginning_normalized.y =
+      MIN(selection.original_beginning.y, selection.original_end.y);
+  selection.end_normalized.y =
+      MAX(selection.original_beginning.y, selection.original_end.y);
 
-  selsnap(&sel.beginning_normalized.x, &sel.beginning_normalized.y, -1);
-  selsnap(&sel.end_normalized.x, &sel.end_normalized.y, +1);
+  selsnap(&selection.beginning_normalized.x, &selection.beginning_normalized.y,
+          -1);
+  selsnap(&selection.end_normalized.x, &selection.end_normalized.y, +1);
 
   /* expand selection over line breaks */
-  if (sel.type == SEL_RECTANGULAR)
+  if (selection.type == SEL_RECTANGULAR)
     return;
-  i = tlinelen(sel.beginning_normalized.y);
-  if (i < sel.beginning_normalized.x)
-    sel.beginning_normalized.x = i;
-  if (tlinelen(sel.end_normalized.y) <= sel.end_normalized.x)
-    sel.end_normalized.x = term.col - 1;
+  i = tlinelen(selection.beginning_normalized.y);
+  if (i < selection.beginning_normalized.x)
+    selection.beginning_normalized.x = i;
+  if (tlinelen(selection.end_normalized.y) <= selection.end_normalized.x)
+    selection.end_normalized.x = term.col - 1;
 }
 
 int selected(int x, int y) {
-  if (sel.mode == SEL_EMPTY || sel.original_beginning.x == -1 ||
-      sel.alt != IS_SET(MODE_ALTSCREEN))
+  if (selection.mode == SEL_EMPTY || selection.original_beginning.x == -1 ||
+      selection.alt != IS_SET(MODE_ALTSCREEN))
     return 0;
 
-  if (sel.type == SEL_RECTANGULAR)
-    return BETWEEN(y, sel.beginning_normalized.y, sel.end_normalized.y) &&
-           BETWEEN(x, sel.beginning_normalized.x, sel.end_normalized.x);
+  if (selection.type == SEL_RECTANGULAR)
+    return BETWEEN(y, selection.beginning_normalized.y,
+                   selection.end_normalized.y) &&
+           BETWEEN(x, selection.beginning_normalized.x,
+                   selection.end_normalized.x);
 
-  return BETWEEN(y, sel.beginning_normalized.y, sel.end_normalized.y) &&
-         (y != sel.beginning_normalized.y || x >= sel.beginning_normalized.x) &&
-         (y != sel.end_normalized.y || x <= sel.end_normalized.x);
+  return BETWEEN(y, selection.beginning_normalized.y,
+                 selection.end_normalized.y) &&
+         (y != selection.beginning_normalized.y ||
+          x >= selection.beginning_normalized.x) &&
+         (y != selection.end_normalized.y || x <= selection.end_normalized.x);
 }
 
 void selsnap(int *x, int *y, int direction) {
@@ -103,7 +115,7 @@ void selsnap(int *x, int *y, int direction) {
   int delim, prevdelim;
   const PGlyph *gp, *prevgp;
 
-  switch (sel.snap) {
+  switch (selection.snap) {
   case SNAP_WORD:
     /*
      * Snap around if the word wraps around at the end or
@@ -172,25 +184,32 @@ char *getsel(void) {
   int y, bufsize, lastx, linelen;
   const PGlyph *gp, *last;
 
-  if (sel.original_beginning.x == -1)
+  if (selection.original_beginning.x == -1)
     return NULL;
 
-  bufsize = (term.col + 1) * (sel.end_normalized.y - sel.beginning_normalized.y + 1) * UTF_SIZ;
+  bufsize =
+      (term.col + 1) *
+      (selection.end_normalized.y - selection.beginning_normalized.y + 1) *
+      UTF_SIZ;
   ptr = str = xmalloc(bufsize);
 
   /* append every set & selected glyph to the selection */
-  for (y = sel.beginning_normalized.y; y <= sel.end_normalized.y; y++) {
+  for (y = selection.beginning_normalized.y; y <= selection.end_normalized.y;
+       y++) {
     if ((linelen = tlinelen(y)) == 0) {
       *ptr++ = '\n';
       continue;
     }
 
-    if (sel.type == SEL_RECTANGULAR) {
-      gp = &TLINE(y)[sel.beginning_normalized.x];
-      lastx = sel.end_normalized.x;
+    if (selection.type == SEL_RECTANGULAR) {
+      gp = &TLINE(y)[selection.beginning_normalized.x];
+      lastx = selection.end_normalized.x;
     } else {
-      gp = &TLINE(y)[sel.beginning_normalized.y == y ? sel.beginning_normalized.x : 0];
-      lastx = (sel.end_normalized.y == y) ? sel.end_normalized.x : term.col - 1;
+      gp = &TLINE(y)[selection.beginning_normalized.y == y
+                         ? selection.beginning_normalized.x
+                         : 0];
+      lastx = (selection.end_normalized.y == y) ? selection.end_normalized.x
+                                                : term.col - 1;
     }
     last = &TLINE(y)[MIN(lastx, linelen - 1)];
     while (last >= gp && last->u == ' ')
@@ -212,8 +231,8 @@ char *getsel(void) {
      * st.
      * FIXME: Fix the computer world.
      */
-    if ((y < sel.end_normalized.y || lastx >= linelen) &&
-        (!(last->mode & ATTR_WRAP) || sel.type == SEL_RECTANGULAR))
+    if ((y < selection.end_normalized.y || lastx >= linelen) &&
+        (!(last->mode & ATTR_WRAP) || selection.type == SEL_RECTANGULAR))
       *ptr++ = '\n';
   }
   *ptr = 0;
