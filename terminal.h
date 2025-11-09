@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <stddef.h>
+#include <wchar.h>
 
 #include "types.h"
 #include "macros.h"
@@ -33,7 +34,7 @@ typedef struct {
    */
   struct {
     int x, y;
-  } nb, ne, ob, oe;
+  } beginning_normalized, end_normalized, original_beginning, original_end;
 
   int alt;
 } Selection;
@@ -146,6 +147,8 @@ int ttynew(const char *, char *, const char *, char **);
 size_t ttyread(void);
 void ttyresize(int, int);
 void ttywrite(const char *, size_t, int);
+
+int tlinelen(int);
 
 void resettitle(void);
 

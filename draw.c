@@ -49,10 +49,9 @@ void draw(void) {
 
   drawregion(0, 0, term.col, term.row);
 
-  if (TSCREEN.off == 0)
-    xdrawcursor(cursor_x, term.cursor.y, TLINE(term.cursor.y)[cursor_x],
-                term.old_cursor_x, term.old_cursor_y,
-                TLINE(term.old_cursor_y)[term.old_cursor_x]);
+  xdrawcursor(cursor_x, term.cursor.y, TLINE(term.cursor.y)[cursor_x],
+              term.old_cursor_x, term.old_cursor_y,
+              TLINE(term.old_cursor_y)[term.old_cursor_x]);
 
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
