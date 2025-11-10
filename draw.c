@@ -13,6 +13,14 @@ int borderpx = 2;
 unsigned int defaultrcs = 257;
 unsigned int cursorthickness = 2;
 
+void xdrawline(Line line, int position_x, int position_y, int column) {
+
+  for (int i = 0; i < column; i++) {
+
+    xdrawglyph(line[i],i,position_y);
+  }
+}
+
 void drawregion(int position_x, int position_y, int column, int row) {
   int i, line_number;
 
@@ -153,16 +161,25 @@ void xdrawglyph(PGlyph glyph, int x, int y) {
   int winy = y * terminal_window.character_height;
   int background_x = x * terminal_window.character_width;
 
+
   gl_draw_rect(color.gl_background_color, background_x, winy,
                terminal_window.character_width,
                terminal_window.character_height);
 
-  float offset = (terminal_window.character_gl_width / 2) -
+  float offset_x = (terminal_window.character_gl_width / 2) -
                  terminal_window.character_width;
 
-  float char_center = terminal_window.character_width / 2;
+  float char_center_x = terminal_window.character_width / 2;
+  
+  float offset_y = (terminal_window.character_gl_height / 2) -
+                 terminal_window.character_height;
 
-  float winx = ((x * terminal_window.character_width) - char_center) - offset;
+  float char_center_y = terminal_window.character_height / 2;
+
+  float draw_x = ((x * terminal_window.character_width) - char_center_x) - offset_x;
+
+  float draw_y = ((y * terminal_window.character_height) - char_center_y) - offset_y;
+  draw_y = draw_y + 1;//move one pixel down for botton line
 
   uint8_t ascii_value;
   if (glyph.u > 127) {
@@ -171,16 +188,9 @@ void xdrawglyph(PGlyph glyph, int x, int y) {
     ascii_value = glyph.u;
   }
 
-  gl_draw_char(ascii_value, color.gl_foreground_color, winx, winy,
+  gl_draw_char(ascii_value, color.gl_foreground_color, draw_x, draw_y,
                terminal_window.character_gl_width,
-               terminal_window.character_height);
+               terminal_window.character_gl_height);
 }
 
-void xdrawline(Line line, int position_x, int position_y, int column) {
-
-  for (int i = 0; i < column; i++) {
-
-    xdrawglyph(line[i],i,position_y);
-  }
-}
 
