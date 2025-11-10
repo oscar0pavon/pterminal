@@ -35,7 +35,7 @@ void draw(void) {
   int old_cursor_x = term.old_cursor_x;
   int old_cursor_y = term.old_cursor_y;
 
-  if (!xstartdraw())
+  if(!IS_WINDOSET(MODE_VISIBLE))
     return;
 
   /* adjust cursor position */
@@ -56,9 +56,6 @@ void draw(void) {
 
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
-
-  if (!is_opengl)
-    xfinishdraw(); // only call when with draw with Xlib
 
 
   glXSwapBuffers(xw.display, xw.win);
@@ -142,8 +139,6 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
   }
 }
 
-int xstartdraw(void) { return IS_WINDOSET(MODE_VISIBLE); }
-
 void xdrawglyph(PGlyph glyph, int x, int y) {
 
   if (selected(x, y))
@@ -189,8 +184,3 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
   }
 }
 
-void xfinishdraw(void) {
-
-  // XSetForeground(xw.display, drawing_context.gc,
-  //                drawing_context.colors[IS_WINDOSET(MODE_REVERSE) ? defaultfg : defaultbg].pixel);
-}
