@@ -105,7 +105,8 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
     }
     drawcol = drawing_context.colors[g.bg];
   }
-
+  int winx, winy;
+  PColor cursor_color = {.r = 1, .g = 1, .b = 1};
   /* draw the new one */
   if (IS_WINDOSET(MODE_FOCUSED)) {
     switch (terminal_window.cursor) {
@@ -117,17 +118,18 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
     case 3: /* Blinking Underline */
     case 4: /* Steady Underline */
 
-      int winx = cursor_x * terminal_window.character_width;
-      int winy = (cursor_y + 1) * terminal_window.character_height;
-      PColor new_color = {.r = 1, .g = 1, .b = 1};
-      gl_draw_rect(new_color, winx,
+      winx = cursor_x * terminal_window.character_width;
+      winy = (cursor_y + 1) * terminal_window.character_height;
+      gl_draw_rect(cursor_color, winx,
                    winy, terminal_window.character_width, cursorthickness);
 
       break;
     case 5: /* Blinking bar */
     case 6: /* Steady bar */
-      // XftDrawRect(xw.draw, &drawcol, borderpx + cx * win.cw,
-      //             borderpx + cy * win.ch, cursorthickness, win.ch);
+      winx = cursor_x * terminal_window.character_width;
+      winy = (cursor_y) * terminal_window.character_height;
+      gl_draw_rect(cursor_color, winx, winy, cursorthickness,
+                   terminal_window.character_height);
       break;
     }
   } else {
