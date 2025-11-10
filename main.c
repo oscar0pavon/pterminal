@@ -306,36 +306,38 @@ void xbell(void) {
 }
 
 void run(void) {
-  XEvent ev;
-  int w = terminal_window.width, h = terminal_window.height;
+  XEvent event;
+
+  int width = terminal_window.width;
+  int height = terminal_window.height;
+
   fd_set rfd;
-  int xfd = XConnectionNumber(xw.display), ttyfd, xev, drawing;
+
+  int xorg_file_descriptor = XConnectionNumber(xw.display);
+
+  int tty_file_descriptor, xev, drawing;
+
   struct timespec seltv, *tv, now, lastblink, trigger;
   double timeout;
 
   /* Waiting for window mapping */
   do {
-    XNextEvent(xw.display, &ev);
-    /*
-     * This XFilterEvent call is required because of XOpenIM. It
-     * does filter out the key event and some client message for
-     * the input method too.
-     */
-    if (XFilterEvent(&ev, None))
-      continue;
-    if (ev.type == ConfigureNotify) {
-      w = ev.xconfigure.width;
-      h = ev.xconfigure.height;
-    }
-  } while (ev.type != MapNotify);
+    XNextEvent(xw.display, &event);
 
-  ttyfd = ttynew(opt_line, shell, opt_io, opt_cmd);
-  cresize(w, h);
+    if (event.type == ConfigureNotify) {
+      width = event.xconfigure.width;
+      height = event.xconfigure.height;
+    }
+
+  } while (event.type != MapNotify);
+
+  tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
+  cresize(width, height);
 
   for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {
     FD_ZERO(&rfd);
-    FD_SET(ttyfd, &rfd);
-    FD_SET(xfd, &rfd);
+    FD_SET(tty_file_descriptor, &rfd);
+    FD_SET(xorg_file_descriptor, &rfd);
 
     if (XPending(xw.display))
       timeout = 0; /* existing events might not set xfd */
@@ -344,24 +346,25 @@ void run(void) {
     seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
     tv = timeout >= 0 ? &seltv : NULL;
 
-    if (pselect(MAX(xfd, ttyfd) + 1, &rfd, NULL, NULL, tv, NULL) < 0) {
+    if (pselect(MAX(xorg_file_descriptor, tty_file_descriptor) + 1, &rfd, NULL,
+                NULL, tv, NULL) < 0) {
       if (errno == EINTR)
         continue;
       die("select failed: %s\n", strerror(errno));
     }
     clock_gettime(CLOCK_MONOTONIC, &now);
 
-    if (FD_ISSET(ttyfd, &rfd))
+    if (FD_ISSET(tty_file_descriptor, &rfd))
       ttyread();
 
     xev = 0;
     while (XPending(xw.display)) {
       xev = 1;
-      XNextEvent(xw.display, &ev);
-      if (XFilterEvent(&ev, None))
+      XNextEvent(xw.display, &event);
+      if (XFilterEvent(&event, None))
         continue;
-      if (handler[ev.type])
-        (handler[ev.type])(&ev);
+      if (handler[event.type])
+        (handler[event.type])(&event);
     }
 
     /*
@@ -375,7 +378,7 @@ void run(void) {
      * maximum latency intervals during `cat huge.txt`, and perfect
      * sync with periodic updates from animations/key-repeats/etc.
      */
-    if (FD_ISSET(ttyfd, &rfd) || xev) {
+    if (FD_ISSET(tty_file_descriptor, &rfd) || xev) {
       if (!drawing) {
         trigger = now;
         drawing = 1;
@@ -401,7 +404,7 @@ void run(void) {
 
     draw();
 
-    // XFlush(xw.display);
+    XFlush(xw.display);
 
     drawing = 0;
   }
