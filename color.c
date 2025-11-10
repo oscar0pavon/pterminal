@@ -1,3 +1,4 @@
+#include <X11/extensions/Xrender.h>
 #include <stdbool.h>
 #include "color.h"
 #include "types.h"
@@ -49,8 +50,9 @@ unsigned int defaultcs = 256;
 
 ushort sixd_to_16bit(int x) { return x == 0 ? 0 : 0x3737 + 0x2828 * x; }
 
-int xloadcolor(int i, const char *name, Color *ncolor) {
+int xloadcolor(int i, const char *name, Color *out_color) {
   XRenderColor color = {.alpha = 0xffff};
+  Color new_color;
 
   if (!name) {
     if (BETWEEN(i, 16, 255)) {  /* 256 color */
@@ -62,12 +64,17 @@ int xloadcolor(int i, const char *name, Color *ncolor) {
         color.red = 0x0808 + 0x0a0a * (i - (6 * 6 * 6 + 16));
         color.green = color.blue = color.red;
       }
-      return XftColorAllocValue(xw.display, xw.vis, xw.cmap, &color, ncolor);
+      new_color.color = color;
+
+      memcpy(out_color,&new_color,sizeof(XftColor));
+      //return XftColorAllocValue(xw.display, xw.vis, xw.cmap, &color, ncolor);
+      return 1;
     } else
       name = colorname[i];
   }
 
-  return XftColorAllocName(xw.display, xw.vis, xw.cmap, name, ncolor);
+  printf("Color name: %s\n",name);
+  return XftColorAllocName(xw.display, xw.vis, xw.cmap, name, out_color);
 }
 
 void xloadcols(void) {
@@ -76,8 +83,8 @@ void xloadcols(void) {
   Color *cp;
 
   if (loaded) {
-    for (cp = drawing_context.colors; cp < &drawing_context.colors[drawing_context.collen]; ++cp)
-      XftColorFree(xw.display, xw.vis, xw.cmap, cp);
+    // for (cp = drawing_context.colors; cp < &drawing_context.colors[drawing_context.collen]; ++cp)
+    //   XftColorFree(xw.display, xw.vis, xw.cmap, cp);
   } else {
     drawing_context.collen = MAX(LEN(colorname), 256);
     drawing_context.colors = xmalloc(drawing_context.collen * sizeof(Color));
@@ -109,6 +116,8 @@ int xsetcolorname(int x, const char *name) {
 
   if (!BETWEEN(x, 0, drawing_context.collen - 1))
     return 1;
+
+  printf("Color name: %s\n",name);
 
   if (!xloadcolor(x, name, &ncolor))
     return 1;
