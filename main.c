@@ -6,34 +6,33 @@
 #include <math.h>
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
 
 char *argv0;
 #include "arg.h"
-#include "window.h"
 #include "draw.h"
 #include "terminal.h"
+#include "window.h"
 
-//OpenGL
+// OpenGL
+#include "events.h"
+#include "opengl.h"
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <stdbool.h>
-#include "opengl.h"
-#include "events.h"
 
-#include "mouse.h"
-#include "input.h"
 #include "color.h"
+#include "input.h"
+#include "mouse.h"
 #include "selection.h"
 
 int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 /* config.h for applying patches and the configuration. */
 #include "config.h"
-
 
 static inline ushort sixd_to_16bit(int);
 
@@ -70,15 +69,10 @@ static void (*handler[LASTEvent])(XEvent *) = {
     [SelectionRequest] = selrequest,
 };
 
-
 /* Font Ring Cache */
 enum { FRC_NORMAL, FRC_ITALIC, FRC_BOLD, FRC_ITALICBOLD };
 
-
 void ttysend(const Arg *arg) { ttywrite(arg->s, strlen(arg->s), 1); }
-
-
-
 
 void xhints(void) {
   XClassHint class = {opt_name ? opt_name : termname,
@@ -147,7 +141,7 @@ void xinit(int cols, int rows) {
                             xw.visual_info->visual, AllocNone);
 
   xloadcols();
-  
+
   terminal_window.character_height = 27;
   terminal_window.character_gl_width = 40;
   terminal_window.character_width = 14;
@@ -157,9 +151,11 @@ void xinit(int cols, int rows) {
   terminal_window.height = rows * terminal_window.character_height;
 
   if (xw.gm & XNegative)
-    xw.left_offset += DisplayWidth(xw.display, xw.screen) - terminal_window.width - 2;
+    xw.left_offset +=
+        DisplayWidth(xw.display, xw.screen) - terminal_window.width - 2;
   if (xw.gm & YNegative)
-    xw.top_offset += DisplayHeight(xw.display, xw.screen) - terminal_window.height - 2;
+    xw.top_offset +=
+        DisplayHeight(xw.display, xw.screen) - terminal_window.height - 2;
 
   /* Events */
   xw.attrs.background_pixel = drawing_context.colors[defaultbg].pixel;
@@ -178,8 +174,8 @@ void xinit(int cols, int rows) {
 
   xw.vis = xw.visual_info->visual;
 
-  printf("Teminal window width %i\n",terminal_window.width);
-  printf("Teminal window height %i\n",terminal_window.height);
+  printf("Teminal window width %i\n", terminal_window.width);
+  printf("Teminal window height %i\n", terminal_window.height);
 
   xw.win = XCreateWindow(
       xw.display, root, xw.left_offset, xw.top_offset, terminal_window.width,
@@ -188,7 +184,7 @@ void xinit(int cols, int rows) {
       CWBackPixel | CWBorderPixel | CWBitGravity | CWEventMask | CWColormap,
       &xw.attrs);
 
-  //Open GL
+  // Open GL
   xw.gl_context = glXCreateContext(xw.display, xw.visual_info, None, GL_TRUE);
   if (!xw.gl_context) {
     die("Can't create GL context");
@@ -201,7 +197,6 @@ void xinit(int cols, int rows) {
 
   if (parent != root)
     XReparentWindow(xw.display, xw.win, parent, xw.left_offset, xw.top_offset);
-
 
   /* white cursor, black outline */
   cursor = XCreateFontCursor(xw.display, mouseshape);
@@ -228,8 +223,8 @@ void xinit(int cols, int rows) {
   XSetWMProtocols(xw.display, xw.win, &xw.wmdeletewin, 1);
 
   xw.netwmpid = XInternAtom(xw.display, "_NET_WM_PID", False);
-  XChangeProperty(xw.display, xw.win, xw.netwmpid, XA_CARDINAL, 32, PropModeReplace,
-                  (uchar *)&thispid, 1);
+  XChangeProperty(xw.display, xw.win, xw.netwmpid, XA_CARDINAL, 32,
+                  PropModeReplace, (uchar *)&thispid, 1);
 
   terminal_window.mode = MODE_NUMLOCK;
   resettitle();
@@ -244,9 +239,7 @@ void xinit(int cols, int rows) {
   xsel.xtarget = XInternAtom(xw.display, "UTF8_STRING", 0);
   if (xsel.xtarget == None)
     xsel.xtarget = XA_STRING;
-
 }
-
 
 void xsetenv(void) {
   char buf[sizeof(long) * 8 + 1];
@@ -285,7 +278,6 @@ void xsettitle(char *p) {
   XFree(prop.value);
 }
 
-
 void xsetpointermotion(int set) {
   MODBIT(xw.attrs.event_mask, set, PointerMotionMask);
   XChangeWindowAttributes(xw.display, xw.win, CWEventMask, &xw.attrs);
@@ -305,14 +297,12 @@ int xsetcursor(int cursor) {
   return 0;
 }
 
-
 void xbell(void) {
   if (!(IS_WINDOSET(MODE_FOCUSED)))
     xseturgency(1);
   if (bellvolume)
     XkbBell(xw.display, xw.win, bellvolume, (Atom)NULL);
 }
-
 
 void run(void) {
   XEvent ev;
@@ -408,11 +398,9 @@ void run(void) {
       }
     }
 
-
     draw();
 
-    //XFlush(xw.display);
-
+    // XFlush(xw.display);
 
     drawing = 0;
   }
@@ -453,7 +441,8 @@ int main(int argc, char *argv[]) {
     opt_font = EARGF(usage());
     break;
   case 'g':
-    xw.gm = XParseGeometry(EARGF(usage()), &xw.left_offset, &xw.top_offset, &cols, &rows);
+    xw.gm = XParseGeometry(EARGF(usage()), &xw.left_offset, &xw.top_offset,
+                           &cols, &rows);
     break;
   case 'i':
     xw.isfixed = 1;
