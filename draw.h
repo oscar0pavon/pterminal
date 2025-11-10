@@ -21,6 +21,8 @@ extern unsigned int defaultrcs;
 
 void draw(void);
 
+void drawregion(int, int, int, int);
+
 void xdrawglyph(PGlyph glyph, int x, int y);
 
 void xdrawcursor(int, int, PGlyph, int, int, PGlyph);

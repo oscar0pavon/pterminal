@@ -11,6 +11,8 @@
 #include "macros.h"
 
 
+enum cursor_movement { CURSOR_SAVE, CURSOR_LOAD };
+
 enum term_mode {
   MODE_WRAP = 1 << 0,
   MODE_INSERT = 1 << 1,
@@ -157,6 +159,45 @@ void tsetdirtattr(int attr);
 void execsh(char *, char **);
 void sigchld(int);
 int twrite(const char *, int, int);
+
+void tprinter(char *, size_t);
+void tdumpsel(void);
+void tdumpline(int);
+void tdump(void);
+void tclearregion(int, int, int, int);
+void tcursor(int);
+void tdeletechar(int);
+void tdeleteline(int);
+void tinsertblank(int);
+void tinsertblankline(int);
+void tmoveto(int, int);
+void tmoveato(int, int);
+void tnewline(int);
+void tputtab(int);
+void tputc(Rune);
+void treset(void);
+void tscrollup(int, int);
+void tscrolldown(int, int);
+void tsetattr(const int *, int);
+void tsetchar(Rune, PGlyph *, int, int);
+void tsetscroll(int, int);
+void tswapscreen(void);
+void tsetmode(int, int, const int *, int);
+void tcontrolcode(uchar);
+void tdectest(char);
+void tdefutf8(char);
+
+int32_t tdefcolor(const int *, int *, int);
+void tdeftran(char);
+void tstrsequence(uchar);
+
+void clearline(Line, PGlyph, int, int);
+Line ensureline(Line);
+
+char *base64dec(const char *);
+char base64dec_getc(const char **);
+
+ssize_t xwrite(int, const char *, size_t);
 
 /* config.h globals */
 extern Term term;

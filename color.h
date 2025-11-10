@@ -26,6 +26,14 @@ typedef struct RenderColor{
 
 void get_color_from_glyph(PGlyph* base, RenderColor* out);
 
+int xgetcolor(int x, unsigned char *r, unsigned char *g, unsigned char *b);
+
+int xloadcolor(int i, const char *name, Color *ncolor);
+
+void xloadcols(void);
+
+int xsetcolorname(int x, const char *name);
+
 extern const char *colorname[];
 
 #endif
