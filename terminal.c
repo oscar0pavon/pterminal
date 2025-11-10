@@ -26,6 +26,8 @@
 #include "tty.h"
 #include "ansi_escapes.h"
 
+#include "color.h"
+
 /* Arbitrary sizes */
 
 

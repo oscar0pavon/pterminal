@@ -9,6 +9,9 @@
 #define TRUEGREEN(x) (((x) & 0xff00))
 #define TRUEBLUE(x) (((x) & 0xff) << 8)
 
+#define TRUECOLOR(r, g, b) (1 << 24 | (r) << 16 | (g) << 8 | (b))
+#define IS_TRUECOL(x) (1 << 24 & (x))
+
 typedef struct PColor{
   GLfloat r;
   GLfloat g;

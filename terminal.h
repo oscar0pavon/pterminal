@@ -30,8 +30,6 @@ enum term_mode {
 #define TIMEDIFF(t1, t2)                                                       \
   ((t1.tv_sec - t2.tv_sec) * 1000 + (t1.tv_nsec - t2.tv_nsec) / 1E6)
 
-#define TRUECOLOR(r, g, b) (1 << 24 | (r) << 16 | (g) << 8 | (b))
-#define IS_TRUECOL(x) (1 << 24 & (x))
 
 #define ISCONTROLC0(c) (BETWEEN(c, 0, 0x1f) || (c) == 0x7f)
 #define ISCONTROLC1(c) (BETWEEN(c, 0x80, 0x9f))
