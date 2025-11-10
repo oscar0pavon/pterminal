@@ -148,9 +148,9 @@ void xinit(int cols, int rows) {
 
   xloadcols();
   
-  terminal_window.character_height = 24;
-  terminal_window.character_gl_width = 32;
-  terminal_window.character_width = 11;
+  terminal_window.character_height = 27;
+  terminal_window.character_gl_width = 40;
+  terminal_window.character_width = 14;
 
   /* adjust fixed window geometry */
   terminal_window.width = cols * terminal_window.character_width;

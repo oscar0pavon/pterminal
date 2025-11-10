@@ -1,0 +1,33 @@
+/* Terminal colors (16 first used in escape sequence) */
+//in HTML notation #cc24cd
+const uint32_t my_colors[] = {
+	/* 8 normal colors */
+  0x000000,//black
+  0xcc241d,//red
+	0x00cd00,//green
+	0xcdcd00,//yellow
+	0x0c5576,//blue
+	0xcd00cd,//magenta
+	0x00cdcd,//cyan
+	0xe5e5e5,//gray
+
+	/* 8 bright colors */
+  0x7f7f7f, //gray
+	0xcc241d,//red2
+	0x98971a,//green
+	0xffff00,//"yellow",
+	0x458588,//blue
+	0xff00ff, //"magenta",
+	0x00ffff, //"cyan",
+	0xffffff, //"white",
+
+	[255] = 0, 
+
+	/* more colors can be added after 255 to use with DefaultXX */
+	0xcccccc,
+	0x555555,
+	0xdfdfdf, /* default foreground colour */
+	0x282C34, /* default background colour */
+
+};
+
