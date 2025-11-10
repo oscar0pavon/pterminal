@@ -60,8 +60,6 @@ void draw(void) {
   if (!is_opengl)
     xfinishdraw(); // only call when with draw with Xlib
 
-  if (old_cursor_x != term.old_cursor_x || old_cursor_y != term.old_cursor_y)
-    xximspot(term.old_cursor_x, term.old_cursor_y);
 
   glXSwapBuffers(xw.display, xw.win);
 }

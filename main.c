@@ -38,10 +38,6 @@ int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 static inline ushort sixd_to_16bit(int);
 
 static int xgeommasktogravity(int);
-static int ximopen(Display *);
-static void ximinstantiate(Display *, XPointer, XPointer);
-static void ximdestroy(XIM, XPointer, XPointer);
-static int xicdestroy(XIC, XPointer, XPointer);
 static void xinit(int, int);
 static void xsetenv(void);
 
@@ -130,50 +126,6 @@ int xgeommasktogravity(int mask) {
   return SouthEastGravity;
 }
 
-
-int ximopen(Display *dpy) {
-  XIMCallback imdestroy = {.client_data = NULL, .callback = ximdestroy};
-  XICCallback icdestroy = {.client_data = NULL, .callback = xicdestroy};
-
-  xw.ime.xim = XOpenIM(xw.display, NULL, NULL, NULL);
-  if (xw.ime.xim == NULL)
-    return 0;
-
-  if (XSetIMValues(xw.ime.xim, XNDestroyCallback, &imdestroy, NULL))
-    fprintf(stderr, "XSetIMValues: "
-                    "Could not set XNDestroyCallback.\n");
-
-  xw.ime.spotlist = XVaCreateNestedList(0, XNSpotLocation, &xw.ime.spot, NULL);
-
-  if (xw.ime.xic == NULL) {
-    xw.ime.xic = XCreateIC(xw.ime.xim, XNInputStyle,
-                           XIMPreeditNothing | XIMStatusNothing, XNClientWindow,
-                           xw.win, XNDestroyCallback, &icdestroy, NULL);
-  }
-  if (xw.ime.xic == NULL)
-    fprintf(stderr, "XCreateIC: Could not create input context.\n");
-
-  return 1;
-}
-
-void ximinstantiate(Display *dpy, XPointer client, XPointer call) {
-  if (ximopen(dpy))
-    XUnregisterIMInstantiateCallback(xw.display, NULL, NULL, NULL, ximinstantiate,
-                                     NULL);
-}
-
-void ximdestroy(XIM xim, XPointer client, XPointer call) {
-  xw.ime.xim = NULL;
-  XRegisterIMInstantiateCallback(xw.display, NULL, NULL, NULL, ximinstantiate,
-                                 NULL);
-  XFree(xw.ime.spotlist);
-}
-
-int xicdestroy(XIC xim, XPointer client, XPointer call) {
-  xw.ime.xic = NULL;
-  return 1;
-}
-
 void xinit(int cols, int rows) {
   XGCValues gcvalues;
   Cursor cursor;
@@ -250,13 +202,6 @@ void xinit(int cols, int rows) {
   if (parent != root)
     XReparentWindow(xw.display, xw.win, parent, xw.left_offset, xw.top_offset);
 
-
-
-  /* input methods */
-  if (!ximopen(xw.display)) {
-    XRegisterIMInstantiateCallback(xw.display, NULL, NULL, NULL, ximinstantiate,
-                                   NULL);
-  }
 
   /* white cursor, black outline */
   cursor = XCreateFontCursor(xw.display, mouseshape);
@@ -338,17 +283,6 @@ void xsettitle(char *p) {
   XSetWMName(xw.display, xw.win, &prop);
   XSetTextProperty(xw.display, xw.win, &prop, xw.netwmname);
   XFree(prop.value);
-}
-
-
-void xximspot(int x, int y) {
-  if (xw.ime.xic == NULL)
-    return;
-
-  xw.ime.spot.x = borderpx + x * terminal_window.character_width;
-  xw.ime.spot.y = borderpx + (y + 1) * terminal_window.character_height;
-
-  XSetICValues(xw.ime.xic, XNPreeditAttributes, xw.ime.spotlist, NULL);
 }
 
 
