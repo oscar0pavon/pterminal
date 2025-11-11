@@ -124,7 +124,7 @@ int xloadcolor(int i, const char *name, Color *out_color) {
       new_color.color = color;
 
       memcpy(out_color, &new_color, sizeof(XftColor));
-      // return XftColorAllocValue(xw.display, xw.vis, xw.cmap, &color, ncolor);
+
       return 1;
     } else {
       name = colorname[i];
@@ -134,7 +134,6 @@ int xloadcolor(int i, const char *name, Color *out_color) {
     }
   }
 
-  // return XftColorAllocName(xw.display, xw.vis, xw.cmap, name, out_color);
   return 1;
 }
 
@@ -169,6 +168,7 @@ int xgetcolor(int x, unsigned char *r, unsigned char *g, unsigned char *b) {
   *r = drawing_context.colors[x].color.red >> 8;
   *g = drawing_context.colors[x].color.green >> 8;
   *b = drawing_context.colors[x].color.blue >> 8;
+  printf("getting color\n");
 
   return 0;
 }
@@ -184,7 +184,6 @@ int xsetcolorname(int x, const char *name) {
   if (!xloadcolor(x, name, &ncolor))
     return 1;
 
-  XftColorFree(xw.display, xw.vis, xw.cmap, &drawing_context.colors[x]);
   drawing_context.colors[x] = ncolor;
 
   return 0;
