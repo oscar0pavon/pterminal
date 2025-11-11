@@ -57,7 +57,8 @@ void cresize(int width, int height) {
   xresize(col, row);
   ttyresize(terminal_window.tty_width, terminal_window.tty_height);
 
-  updating_window = true;
+  set_ortho_projection(terminal_window.width, terminal_window.height);
+  glViewport(0, 0, terminal_window.width, terminal_window.height);
 
 }
 
@@ -67,6 +68,8 @@ void resize(XEvent *e) {
     return;
 
   cresize(e->xconfigure.width, e->xconfigure.height);
+  glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);//TODO get colors
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
 
