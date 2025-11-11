@@ -317,6 +317,7 @@ void run(void) {
   } while (event.type != MapNotify);
 
   tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
+
   cresize(width, height);
 
   for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {

@@ -146,7 +146,7 @@ void die(const char *errstr, ...) {
   exit(1);
 }
 
-void execsh(char *cmd, char **args) {
+void execute_shell(char *cmd, char **args) {
   char *sh, *prog, *arg;
   const struct passwd *pw;
 

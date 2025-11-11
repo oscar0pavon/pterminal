@@ -154,7 +154,7 @@ void tfulldirt(void);
 void tsetdirt(int top, int bot);
 void tsetdirtattr(int attr);
 
-void execsh(char *, char **);
+void execute_shell(char *, char **);
 void sigchld(int);
 int twrite(const char *, int, int);
 

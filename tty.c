@@ -22,31 +22,44 @@ int iofd = 1;
 int cmdfd;
 pid_t pid;
 
-void stty(char **args) {
-  char cmd[_POSIX_ARG_MAX], **p, *q, *s;
-  size_t n, siz;
+void new_serial_tty(char **args) {
+  char cmd[_POSIX_ARG_MAX], **argument_pointer, *queue, *string;
+  size_t arguments_lenght, current_argument_size;
 
-  if ((n = strlen(stty_args)) > sizeof(cmd) - 1)
+  if ((arguments_lenght = strlen(stty_args)) > sizeof(cmd) - 1)
     die("incorrect stty parameters\n");
-  memcpy(cmd, stty_args, n);
-  q = cmd + n;
-  siz = sizeof(cmd) - n;
-  for (p = args; p && (s = *p); ++p) {
-    if ((n = strlen(s)) > siz - 1)
+
+  memcpy(cmd, stty_args, arguments_lenght);
+
+  queue = cmd + arguments_lenght;
+
+  current_argument_size = sizeof(cmd) - arguments_lenght;
+
+  for (argument_pointer = args;
+       argument_pointer && (string = *argument_pointer); ++argument_pointer) {
+
+    if ((arguments_lenght = strlen(string)) > current_argument_size - 1)
       die("stty parameter length too long\n");
-    *q++ = ' ';
-    memcpy(q, s, n);
-    q += n;
-    siz -= n + 1;
+
+    *queue++ = ' ';
+
+    memcpy(queue, string, arguments_lenght);
+
+    queue += arguments_lenght;
+
+    current_argument_size -= arguments_lenght + 1;
   }
-  *q = '\0';
+
+  *queue = '\0';
+
   if (system(cmd) != 0)
     perror("Couldn't call stty");
 }
 
 int ttynew(const char *line, char *cmd, const char *out, char **args) {
-  int m, s;
-
+  int master, slave;
+  
+  //for using like serial terminal
   if (out) {
     term.mode |= MODE_PRINT;
     iofd = (!strcmp(out, "-")) ? 1 : open(out, O_WRONLY | O_CREAT, 0666);
@@ -59,12 +72,13 @@ int ttynew(const char *line, char *cmd, const char *out, char **args) {
     if ((cmdfd = open(line, O_RDWR)) < 0)
       die("open line '%s' failed: %s\n", line, strerror(errno));
     dup2(cmdfd, 0);
-    stty(args);
+    new_serial_tty(args);
     return cmdfd;
   }
+  //end serial terminal
 
   /* seems to work fine on linux, openbsd and freebsd */
-  if (openpty(&m, &s, NULL, NULL, NULL) < 0)
+  if (openpty(&master, &slave, NULL, NULL, NULL) < 0)
     die("openpty failed: %s\n", strerror(errno));
 
   switch (pid = fork()) {
@@ -73,25 +87,26 @@ int ttynew(const char *line, char *cmd, const char *out, char **args) {
     break;
   case 0:
     close(iofd);
-    close(m);
+    close(master);
     setsid(); /* create a new process group */
-    dup2(s, 0);
-    dup2(s, 1);
-    dup2(s, 2);
-    if (ioctl(s, TIOCSCTTY, NULL) < 0)
+    dup2(slave, 0);
+    dup2(slave, 1);
+    dup2(slave, 2);
+    if (ioctl(slave, TIOCSCTTY, NULL) < 0)
       die("ioctl TIOCSCTTY failed: %s\n", strerror(errno));
-    if (s > 2)
-      close(s);
-    execsh(cmd, args);
+    if (slave > 2)
+      close(slave);
+    execute_shell(cmd, args);
     break;
   default:
-    close(s);
-    cmdfd = m;
+    close(slave);
+    cmdfd = master;
     signal(SIGCHLD, sigchld);
     break;
   }
   return cmdfd;
 }
+
 size_t ttyread(void) {
   static char buf[BUFSIZ];
   static int buflen = 0;
