@@ -37,6 +37,5 @@ void xloadcols(void);
 
 int xsetcolorname(int x, const char *name);
 
-extern const char *colorname[];
 
 #endif

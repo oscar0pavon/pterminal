@@ -41,37 +41,6 @@ const uint32_t my_colors[] = {
 
 };
 
-/* Terminal colors (16 first used in escape sequence) */
-const char *colorname[] = {
-	/* 8 normal colors */
-	"black",
-	"#cc241d",//red
-	"green3",
-	"yellow3",
-	"#0c5576",//blue
-	"magenta3",
-	"cyan3",
-	"gray90",
-
-	/* 8 bright colors */
-	"gray50",
-	"#cc241d",//red2
-	"#98971a",//green
-	"yellow",
-	"#458588",//blue
-	"magenta",
-	"cyan",
-	"white",
-
-	[255] = 0,
-
-	/* more colors can be added after 255 to use with DefaultXX */
-	"#cccccc",
-	"#555555",
-	"gray90", /* default foreground colour */
-	"#282C34", /* default background colour */
-};
-
 
 /*
  * Default colors (colorname index)
@@ -127,8 +96,7 @@ int xloadcolor(int i, const char *name, Color *out_color) {
 
       return 1;
     } else {
-      name = colorname[i];
-      printf("Color name: %s\n", name);
+
       hexToXftColor(my_colors[i], &new_color);
       memcpy(out_color, &new_color, sizeof(XftColor));
     }
@@ -147,17 +115,13 @@ void xloadcols(void) {
     //   XftColorFree(xw.display, xw.vis, xw.cmap, cp);
     printf("Reset colors\n");
   } else {
-    drawing_context.collen = MAX(LEN(colorname), 256);
+    drawing_context.collen = MAX(LEN(my_colors), 256);
     drawing_context.colors = xmalloc(drawing_context.collen * sizeof(Color));
   }
 
   for (i = 0; i < drawing_context.collen; i++)
-    if (!xloadcolor(i, NULL, &drawing_context.colors[i])) {
-      if (colorname[i])
-        die("could not allocate color '%s'\n", colorname[i]);
-      else
-        die("could not allocate color %d\n", i);
-    }
+    xloadcolor(i, NULL, &drawing_context.colors[i]);
+
   loaded = 1;
 }
 

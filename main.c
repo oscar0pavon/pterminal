@@ -199,23 +199,6 @@ void xinit(int cols, int rows) {
   if (parent != root)
     XReparentWindow(xw.display, xw.win, parent, xw.left_offset, xw.top_offset);
 
-  /* white cursor, black outline */
-  cursor = XCreateFontCursor(xw.display, mouseshape);
-  XDefineCursor(xw.display, xw.win, cursor);
-
-  if (XParseColor(xw.display, xw.cmap, colorname[mousefg], &xmousefg) == 0) {
-    xmousefg.red = 0xffff;
-    xmousefg.green = 0xffff;
-    xmousefg.blue = 0xffff;
-  }
-
-  if (XParseColor(xw.display, xw.cmap, colorname[mousebg], &xmousebg) == 0) {
-    xmousebg.red = 0x0000;
-    xmousebg.green = 0x0000;
-    xmousebg.blue = 0x0000;
-  }
-
-  XRecolorCursor(xw.display, cursor, &xmousefg, &xmousebg);
 
   xw.xembed = XInternAtom(xw.display, "_XEMBED", False);
   xw.wmdeletewin = XInternAtom(xw.display, "WM_DELETE_WINDOW", False);
