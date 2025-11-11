@@ -94,7 +94,7 @@ int get_texture_atlas_index(unsigned int unicode_char) {
     }
   }
 
-  return 63; // Index for '?' in ASCII
+  return 2; // Index for '?' in ASCII
 }
 
 size_t utf8decode(const char *c, Rune *u, size_t clen) {

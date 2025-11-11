@@ -8,7 +8,7 @@
 /* Drawing Context */
 typedef struct {
   Color *colors;
-  size_t collen;
+  size_t colors_count;
   Font font, bfont, ifont, ibfont;
   GC gc;
 } DC;

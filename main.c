@@ -87,10 +87,10 @@ void xhints(void) {
   sizeh->width = terminal_window.width;
   sizeh->height_inc = terminal_window.character_height;
   sizeh->width_inc = terminal_window.character_width;
-  sizeh->base_height = 2 * borderpx;
-  sizeh->base_width = 2 * borderpx;
-  sizeh->min_height = terminal_window.character_height + 2 * borderpx;
-  sizeh->min_width = terminal_window.character_width + 2 * borderpx;
+  sizeh->base_height = 2;
+  sizeh->base_width = 2;
+  sizeh->min_height = terminal_window.character_height;
+  sizeh->min_width = terminal_window.character_width;
   if (xw.isfixed) {
     sizeh->flags |= PMaxSize;
     sizeh->min_width = sizeh->max_width = terminal_window.width;
@@ -130,7 +130,6 @@ void xinit(int cols, int rows) {
   if (!(xw.display = XOpenDisplay(NULL)))
     die("can't open display\n");
   xw.screen = XDefaultScreen(xw.display);
-  xw.vis = XDefaultVisual(xw.display, xw.screen);
 
   xw.visual_info = glXChooseVisual(xw.display, xw.screen, gl_attributes);
   if (!xw.visual_info)
@@ -159,8 +158,6 @@ void xinit(int cols, int rows) {
         DisplayHeight(xw.display, xw.screen) - terminal_window.height - 2;
 
   /* Events */
-  xw.attrs.background_pixel = drawing_context.colors[defaultbg].pixel;
-  xw.attrs.border_pixel = drawing_context.colors[defaultbg].pixel;
   xw.attrs.bit_gravity = NorthWestGravity;
   xw.attrs.event_mask = FocusChangeMask | KeyPressMask | KeyReleaseMask |
                         ExposureMask | VisibilityChangeMask |
@@ -211,15 +208,20 @@ void xinit(int cols, int rows) {
                   PropModeReplace, (uchar *)&thispid, 1);
 
   terminal_window.mode = MODE_NUMLOCK;
+
   resettitle();
+
   xhints();
+
   XMapWindow(xw.display, xw.win);
+
   XSync(xw.display, False);
 
   clock_gettime(CLOCK_MONOTONIC, &xsel.tclick1);
   clock_gettime(CLOCK_MONOTONIC, &xsel.tclick2);
   xsel.primary = NULL;
   xsel.clipboard = NULL;
+
   xsel.xtarget = XInternAtom(xw.display, "UTF8_STRING", 0);
   if (xsel.xtarget == None)
     xsel.xtarget = XA_STRING;

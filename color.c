@@ -115,18 +115,18 @@ void xloadcols(void) {
     //   XftColorFree(xw.display, xw.vis, xw.cmap, cp);
     printf("Reset colors\n");
   } else {
-    drawing_context.collen = MAX(LEN(my_colors), 256);
-    drawing_context.colors = xmalloc(drawing_context.collen * sizeof(Color));
+    drawing_context.colors_count = MAX(LEN(my_colors), 256);
+    drawing_context.colors = xmalloc(drawing_context.colors_count * sizeof(Color));
   }
 
-  for (i = 0; i < drawing_context.collen; i++)
+  for (i = 0; i < drawing_context.colors_count; i++)
     xloadcolor(i, NULL, &drawing_context.colors[i]);
 
   loaded = 1;
 }
 
 int xgetcolor(int x, unsigned char *r, unsigned char *g, unsigned char *b) {
-  if (!BETWEEN(x, 0, drawing_context.collen - 1))
+  if (!BETWEEN(x, 0, drawing_context.colors_count - 1))
     return 1;
 
   *r = drawing_context.colors[x].color.red >> 8;
@@ -140,7 +140,7 @@ int xgetcolor(int x, unsigned char *r, unsigned char *g, unsigned char *b) {
 int xsetcolorname(int x, const char *name) {
   Color ncolor;
 
-  if (!BETWEEN(x, 0, drawing_context.collen - 1))
+  if (!BETWEEN(x, 0, drawing_context.colors_count - 1))
     return 1;
 
   printf("Color name: %s\n",name);
