@@ -3,6 +3,7 @@
 #include "window.h"
 #include "opengl.h"
 #include <X11/extensions/Xrender.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include "utf8.h"
 #include "selection.h"
@@ -13,6 +14,15 @@ int borderpx = 2;
 unsigned int defaultrcs = 257;
 unsigned int cursorthickness = 2;
 
+bool updating_window = false;
+
+void update_draw_window(){
+  set_ortho_projection(terminal_window.width, terminal_window.height);
+  glViewport(0, 0, terminal_window.width, terminal_window.height);
+  updating_window = false;
+}
+
+
 void xdrawline(Line line, int position_x, int position_y, int column) {
 
   for (int i = 0; i < column; i++) {
@@ -20,6 +30,7 @@ void xdrawline(Line line, int position_x, int position_y, int column) {
     xdrawglyph(line[i],i,position_y);
   }
 }
+
 
 void drawregion(int position_x, int position_y, int column, int row) {
   int i, line_number;
@@ -36,7 +47,10 @@ void drawregion(int position_x, int position_y, int column, int row) {
 }
 
 void draw(void) {
-  // glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
+  glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
+
+  update_draw_window();
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   int cursor_x = term.cursor.x;

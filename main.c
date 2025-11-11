@@ -10,6 +10,7 @@
 #include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <pthread.h>
 
 char *argv0;
 #include "arg.h"
@@ -42,6 +43,8 @@ static void xsetenv(void);
 
 static void run(void);
 static void usage(void);
+
+static int tty_file_descriptor;
 
 static void (*event_handler[LASTEvent])(XEvent *) = {
     [KeyPress] = kpress,
@@ -290,40 +293,23 @@ void xbell(void) {
     XkbBell(xw.display, xw.win, bellvolume, (Atom)NULL);
 }
 
-void run(void) {
-  XEvent event;
 
-  int width = terminal_window.width;
-  int height = terminal_window.height;
+void* handle_input(void*none){
+  
+  XEvent event;
 
   fd_set read_file_descriptor;
 
   int xorg_file_descriptor = XConnectionNumber(xw.display);
 
-  int tty_file_descriptor;
 
   bool have_event, drawing;
 
   struct timespec seltv, *wait_time, now, lastblink, trigger;
   double timeout;
+  
+  
 
-  /* Waiting for window mapping */
-  do {
-    XNextEvent(xw.display, &event);
-
-    if (event.type == ConfigureNotify) {
-      width = event.xconfigure.width;
-      height = event.xconfigure.height;
-    }
-
-  } while (event.type != MapNotify);
-
-  tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
-
-  cresize(width, height);
-
-
-  // Main loop
   for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {
 
     FD_ZERO(&read_file_descriptor);
@@ -402,12 +388,47 @@ void run(void) {
       }
     }
 
-    draw();
 
     XFlush(xw.display);
 
     drawing = false;
   }
+  return NULL;
+}
+
+
+void run(void) {
+
+  XEvent event;
+
+  int width = terminal_window.width;
+  int height = terminal_window.height;
+
+
+  /* Waiting for window mapping */
+  do {
+    XNextEvent(xw.display, &event);
+
+    if (event.type == ConfigureNotify) {
+      width = event.xconfigure.width;
+      height = event.xconfigure.height;
+    }
+
+  } while (event.type != MapNotify);
+
+  tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
+  cresize(width, height);
+
+
+  pthread_t input_thread;
+  pthread_create(&input_thread,NULL,handle_input,NULL);
+
+
+  // Main loop
+  while(1){
+    draw();
+  }
+
 }
 
 void usage(void) {
