@@ -43,7 +43,7 @@ static void xsetenv(void);
 static void run(void);
 static void usage(void);
 
-static void (*handler[LASTEvent])(XEvent *) = {
+static void (*event_handler[LASTEvent])(XEvent *) = {
     [KeyPress] = kpress,
     [ClientMessage] = cmessage,
     [ConfigureNotify] = resize,
@@ -296,13 +296,15 @@ void run(void) {
   int width = terminal_window.width;
   int height = terminal_window.height;
 
-  fd_set rfd;
+  fd_set read_file_descriptor;
 
   int xorg_file_descriptor = XConnectionNumber(xw.display);
 
-  int tty_file_descriptor, xev, drawing;
+  int tty_file_descriptor;
 
-  struct timespec seltv, *tv, now, lastblink, trigger;
+  bool have_event, drawing;
+
+  struct timespec seltv, *wait_time, now, lastblink, trigger;
   double timeout;
 
   /* Waiting for window mapping */
@@ -320,37 +322,49 @@ void run(void) {
 
   cresize(width, height);
 
+
+  // Main loop
   for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {
-    FD_ZERO(&rfd);
-    FD_SET(tty_file_descriptor, &rfd);
-    FD_SET(xorg_file_descriptor, &rfd);
+
+    FD_ZERO(&read_file_descriptor);
+    FD_SET(tty_file_descriptor, &read_file_descriptor);
+    FD_SET(xorg_file_descriptor, &read_file_descriptor);
 
     if (XPending(xw.display))
-      timeout = 0; /* existing events might not set xfd */
+      timeout = 0; /* existing events might not set xorg_file_descriptor */
 
     seltv.tv_sec = timeout / 1E3;
     seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
-    tv = timeout >= 0 ? &seltv : NULL;
+    wait_time = timeout >= 0 ? &seltv : NULL;
 
-    if (pselect(MAX(xorg_file_descriptor, tty_file_descriptor) + 1, &rfd, NULL,
-                NULL, tv, NULL) < 0) {
+    uint8_t file_descriptor_count = MAX(xorg_file_descriptor, tty_file_descriptor) + 1;
+
+    //this where we wait or block the rendering
+    if (pselect(file_descriptor_count, &read_file_descriptor, NULL, NULL, wait_time,
+                NULL) < 0) {
+
       if (errno == EINTR)
         continue;
-      die("select failed: %s\n", strerror(errno));
+      
+      die("pselect failed: %s\n", strerror(errno));
+
     }
+
     clock_gettime(CLOCK_MONOTONIC, &now);
 
-    if (FD_ISSET(tty_file_descriptor, &rfd))
+    if (FD_ISSET(tty_file_descriptor, &read_file_descriptor))
       ttyread();
+    
 
-    xev = 0;
+    //this where we handle input to the pseudo terminal o serial terminal
+    have_event = false;
     while (XPending(xw.display)) {
-      xev = 1;
+      have_event = true;
       XNextEvent(xw.display, &event);
       if (XFilterEvent(&event, None))
         continue;
-      if (handler[event.type])
-        (handler[event.type])(&event);
+      if (event_handler[event.type])
+        (event_handler[event.type])(&event);
     }
 
     /*
@@ -364,10 +378,10 @@ void run(void) {
      * maximum latency intervals during `cat huge.txt`, and perfect
      * sync with periodic updates from animations/key-repeats/etc.
      */
-    if (FD_ISSET(tty_file_descriptor, &rfd) || xev) {
+    if (FD_ISSET(tty_file_descriptor, &read_file_descriptor) || have_event) {
       if (!drawing) {
         trigger = now;
-        drawing = 1;
+        drawing = true;
       }
       timeout = (maxlatency - TIMEDIFF(now, trigger)) / maxlatency * minlatency;
       if (timeout > 0)
@@ -392,7 +406,7 @@ void run(void) {
 
     XFlush(xw.display);
 
-    drawing = 0;
+    drawing = false;
   }
 }
 

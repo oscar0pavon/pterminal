@@ -68,6 +68,9 @@ void resize(XEvent *e) {
     return;
 
   cresize(e->xconfigure.width, e->xconfigure.height);
+  glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);//TODO get colors
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 }
 
 void redraw(void) {
