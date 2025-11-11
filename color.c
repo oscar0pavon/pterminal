@@ -1,11 +1,45 @@
 #include <X11/extensions/Xrender.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "color.h"
 #include "types.h"
 #include "window.h"
 #include "macros.h"
 #include "draw.h"
 #include "terminal.h"
+
+/* Terminal colors (16 first used in escape sequence) */
+//in HTML notation #cc24cd
+const uint32_t my_colors[] = {
+	/* 8 normal colors */
+  0x000000,//black
+  0xcc241d,//red
+	0x00cd00,//green
+	0xcdcd00,//yellow
+	0x0c5576,//blue
+	0xcd00cd,//magenta
+	0x00cdcd,//cyan
+	0xe5e5e5,//gray
+
+	/* 8 bright colors */
+  0x7f7f7f, //gray
+	0xcc241d,//red2
+	0x98971a,//green
+	0xffff00,//"yellow",
+	0x458588,//blue
+	0xff00ff, //"magenta",
+	0x00ffff, //"cyan",
+	0xffffff, //"white",
+
+	[255] = 0, 
+
+	/* more colors can be added after 255 to use with DefaultXX */
+	0xcccccc,
+	0x555555,
+	0xdfdfdf, /* default foreground colour */
+	0x282C34, /* default background colour */
+
+};
 
 /* Terminal colors (16 first used in escape sequence) */
 const char *colorname[] = {
@@ -50,6 +84,29 @@ unsigned int defaultcs = 256;
 
 ushort sixd_to_16bit(int x) { return x == 0 ? 0 : 0x3737 + 0x2828 * x; }
 
+// Function to convert an 0xRRGGBB integer to an XftColor
+int hexToXftColor(unsigned int hexValue, XftColor *out_color) {
+
+    // Extract R, G, B components (8-bit values)
+    unsigned int r8 = (hexValue >> 16) & 0xFF;
+    unsigned int g8 = (hexValue >> 8) & 0xFF;
+    unsigned int b8 = hexValue & 0xFF;
+
+    XftColor xft_color;
+    // Convert to 16-bit values expected by XftColorAllocValue (0 to 65535)
+    XRenderColor new_color;
+    new_color.red = (unsigned short)(r8 * 257);   // or (r8 << 8) | r8
+    new_color.green = (unsigned short)(g8 * 257); // 255 * 257 = 65535
+    new_color.blue = (unsigned short)(b8 * 257);
+    new_color.alpha = 0xFFFF; // Full opacity
+    xft_color.color = new_color;
+
+    memcpy(out_color,&xft_color,sizeof(XftColor));
+
+
+    return 1; // Success
+}
+
 int xloadcolor(int i, const char *name, Color *out_color) {
   XRenderColor color = {.alpha = 0xffff};
   Color new_color;
@@ -66,15 +123,19 @@ int xloadcolor(int i, const char *name, Color *out_color) {
       }
       new_color.color = color;
 
-      memcpy(out_color,&new_color,sizeof(XftColor));
-      //return XftColorAllocValue(xw.display, xw.vis, xw.cmap, &color, ncolor);
+      memcpy(out_color, &new_color, sizeof(XftColor));
+      // return XftColorAllocValue(xw.display, xw.vis, xw.cmap, &color, ncolor);
       return 1;
-    } else
+    } else {
       name = colorname[i];
+      printf("Color name: %s\n", name);
+      hexToXftColor(my_colors[i], &new_color);
+      memcpy(out_color, &new_color, sizeof(XftColor));
+    }
   }
 
-  printf("Color name: %s\n",name);
-  return XftColorAllocName(xw.display, xw.vis, xw.cmap, name, out_color);
+  // return XftColorAllocName(xw.display, xw.vis, xw.cmap, name, out_color);
+  return 1;
 }
 
 void xloadcols(void) {
@@ -85,6 +146,7 @@ void xloadcols(void) {
   if (loaded) {
     // for (cp = drawing_context.colors; cp < &drawing_context.colors[drawing_context.collen]; ++cp)
     //   XftColorFree(xw.display, xw.vis, xw.cmap, cp);
+    printf("Reset colors\n");
   } else {
     drawing_context.collen = MAX(LEN(colorname), 256);
     drawing_context.colors = xmalloc(drawing_context.collen * sizeof(Color));
