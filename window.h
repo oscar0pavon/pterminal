@@ -152,5 +152,6 @@ void zoom(const Arg *);
 void zoomabs(const Arg *);
 void zoomreset(const Arg *);
 
+void create_window(int columns, int rows);
 
 #endif

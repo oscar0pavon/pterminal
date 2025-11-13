@@ -19,4 +19,6 @@ void gl_draw_char(uint8_t character, PColor color, float x, float y,
 
 extern bool is_opengl;
 
+extern int gl_attributes[4];
+
 #endif

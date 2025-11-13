@@ -17,8 +17,9 @@ EGLContext egl_context;
 EGLSurface egl_surface;
 
 
-
 bool is_opengl = false;
+
+int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 typedef struct UV{
     float x;
