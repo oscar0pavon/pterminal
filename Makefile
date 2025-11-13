@@ -11,14 +11,17 @@ X11LIB = /usr/lib
 INCS = -I$(X11INC) -I/usr/include/freetype2
 
 LIBS = -L/usr/lib -lm -lrt -lX11 -lutil -lGL -llodepng
-LIBS += -lEGL
+LIBS += -lEGL -lwayland-client
 
 STCFLAGS = $(INCS) $(CFLAGS) -g
 STLDFLAGS = $(LIBS) $(LDFLAGS)
 
+wayland_src := $(wildcard ./wayland/*.c)
+wayland_objs := $(wayland_src:%.c=%.o)
 
 SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
+OBJ += $(wayland_objs)
 
 all: pterminal
 
@@ -30,6 +33,9 @@ $(OBJ): config.h
 
 pterminal: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(STLDFLAGS)
+
+./wayland/%.o: ./wayland/%.c
+	cc $(STLDFLAGS) -o $@ -c $<
 
 clean:
 	rm -f pterminal $(OBJ) 

@@ -3,6 +3,7 @@
 #include "terminal.h"
 #include "types.h"
 #include "draw.h"
+#include "wayland/wayland.h"
 
 #include <unistd.h>
 
@@ -21,6 +22,7 @@ char *opt_name = NULL;
 char *opt_title = NULL;
 
 void create_window(int cols, int rows){
+  init_wayland();
   Window parent, root;
   pid_t thispid = getpid();
 
