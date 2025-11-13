@@ -182,6 +182,10 @@ void xinit(int cols, int rows) {
       CWBackPixel | CWBorderPixel | CWBitGravity | CWEventMask | CWColormap,
       &xw.attrs);
 
+  
+  init_egl();
+
+
   // Open GL
   xw.gl_context = glXCreateContext(xw.display, xw.visual_info, None, GL_TRUE);
   if (!xw.gl_context) {

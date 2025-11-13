@@ -11,6 +11,7 @@ X11LIB = /usr/lib
 INCS = -I$(X11INC) -I/usr/include/freetype2
 
 LIBS = -L/usr/lib -lm -lrt -lX11 -lutil -lGL -llodepng
+LIBS += -lEGL
 
 STCFLAGS = $(INCS) $(CFLAGS) -g
 STLDFLAGS = $(LIBS) $(LDFLAGS)

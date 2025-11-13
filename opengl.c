@@ -1,4 +1,5 @@
 #include "opengl.h"
+#include <EGL/eglplatform.h>
 #include <GL/gl.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -6,6 +7,16 @@
 #include <lodepng.h>
 #include <math.h>
 #include "types.h"
+#include "window.h"
+
+#include <EGL/egl.h>
+
+EGLDisplay egl_display;
+EGLDisplay egl_config;
+EGLContext egl_context;
+EGLSurface egl_surface;
+
+
 
 bool is_opengl = false;
 
@@ -15,6 +26,38 @@ typedef struct UV{
 }UV;
 
 GLuint font_texture_id;
+
+
+void init_egl(){
+
+  egl_display = eglGetDisplay((EGLNativeDisplayType)xw.display);
+
+  if(egl_display == EGL_NO_DISPLAY){
+    die("Can't create EGL display");
+  }
+
+  eglInitialize(egl_display, NULL,NULL);
+
+  eglBindAPI(EGL_OPENGL_API);
+
+  const EGLint attributes[] = {
+        EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT, // Request support for desktop GL
+        EGL_RED_SIZE, 8,
+        EGL_GREEN_SIZE, 8,
+        EGL_BLUE_SIZE, 8,
+        EGL_NONE
+    };
+  EGLint configuration_numbers;
+  eglChooseConfig(egl_display, attributes, &egl_config, 1, &configuration_numbers);
+
+  egl_context = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, NULL);
+  egl_surface = eglCreateWindowSurface(egl_display, egl_config,
+                                       (EGLNativeWindowType)xw.win, NULL);
+
+  eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
+}
+
+
 
 void gl_draw_rect(PColor color,  float x, float y, float width, float height){
     glColor4f(color.r, color.g, color.b,1.f); 
