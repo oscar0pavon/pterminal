@@ -31,7 +31,6 @@ char *argv0;
 
 #include "xorg.h"
 
-
 /* config.h for applying patches and the configuration. */
 #include "config.h"
 
@@ -42,7 +41,6 @@ static void xsetenv(void);
 
 static void run(void);
 static void usage(void);
-
 
 /* Font Ring Cache */
 enum { FRC_NORMAL, FRC_ITALIC, FRC_BOLD, FRC_ITALICBOLD };
@@ -94,7 +92,6 @@ int xgeommasktogravity(int mask) {
 
   return SouthEastGravity;
 }
-
 
 void xsetenv(void) {
   char buf[sizeof(long) * 8 + 1];
@@ -163,13 +160,12 @@ void run(void) {
   XEvent event;
 
   fd_set read_file_descriptor;
- 
+
   int window_manager_file_descriptor;
-  if(terminal_window.type == XORG){
+  if (terminal_window.type == XORG) {
     window_manager_file_descriptor = XConnectionNumber(xw.display);
     wait_for_mapping();
   }
-
 
   int tty_file_descriptor;
 
@@ -178,13 +174,11 @@ void run(void) {
   struct timespec seltv, *wait_time, now, lastblink, trigger;
   double timeout;
 
-
   tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
-
 
   // Main loop
   for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {
-    if(terminal_window.type == WAYLAND)
+    if (terminal_window.type == WAYLAND)
       continue;
 
     FD_ZERO(&read_file_descriptor);
@@ -200,27 +194,26 @@ void run(void) {
     seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
     wait_time = timeout >= 0 ? &seltv : NULL;
 
-    uint8_t file_descriptor_count = MAX(window_manager_file_descriptor, tty_file_descriptor) + 1;
+    uint8_t file_descriptor_count =
+        MAX(window_manager_file_descriptor, tty_file_descriptor) + 1;
 
-    //this where we wait or block the rendering
-    if (pselect(file_descriptor_count, &read_file_descriptor, NULL, NULL, wait_time,
-                NULL) < 0) {
+    // this where we wait or block the rendering
+    if (pselect(file_descriptor_count, &read_file_descriptor, NULL, NULL,
+                wait_time, NULL) < 0) {
 
       if (errno == EINTR)
         continue;
-      
-      die("pselect failed: %s\n", strerror(errno));
 
+      die("pselect failed: %s\n", strerror(errno));
     }
 
     clock_gettime(CLOCK_MONOTONIC, &now);
 
     if (FD_ISSET(tty_file_descriptor, &read_file_descriptor))
       ttyread();
-    
 
-    //this where we handle input to the pseudo terminal o serial terminal
-    if(terminal_window.type == XORG) 
+    // this where we handle input to the pseudo terminal o serial terminal
+    if (terminal_window.type == XORG)
       have_event = handle_xorg_events();
 
     /*
@@ -260,7 +253,8 @@ void run(void) {
 
     draw();
 
-    XFlush(xw.display);
+    if (terminal_window.type == XORG)
+      XFlush(xw.display);
 
     drawing = false;
   }
