@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <wayland-client-core.h>
+#include <wayland-client-protocol.h>
 
 
 WaylandTerminal wayland_terminal = {};
@@ -29,16 +30,37 @@ bool handle_wayland_initialization(){
 
   return true;
 }
+void configure_surface(void* data, DesktopSurface *surface, uint32_t serial){
 
-void register_global(void *data, Registry *registry, uint32_t name,
+  WaylandTerminal* terminal = (WaylandTerminal*)data;
+
+  xdg_surface_ack_configure(surface, serial);
+
+}
+
+SurfaceListener surface_listener = {
+  .configure = configure_surface
+};
+
+void register_global(void *data, Registry *registry, uint32_t name_id,
     const char *interface_name, uint32_t version) {
 
   WaylandTerminal *terminal = (WaylandTerminal*)data;
 
   if(strcmp(interface_name, wl_compositor_interface.name) == 0){
+
     initialization.compositor = true;
-  }else if (strcmp(interface_name, xdg_wm_base_interface.name) == 0){
+    terminal->compositor =
+        wl_registry_bind(registry, name_id, &wl_compositor_interface, 1);
+    printf("Got compositor\n");
+
+  } else if (strcmp(interface_name, xdg_wm_base_interface.name) == 0) {
+
     initialization.desktop = true;
+
+    terminal->desktop =
+        wl_registry_bind(registry, name_id, &xdg_wm_base_interface, 1);
+
   }
 }
 
@@ -68,8 +90,24 @@ bool init_wayland() {
   if(!init)
     return false;
 
+  wayland_terminal.wayland_surface =
+      wl_compositor_create_surface(wayland_terminal.compositor);
+
+  wayland_terminal.desktop_surface = xdg_wm_base_get_xdg_surface(
+      wayland_terminal.desktop, wayland_terminal.wayland_surface);
+
+  xdg_surface_add_listener(wayland_terminal.desktop_surface, &surface_listener,
+                           &wayland_terminal);
   
+  wayland_terminal.window = xdg_surface_get_toplevel(wayland_terminal.desktop_surface);
+
+  xdg_toplevel_set_title(wayland_terminal.window, "pterminal");
+
+  wl_surface_commit(wayland_terminal.wayland_surface);
   
+  wl_display_roundtrip(wayland_terminal.display);
+
+  printf("pterminal\n");
 
   return true;
 }

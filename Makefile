@@ -35,7 +35,7 @@ pterminal: $(OBJ)
 	$(CC) -o $@ $(OBJ) $(STLDFLAGS)
 
 ./wayland/%.o: ./wayland/%.c
-	cc $(STLDFLAGS) -o $@ -c $<
+	cc $(STCFLAGS) -o $@ -c $<
 
 clean:
 	rm -f pterminal $(OBJ) 
