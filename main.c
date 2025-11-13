@@ -43,31 +43,6 @@ static void xsetenv(void);
 static void run(void);
 static void usage(void);
 
-static void (*event_handler[LASTEvent])(XEvent *) = {
-    [KeyPress] = kpress,
-    [ClientMessage] = cmessage,
-    [ConfigureNotify] = resize,
-    [VisibilityNotify] = visibility,
-    [UnmapNotify] = unmap,
-    [Expose] = expose,
-    [FocusIn] = focus,
-    [FocusOut] = focus,
-    [MotionNotify] = bmotion,
-    [ButtonPress] = bpress,
-    [ButtonRelease] = brelease,
-    /*
-     * Uncomment if you want the selection to disappear when you select
-     * something different in another window.
-     */
-    /*	[SelectionClear] = selclear_, */
-    [SelectionNotify] = selnotify,
-    /*
-     * PropertyNotify is only turned on when there is some INCR transfer
-     * happening for the selection retrieval.
-     */
-    [PropertyNotify] = propnotify,
-    [SelectionRequest] = selrequest,
-};
 
 /* Font Ring Cache */
 enum { FRC_NORMAL, FRC_ITALIC, FRC_BOLD, FRC_ITALICBOLD };
@@ -214,10 +189,12 @@ void run(void) {
 
     FD_ZERO(&read_file_descriptor);
     FD_SET(tty_file_descriptor, &read_file_descriptor);
-    FD_SET(window_manager_file_descriptor, &read_file_descriptor);
 
-    if (XPending(xw.display))
-      timeout = 0; /* existing events might not set xorg_file_descriptor */
+    if (terminal_window.type == XORG) {
+      FD_SET(window_manager_file_descriptor, &read_file_descriptor);
+      if (XPending(xw.display))
+        timeout = 0; /* existing events might not set xorg_file_descriptor */
+    }
 
     seltv.tv_sec = timeout / 1E3;
     seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
@@ -243,15 +220,8 @@ void run(void) {
     
 
     //this where we handle input to the pseudo terminal o serial terminal
-    have_event = false;
-    while (XPending(xw.display)) {
-      have_event = true;
-      XNextEvent(xw.display, &event);
-      if (XFilterEvent(&event, None))
-        continue;
-      if (event_handler[event.type])
-        (event_handler[event.type])(&event);
-    }
+    if(terminal_window.type == XORG) 
+      have_event = handle_xorg_events();
 
     /*
      * To reduce flicker and tearing, when new content or event

@@ -5,6 +5,23 @@
 #include "terminal.h"
 #include "opengl.h"
 
+#include "events.h"
+
+bool handle_xorg_events(){
+  XEvent event;
+  bool have_event = false;
+    while (XPending(xw.display)) {
+      have_event = true;
+      XNextEvent(xw.display, &event);
+      if (XFilterEvent(&event, None))
+        continue;
+      if (event_handler[event.type])
+        (event_handler[event.type])(&event);
+    }
+
+  return have_event;
+}
+
 void wait_for_mapping(){
 
   int width = terminal_window.width;

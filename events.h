@@ -9,4 +9,6 @@ void unmap(XEvent *);
 void cmessage(XEvent *);
 void focus(XEvent *);
 
+extern void (*event_handler[LASTEvent])(XEvent *);
+
 #endif
