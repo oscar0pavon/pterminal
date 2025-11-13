@@ -7,6 +7,7 @@
 #include <string.h>
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
+#include <pthread.h>
 
 
 WaylandTerminal wayland_terminal = {};
@@ -71,6 +72,15 @@ RegistryListener registry_listener = {
   .global_remove = remove_global
 };
 
+void* run_wayland_loop(void*none){
+  
+  while(wl_display_dispatch(wayland_terminal.display)){
+   //events 
+  }
+
+  return NULL;
+}
+
 bool init_wayland() {
   wayland_terminal.display = wl_display_connect(NULL);
   if(wayland_terminal.display == NULL){
@@ -107,7 +117,8 @@ bool init_wayland() {
   
   wl_display_roundtrip(wayland_terminal.display);
 
-  printf("pterminal\n");
+  pthread_t wayland_loop_id;
+  pthread_create(&wayland_loop_id, NULL, run_wayland_loop, NULL);
 
   return true;
 }
