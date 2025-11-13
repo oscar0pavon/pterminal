@@ -383,6 +383,7 @@ run:
   tnew(cols, rows);
   printf("now terminal col %i\n", term.col);
   create_window(cols, rows);
+  init_draw_method();
   xsetenv();
   selinit();
   run();

@@ -27,6 +27,10 @@ void xdrawglyph(PGlyph glyph, int x, int y);
 
 void xdrawcursor(int, int, PGlyph, int, int, PGlyph);
 void xdrawline(Line, int, int, int);
+
+void init_draw_method(void);
+void swap_draw_buffers(void);
+
 /*
  * thickness of underline and bar cursors
  */

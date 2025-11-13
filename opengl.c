@@ -1,5 +1,4 @@
 #include "opengl.h"
-#include <EGL/eglplatform.h>
 #include <GL/gl.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -9,11 +8,10 @@
 #include "types.h"
 #include "window.h"
 
-#include <EGL/egl.h>
 
-EGLDisplay egl_display;
 EGLDisplay egl_config;
 EGLContext egl_context;
+EGLDisplay egl_display;
 EGLSurface egl_surface;
 
 

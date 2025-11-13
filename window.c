@@ -79,24 +79,9 @@ void create_window(int cols, int rows){
       CWBackPixel | CWBorderPixel | CWBitGravity | CWEventMask | CWColormap,
       &xw.attrs);
 
-  
-  init_egl();
-
-
-  // Open GL
-  xw.gl_context = glXCreateContext(xw.display, xw.visual_info, None, GL_TRUE);
-  if (!xw.gl_context) {
-    die("Can't create GL context");
-  }
-
-  glXMakeCurrent(xw.display, xw.win, xw.gl_context);
-  set_ortho_projection(terminal_window.width, terminal_window.height);
-  glViewport(0, 0, terminal_window.width, terminal_window.height);
-  load_texture(&font_texture_id, "/root/pterminal/font1.png");
 
   if (parent != root)
     XReparentWindow(xw.display, xw.win, parent, xw.left_offset, xw.top_offset);
-
 
   xw.xembed = XInternAtom(xw.display, "_XEMBED", False);
   xw.wmdeletewin = XInternAtom(xw.display, "WM_DELETE_WINDOW", False);

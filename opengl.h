@@ -4,6 +4,7 @@
 #include <GL/gl.h>
 #include <stdbool.h>
 #include "color.h"
+#include <EGL/egl.h>
 
 
 extern GLuint font_texture_id;
@@ -20,5 +21,8 @@ void gl_draw_char(uint8_t character, PColor color, float x, float y,
 extern bool is_opengl;
 
 extern int gl_attributes[4];
+
+extern EGLDisplay egl_display;
+extern EGLSurface egl_surface;
 
 #endif

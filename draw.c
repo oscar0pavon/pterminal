@@ -13,6 +13,34 @@ int borderpx = 2;
 unsigned int defaultrcs = 257;
 unsigned int cursorthickness = 2;
 
+
+// if we don't use EGL
+void create_xgl_context() {
+
+  xw.gl_context = glXCreateContext(xw.display, xw.visual_info, None, GL_TRUE);
+  if (!xw.gl_context) {
+    die("Can't create GLX context");
+  }
+
+  glXMakeCurrent(xw.display, xw.win, xw.gl_context);
+}
+
+void swap_draw_buffers(){
+
+  //glXSwapBuffers(xw.display, xw.win); TODO
+  eglSwapBuffers(egl_display, egl_surface);
+}
+
+void init_draw_method(){
+
+  init_egl();
+
+  set_ortho_projection(terminal_window.width, terminal_window.height);
+  glViewport(0, 0, terminal_window.width, terminal_window.height);
+  load_texture(&font_texture_id, "/root/pterminal/font1.png");
+
+}
+
 void xdrawline(Line line, int position_x, int position_y, int column) {
 
   for (int i = 0; i < column; i++) {
@@ -66,7 +94,7 @@ void draw(void) {
   term.old_cursor_y = term.cursor.y;
 
 
-  glXSwapBuffers(xw.display, xw.win);
+  swap_draw_buffers();
 }
 
 
