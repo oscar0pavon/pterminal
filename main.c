@@ -29,6 +29,8 @@ char *argv0;
 #include "mouse.h"
 #include "selection.h"
 
+#include "xorg.h"
+
 
 /* config.h for applying patches and the configuration. */
 #include "config.h"
@@ -185,12 +187,14 @@ void xbell(void) {
 void run(void) {
   XEvent event;
 
-  int width = terminal_window.width;
-  int height = terminal_window.height;
-
   fd_set read_file_descriptor;
+ 
+  int window_manager_file_descriptor;
+  if(terminal_window.type == XORG){
+    window_manager_file_descriptor = XConnectionNumber(xw.display);
+    wait_for_mapping();
+  }
 
-  int xorg_file_descriptor = XConnectionNumber(xw.display);
 
   int tty_file_descriptor;
 
@@ -199,28 +203,18 @@ void run(void) {
   struct timespec seltv, *wait_time, now, lastblink, trigger;
   double timeout;
 
-  /* Waiting for window mapping */
-  do {
-    XNextEvent(xw.display, &event);
-
-    if (event.type == ConfigureNotify) {
-      width = event.xconfigure.width;
-      height = event.xconfigure.height;
-    }
-
-  } while (event.type != MapNotify);
 
   tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
-
-  cresize(width, height);
 
 
   // Main loop
   for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {
+    if(terminal_window.type == WAYLAND)
+      continue;
 
     FD_ZERO(&read_file_descriptor);
     FD_SET(tty_file_descriptor, &read_file_descriptor);
-    FD_SET(xorg_file_descriptor, &read_file_descriptor);
+    FD_SET(window_manager_file_descriptor, &read_file_descriptor);
 
     if (XPending(xw.display))
       timeout = 0; /* existing events might not set xorg_file_descriptor */
@@ -229,7 +223,7 @@ void run(void) {
     seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
     wait_time = timeout >= 0 ? &seltv : NULL;
 
-    uint8_t file_descriptor_count = MAX(xorg_file_descriptor, tty_file_descriptor) + 1;
+    uint8_t file_descriptor_count = MAX(window_manager_file_descriptor, tty_file_descriptor) + 1;
 
     //this where we wait or block the rendering
     if (pselect(file_descriptor_count, &read_file_descriptor, NULL, NULL, wait_time,

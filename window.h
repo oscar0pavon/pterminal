@@ -66,6 +66,8 @@ typedef struct {
   signed char appcursor; /* application cursor */
 } Key;
 
+typedef enum window_type {WAYLAND, XORG} WindowType;
+
 /* Purely graphic info */
 typedef struct {
   int tty_width, tty_height; /* tty width and height */
@@ -76,6 +78,8 @@ typedef struct {
   float character_gl_height;
   int mode;   /* window state/mode flags */
   int cursor; /* cursor style */
+  WindowType type;
+
 } TermWindow;
 
 typedef struct {

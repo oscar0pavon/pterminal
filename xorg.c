@@ -5,6 +5,26 @@
 #include "terminal.h"
 #include "opengl.h"
 
+void wait_for_mapping(){
+
+  int width = terminal_window.width;
+  int height = terminal_window.height;
+
+  XEvent event;
+  /* Waiting for window mapping */
+  do {
+    XNextEvent(xw.display, &event);
+
+    if (event.type == ConfigureNotify) {
+      width = event.xconfigure.width;
+      height = event.xconfigure.height;
+    }
+
+  } while (event.type != MapNotify);
+  
+  cresize(width, height);
+}
+
 void create_x_window(){
 
   Window parent, root;
