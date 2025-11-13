@@ -3,6 +3,8 @@
 
 #include "protocol.h"
 
+#include <stdbool.h>
+
 typedef struct wl_buffer_listener BufferListener;
 typedef struct xdg_surface_listener SurfaceListener;
 typedef struct wl_registry_listener RegistryListener;
@@ -22,6 +24,6 @@ typedef struct WaylandTerminal{
 
 extern WaylandTerminal wayland_terminal;
 
-void init_wayland(void);
+bool init_wayland(void);
 
 #endif
