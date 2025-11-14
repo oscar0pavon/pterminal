@@ -34,13 +34,19 @@ GLuint font_texture_id;
 
 void init_egl(){
 
-  egl_display = eglGetDisplay((EGLNativeDisplayType)xw.display);
+  if(terminal_window.type == XORG)
+    egl_display = eglGetDisplay((EGLNativeDisplayType)xw.display);
+  else
+    egl_display = eglGetDisplay((EGLNativeDisplayType)wayland_terminal.display);
 
   if(egl_display == EGL_NO_DISPLAY){
     die("Can't create EGL display");
   }
+  printf("Created EGL display\n");
 
   eglInitialize(egl_display, NULL,NULL);
+
+  printf("Initialized EGL display\n");
 
   eglBindAPI(EGL_OPENGL_API);
 
@@ -73,6 +79,8 @@ void init_egl(){
 
     egl_surface = eglCreateWindowSurface(egl_display, egl_config,
                                          (EGLNativeWindowType)egl_window, NULL);
+    if(!egl_surface)
+      die("Can't create EGL surface\n");
   }
   
   eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
