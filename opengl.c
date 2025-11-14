@@ -5,14 +5,19 @@
 #include <stdio.h>
 #include <lodepng.h>
 #include <math.h>
+#include "terminal.h"
 #include "types.h"
+#include "wayland/wayland.h"
 #include "window.h"
-
+#include <wayland-egl-core.h>
+#include <wayland-egl.h>
+#include <EGL/eglext.h>
 
 EGLDisplay egl_config;
 EGLContext egl_context;
 EGLDisplay egl_display;
 EGLSurface egl_surface;
+struct wl_egl_window *egl_window;
 
 
 bool is_opengl = false;
@@ -50,13 +55,29 @@ void init_egl(){
   eglChooseConfig(egl_display, attributes, &egl_config, 1, &configuration_numbers);
 
   egl_context = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, NULL);
-  egl_surface = eglCreateWindowSurface(egl_display, egl_config,
+
+  if(terminal_window.type == XORG){
+
+    egl_surface = eglCreateWindowSurface(egl_display, egl_config,
                                        (EGLNativeWindowType)xw.win, NULL);
 
+  } else { // WAYLAND
+
+    egl_window =
+        wl_egl_window_create(wayland_terminal.wayland_surface,
+                             terminal_window.width, terminal_window.height);
+
+    if (!egl_window) {
+      die("Can't create EGL Wayland\n");
+    }
+
+    egl_surface = eglCreateWindowSurface(egl_display, egl_config,
+                                         (EGLNativeWindowType)egl_window, NULL);
+  }
+  
   eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
+
 }
-
-
 
 void gl_draw_rect(PColor color,  float x, float y, float width, float height){
     glColor4f(color.r, color.g, color.b,1.f); 

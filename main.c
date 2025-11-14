@@ -165,7 +165,12 @@ void run(void) {
   if (terminal_window.type == XORG) {
     window_manager_file_descriptor = XConnectionNumber(xw.display);
     wait_for_mapping();
+  }else{
+
+    cresize(terminal_window.width, terminal_window.height);
+    MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
   }
+
 
   int tty_file_descriptor;
 
@@ -178,8 +183,6 @@ void run(void) {
 
   // Main loop
   for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {
-    if (terminal_window.type == WAYLAND)
-      continue;
 
     FD_ZERO(&read_file_descriptor);
     FD_SET(tty_file_descriptor, &read_file_descriptor);

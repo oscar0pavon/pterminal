@@ -29,6 +29,7 @@ void swap_draw_buffers(){
 
   //glXSwapBuffers(xw.display, xw.win); TODO
   eglSwapBuffers(egl_display, egl_surface);
+  printf("drawing\n");
 }
 
 void init_draw_method(){
@@ -74,6 +75,7 @@ void draw(void) {
   if(!IS_WINDOSET(MODE_VISIBLE))
     return;
 
+
   /* adjust cursor position */
   LIMIT(term.old_cursor_x, 0, term.col - 1);
   LIMIT(term.old_cursor_y, 0, term.row - 1);
@@ -92,7 +94,6 @@ void draw(void) {
 
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
-
 
   swap_draw_buffers();
 }
