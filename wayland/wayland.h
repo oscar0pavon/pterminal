@@ -7,6 +7,8 @@
 
 typedef struct wl_buffer_listener BufferListener;
 typedef struct xdg_surface_listener SurfaceListener;
+typedef struct xdg_toplevel_listener WindowListener;
+typedef struct xdg_toplevel Window;
 typedef struct wl_registry_listener RegistryListener;
 typedef struct xdg_surface DesktopSurface;
 typedef struct wl_registry Registry;

@@ -39,8 +39,21 @@ void configure_surface(void* data, DesktopSurface *surface, uint32_t serial){
 
 }
 
+void configure_window(void* data, struct xdg_toplevel* window, int width, 
+    int height, struct wl_array *state){
+
+  WaylandTerminal* terminal = data;
+
+  printf("Compositor suggested size %i %i\n",width, height); 
+
+}
+
 SurfaceListener surface_listener = {
   .configure = configure_surface
+};
+
+WindowListener window_listener = {
+  .configure = configure_window
 };
 
 void register_global(void *data, Registry *registry, uint32_t name_id,
@@ -108,8 +121,10 @@ bool init_wayland() {
 
   xdg_surface_add_listener(wayland_terminal.desktop_surface, &surface_listener,
                            &wayland_terminal);
-  
+
   wayland_terminal.window = xdg_surface_get_toplevel(wayland_terminal.desktop_surface);
+  
+  xdg_toplevel_add_listener(wayland_terminal.window, &window_listener, &wayland_terminal);
 
   xdg_toplevel_set_title(wayland_terminal.window, "pterminal");
 
