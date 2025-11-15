@@ -75,6 +75,13 @@ void register_global(void *data, Registry *registry, uint32_t name_id,
     terminal->desktop =
         wl_registry_bind(registry, name_id, &xdg_wm_base_interface, 1);
 
+  }else if (strcmp(interface_name, wl_shm_interface.name) == 0) {
+
+
+      wl_registry_bind(registry, name_id, &wl_shm_interface, 1);
+    
+      printf("found shared memory\n");
+
   }
 }
 

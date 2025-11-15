@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "utf8.h"
 #include "selection.h"
+#include "egl.h"
 
 DC drawing_context;
 
@@ -29,7 +30,7 @@ void swap_draw_buffers(){
 
   //glXSwapBuffers(xw.display, xw.win); TODO
   eglSwapBuffers(egl_display, egl_surface);
-  printf("drawing\n");
+  //printf("drawing\n");
 }
 
 void init_draw_method(){
