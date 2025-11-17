@@ -1,5 +1,5 @@
 #!/bin/sh
 cd /root/pterminal
 #strace -e openat,open ./pterminal > /root/terminal.log 2>&1
-./pterminal > /root/terminal.log 2>&1
+gdb -ex run ./pterminal > /root/terminal.log 2>&1
 echo "finish" >> /root/terminal.log

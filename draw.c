@@ -4,6 +4,7 @@
 #include "opengl.h"
 #include <X11/extensions/Xrender.h>
 #include <stdio.h>
+#include <time.h>
 #include "utf8.h"
 #include "selection.h"
 #include "egl.h"
@@ -29,6 +30,8 @@ void create_xgl_context() {
 void swap_draw_buffers(){
 
   //glXSwapBuffers(xw.display, xw.win); TODO
+  if(egl_surface == NULL)
+    printf("EGL surface NULL\n");
   eglSwapBuffers(egl_display, egl_surface);
   //printf("drawing\n");
 }
@@ -36,6 +39,7 @@ void swap_draw_buffers(){
 void init_draw_method(){
 
   init_egl();
+
 
   set_ortho_projection(terminal_window.width, terminal_window.height);
   glViewport(0, 0, terminal_window.width, terminal_window.height);
@@ -96,6 +100,7 @@ void draw(void) {
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
 
+  printf("Swap buffer\n");
   swap_draw_buffers();
 }
 

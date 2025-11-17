@@ -182,6 +182,7 @@ void run(void) {
   tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
 
   // Main loop
+  printf("Entering in pterminal main loop\n");
   for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {
 
     FD_ZERO(&read_file_descriptor);

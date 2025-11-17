@@ -47,6 +47,12 @@ void handle_egl_error(EGLSurface surface) {
     case EGL_BAD_ALLOC:
       fprintf(stderr, "Reason: Ran out of memory or hardware resources.\n");
       break;
+    
+    case EGL_BAD_NATIVE_WINDOW:
+      fprintf(
+          stderr,
+          "Reason: Invalid native window provided (e.g., Wayland surface).\n");
+      break;
     default:
       fprintf(stderr, "Reason: Unknown EGL error.\n");
       break;
@@ -65,19 +71,23 @@ void init_egl(){
     if(wayland_terminal.display == NULL){
       die("Wayland display NULL\n");
     }
-    egl_display = eglGetPlatformDisplay(EGL_PLATFORM_WAYLAND_KHR, (EGLNativeDisplayType)wayland_terminal.display, NULL);
+    egl_display = eglGetPlatformDisplay(EGL_PLATFORM_WAYLAND_KHR,
+                                        (void *)wayland_terminal.display, NULL);
   }
 
-
   if(egl_display == EGL_NO_DISPLAY){
+    sleep(1);
     die("Can't create EGL display\n");
   }
 
+
   EGLBoolean success = eglInitialize(egl_display, NULL, NULL);
+  sleep(1);
   if (success == EGL_FALSE) {
     EGLint error = eglGetError();
     fprintf(stderr, "FATAL EGL Error during initialization! Code: 0x%x\n",
             error);
+    sleep(1);
     die("EGL not initialized\n");
   }
 
@@ -112,7 +122,7 @@ void init_egl(){
 
     egl_surface = eglCreateWindowSurface(egl_display, egl_config,
                                          (EGLNativeWindowType)egl_window, NULL);
-    if(!egl_surface){
+    if(egl_surface == EGL_NO_SURFACE){
       handle_egl_error(egl_surface);
       die("Can't create EGL surface\n");
     }
@@ -120,6 +130,7 @@ void init_egl(){
   }
   
   eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
-
+  
+  printf("EGL initialized successfully\n");
 }
 
