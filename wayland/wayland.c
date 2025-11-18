@@ -135,7 +135,7 @@ bool init_wayland() {
 
   xdg_toplevel_set_title(wayland_terminal.window, "pterminal");
 
-  wl_surface_commit(wayland_terminal.wayland_surface);
+  //wl_surface_commit(wayland_terminal.wayland_surface);
   
   wl_display_roundtrip(wayland_terminal.display);
 

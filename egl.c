@@ -76,18 +76,15 @@ void init_egl(){
   }
 
   if(egl_display == EGL_NO_DISPLAY){
-    sleep(1);
     die("Can't create EGL display\n");
   }
 
 
   EGLBoolean success = eglInitialize(egl_display, NULL, NULL);
-  sleep(1);
   if (success == EGL_FALSE) {
     EGLint error = eglGetError();
     fprintf(stderr, "FATAL EGL Error during initialization! Code: 0x%x\n",
             error);
-    sleep(1);
     die("EGL not initialized\n");
   }
 
@@ -100,6 +97,7 @@ void init_egl(){
         EGL_BLUE_SIZE, 8,
         EGL_NONE
     };
+
   EGLint configuration_numbers;
   eglChooseConfig(egl_display, attributes, &egl_config, 1, &configuration_numbers);
 
@@ -130,6 +128,7 @@ void init_egl(){
   }
   
   eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
+
   
   printf("EGL initialized successfully\n");
 }
