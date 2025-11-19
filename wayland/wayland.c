@@ -8,6 +8,7 @@
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 #include <pthread.h>
+#include "input.h"
 
 
 WaylandTerminal wayland_terminal = {};
@@ -61,7 +62,7 @@ void register_global(void *data, Registry *registry, uint32_t name_id,
 
   WaylandTerminal *terminal = (WaylandTerminal*)data;
 
-  if(strcmp(interface_name, wl_compositor_interface.name) == 0){
+  if (strcmp(interface_name, wl_compositor_interface.name) == 0) {
 
     initialization.compositor = true;
     terminal->compositor =
@@ -75,13 +76,19 @@ void register_global(void *data, Registry *registry, uint32_t name_id,
     terminal->desktop =
         wl_registry_bind(registry, name_id, &xdg_wm_base_interface, 1);
 
-  }else if (strcmp(interface_name, wl_shm_interface.name) == 0) {
+  } else if (strcmp(interface_name, wl_shm_interface.name) == 0) {
 
+    wl_registry_bind(registry, name_id, &wl_shm_interface, 1);
 
-      wl_registry_bind(registry, name_id, &wl_shm_interface, 1);
-    
-      printf("found shared memory\n");
+    printf("found shared memory\n");
 
+  } else if (strcmp(interface_name, wl_seat_interface.name) == 0) {
+
+    terminal->seat = wl_registry_bind(registry, name_id, &wl_seat_interface, 1);
+
+    configure_input(&wayland_terminal);
+
+    printf("found seat\n");
   }
 }
 
@@ -137,6 +144,7 @@ bool init_wayland() {
 
   //wl_surface_commit(wayland_terminal.wayland_surface);
   
+
   wl_display_roundtrip(wayland_terminal.display);
 
   pthread_t wayland_loop_id;

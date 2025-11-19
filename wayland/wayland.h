@@ -4,6 +4,7 @@
 #include "protocol.h"
 
 #include <stdbool.h>
+#include <wayland-client-protocol.h>
 
 typedef struct wl_buffer_listener BufferListener;
 typedef struct xdg_surface_listener SurfaceListener;
@@ -21,6 +22,9 @@ typedef struct WaylandTerminal{
     struct wl_surface *wayland_surface;
     struct xdg_surface *desktop_surface;
     struct xdg_toplevel *window;
+    struct wl_seat *seat;
+    struct wl_pointer *pointer;
+    struct wl_keyboard *keyboard;
 }WaylandTerminal;
 
 extern WaylandTerminal wayland_terminal;

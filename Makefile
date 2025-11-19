@@ -45,8 +45,9 @@ install: pterminal
 
 EGL = WAYLAND_DISPLAY=wayland-0 EGL_LOG_LEVEL=debug MESA_DEBUG=egl MESA_LOADER_DRIVER_OVERRIDE=llvmpipe LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
 
+
 test: all
-	WAYLAND_DEBUG=1 EGL_LOG_LEVEL=debug ./pterminal -c "pterminal-test" -t "pterminal" -g 30x10
+	./pterminal -c "pterminal-test" -t "pterminal" -g 30x10
 
 
 .PHONY: all clean install
