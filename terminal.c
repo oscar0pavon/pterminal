@@ -193,6 +193,7 @@ void execute_shell(char *cmd, char **args) {
   signal(SIGALRM, SIG_DFL);
 
   execvp(prog, args);
+  printf("Exit from shell\n");
   _exit(1);
 }
 

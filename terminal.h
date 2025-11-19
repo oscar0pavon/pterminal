@@ -197,6 +197,8 @@ char base64dec_getc(const char **);
 
 ssize_t xwrite(int, const char *, size_t);
 
+void exit_pterminal();
+
 /* config.h globals */
 extern Term term;
 extern char *utmp;

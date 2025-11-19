@@ -29,11 +29,7 @@ void create_xgl_context() {
 
 void swap_draw_buffers(){
 
-  //glXSwapBuffers(xw.display, xw.win); TODO
-  if(egl_surface == NULL)
-    printf("EGL surface NULL\n");
   eglSwapBuffers(egl_display, egl_surface);
-  //printf("drawing\n");
 }
 
 void init_draw_method(){
@@ -100,7 +96,6 @@ void draw(void) {
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
 
-  printf("Swap buffer\n");
   swap_draw_buffers();
 }
 

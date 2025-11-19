@@ -1,4 +1,5 @@
 /* See LICENSE for license details. */
+#include "wayland/wayland.h"
 #include <errno.h>
 #include <libgen.h>
 #include <limits.h>
@@ -10,6 +11,7 @@
 #include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <wayland-client-core.h>
 
 char *argv0;
 #include "arg.h"
@@ -156,6 +158,22 @@ void xbell(void) {
     XkbBell(xw.display, xw.win, bellvolume, (Atom)NULL);
 }
 
+void handle_interrupt(int signal_number){
+
+  exit_pterminal();
+
+}
+
+void exit_pterminal(){
+  ttyhangup();
+
+  if(terminal_window.type == WAYLAND){
+    wl_display_disconnect(wayland_terminal.display);
+  }
+  printf("Exit pterminal\n");
+  exit(0);
+}
+
 void run(void) {
   XEvent event;
 
@@ -277,6 +295,8 @@ void usage(void) {
 }
 
 int main(int argc, char *argv[]) {
+
+  signal(SIGINT, handle_interrupt);
 
   is_opengl = true;
 

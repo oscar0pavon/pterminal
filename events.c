@@ -75,19 +75,9 @@ void focus(XEvent *ev) {
 
 
 void cmessage(XEvent *e) {
-  /*
-   * See xembed specs
-   *  http://standards.freedesktop.org/xembed-spec/xembed-spec-latest.html
-   */
-  if (e->xclient.message_type == xw.xembed && e->xclient.format == 32) {
-    if (e->xclient.data.l[1] == XEMBED_FOCUS_IN) {
-      terminal_window.mode |= MODE_FOCUSED;
-      xseturgency(0);
-    } else if (e->xclient.data.l[1] == XEMBED_FOCUS_OUT) {
-      terminal_window.mode &= ~MODE_FOCUSED;
-    }
-  } else if (e->xclient.data.l[0] == xw.wmdeletewin) {
-    ttyhangup();
-    exit(0);
+
+  if (e->xclient.data.l[0] == xw.wmdeletewin) {
+    exit_pterminal();
   }
+
 }

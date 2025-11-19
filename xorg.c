@@ -94,10 +94,11 @@ void create_x_window(){
   if (parent != root)
     XReparentWindow(xw.display, xw.win, parent, xw.left_offset, xw.top_offset);
 
-  xw.xembed = XInternAtom(xw.display, "_XEMBED", False);
+  
   xw.wmdeletewin = XInternAtom(xw.display, "WM_DELETE_WINDOW", False);
   xw.netwmname = XInternAtom(xw.display, "_NET_WM_NAME", False);
   xw.netwmiconname = XInternAtom(xw.display, "_NET_WM_ICON_NAME", False);
+
   XSetWMProtocols(xw.display, xw.win, &xw.wmdeletewin, 1);
 
   xw.netwmpid = XInternAtom(xw.display, "_NET_WM_PID", False);

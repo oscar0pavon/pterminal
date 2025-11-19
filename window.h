@@ -100,7 +100,7 @@ typedef struct {
   GLXContext gl_context;
   XVisualInfo* visual_info;
 
-  Atom xembed, wmdeletewin, netwmname, netwmiconname, netwmpid;
+  Atom wmdeletewin, netwmname, netwmiconname, netwmpid;
   struct {
     XIM xim;
     XIC xic;
