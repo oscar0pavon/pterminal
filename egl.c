@@ -130,6 +130,7 @@ void init_egl(){
   eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
 
   
+
   printf("EGL initialized successfully\n");
 }
 

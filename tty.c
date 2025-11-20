@@ -17,6 +17,13 @@
 #include <termios.h>
 #include <unistd.h>
 #include <pty.h>
+#include <poll.h>
+
+#include <stdbool.h>
+#include <pthread.h>
+#include "window.h"
+
+static char *shell = "/bin/sh";
 
 int iofd = 1;
 int cmdfd;
@@ -226,4 +233,31 @@ void ttyresize(int tw, int th) {
 void ttyhangup(void) {
   /* Send SIGHUP to shell */
   kill(pid, SIGHUP);
+}
+
+void *handle_tty(void *none) {
+
+  fd_set read_file_descriptor;
+
+  int tty_file_descriptor;
+
+  bool have_event, drawing;
+
+  struct timespec seltv, *wait_time, now, lastblink, trigger;
+  double timeout;
+
+  tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
+
+  struct pollfd fds[] = {{tty_file_descriptor, POLLIN, 0}};
+  while (1) {
+    printf("tty loop\n");
+    if (poll(fds, 1, -1) == -1) {
+    }
+    ttyread();
+
+    pthread_mutex_lock(&draw_mutex);
+    can_draw = true;
+    printf("Can draw tty\n");
+    pthread_mutex_unlock(&draw_mutex);
+  }
 }

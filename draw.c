@@ -52,6 +52,7 @@ void update_size() {
 void init_draw_method(){
 
   init_egl();
+  
 
 
   set_ortho_projection(terminal_window.width, terminal_window.height);
@@ -84,7 +85,6 @@ void drawregion(int position_x, int position_y, int column, int row) {
 
 void draw(void) {
   update_size();
-  glViewport(0, 0, terminal_window.width, terminal_window.height);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

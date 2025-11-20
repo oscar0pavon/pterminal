@@ -10,6 +10,7 @@
 #include "types.h"
 #include "macros.h"
 
+extern pthread_mutex_t draw_mutex;
 
 enum cursor_movement { CURSOR_SAVE, CURSOR_LOAD };
 

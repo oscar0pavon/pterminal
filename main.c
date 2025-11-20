@@ -1,6 +1,7 @@
 /* See LICENSE for license details. */
 #include "wayland/wayland.h"
 #include <X11/X.h>
+#include <bits/pthreadtypes.h>
 #include <errno.h>
 #include <libgen.h>
 #include <limits.h>
@@ -33,7 +34,9 @@ char *argv0;
 #include "input.h"
 #include "mouse.h"
 #include "selection.h"
+#include <pthread.h>
 
+#include "tty.h"
 
 #include "xorg.h"
 
@@ -47,7 +50,6 @@ static inline ushort sixd_to_16bit(int);
 static int xgeommasktogravity(int);
 static void xsetenv(void);
 
-static void run(void);
 static void usage(void);
 
 /* Font Ring Cache */
@@ -181,131 +183,6 @@ void exit_pterminal(){
   exit(0);
 }
 
-void* hanlde_tty(void* none){
-
-  fd_set read_file_descriptor;
-
-  int tty_file_descriptor;
-
-  bool have_event, drawing;
-
-  struct timespec seltv, *wait_time, now, lastblink, trigger;
-  double timeout;
-
-  tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
-
-  // Main loop
-  printf("Entering in pterminal main loop\n");
-  for (timeout = -1, drawing = 0, lastblink = (struct timespec){0};;) {
-
-    FD_ZERO(&read_file_descriptor);
-    FD_SET(tty_file_descriptor, &read_file_descriptor);
-
-    if (terminal_window.type == XORG) {
-      FD_SET(window_manager_file_descriptor, &read_file_descriptor);
-      if (XPending(xw.display))
-        timeout = 0; /* existing events might not set xorg_file_descriptor */
-    }
-
-    seltv.tv_sec = timeout / 1E3;
-    seltv.tv_nsec = 1E6 * (timeout - 1E3 * seltv.tv_sec);
-    wait_time = timeout >= 0 ? &seltv : NULL;
-
-    uint8_t file_descriptor_count =
-        MAX(window_manager_file_descriptor, tty_file_descriptor) + 1;
-
-    // this where we wait or block the rendering
-    if (pselect(file_descriptor_count, &read_file_descriptor, NULL, NULL,
-                wait_time, NULL) < 0) {
-
-      if (errno == EINTR)
-        continue;
-
-      die("pselect failed: %s\n", strerror(errno));
-    }
-
-    clock_gettime(CLOCK_MONOTONIC, &now);
-
-    if (FD_ISSET(tty_file_descriptor, &read_file_descriptor))
-      ttyread();
-
-    can_draw = true;
-    continue;
-
-    // this where we handle input to the pseudo terminal o serial terminal
-    if (terminal_window.type == XORG)
-      have_event = handle_xorg_events();
-
-    /*
-     * To reduce flicker and tearing, when new content or event
-     * triggers drawing, we first wait a bit to ensure we got
-     * everything, and if nothing new arrives - we draw.
-     * We start with trying to wait minlatency ms. If more content
-     * arrives sooner, we retry with shorter and shorter periods,
-     * and eventually draw even without idle after maxlatency ms.
-     * Typically this results in low latency while interacting,
-     * maximum latency intervals during `cat huge.txt`, and perfect
-     * sync with periodic updates from animations/key-repeats/etc.
-     */
-    if (FD_ISSET(tty_file_descriptor, &read_file_descriptor) || have_event) {
-      if (!drawing) {
-        trigger = now;
-        drawing = true;
-      }
-      timeout = (maxlatency - TIMEDIFF(now, trigger)) / maxlatency * minlatency;
-      if (timeout > 0)
-        continue; /* we have time, try to find idle */
-    }
-
-    /* idle detected or maxlatency exhausted -> draw */
-    timeout = -1;
-    if (blinktimeout && tattrset(ATTR_BLINK)) {
-      timeout = blinktimeout - TIMEDIFF(now, lastblink);
-      if (timeout <= 0) {
-        if (-timeout > blinktimeout) /* start visible */
-          terminal_window.mode |= MODE_BLINK;
-        terminal_window.mode ^= MODE_BLINK;
-        tsetdirtattr(ATTR_BLINK);
-        lastblink = now;
-        timeout = blinktimeout;
-      }
-    }
-
-    can_draw = true;
-
-    if (terminal_window.type == XORG)
-      XFlush(xw.display);
-
-    drawing = false;
-  }
-}
-
-void run(void) {
-
-  if (terminal_window.type == XORG) {
-    window_manager_file_descriptor = XConnectionNumber(xw.display);
-    wait_for_mapping();
-  }else{
-
-    while(!is_window_configured){}
-    MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
-  }
-
-  cresize(terminal_window.width, terminal_window.height);
-
-  pthread_t tty_id;
-  pthread_create(&tty_id, NULL, hanlde_tty, NULL);
-
-  while (1) {
-    draw();
-    //printf("draw\n");
-    // if (can_draw) {
-    //   printf("draw\n");
-    //   draw();
-    //   can_draw = false;
-    // }
-  }
-}
 
 void usage(void) {
   die("usage: %s [-aiv] [-c class] [-f font] [-g geometry]"
@@ -393,7 +270,31 @@ run:
   init_draw_method();
   xsetenv();
   selinit();
-  run();
 
+  if (terminal_window.type == XORG) {
+    window_manager_file_descriptor = XConnectionNumber(xw.display);
+    wait_for_mapping();
+  }else{
+
+    while(!is_window_configured){}
+    MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
+  }
+
+  cresize(terminal_window.width, terminal_window.height);
+
+  pthread_t tty_id;
+  pthread_create(&tty_id, NULL, handle_tty, NULL);
+
+  while (1) {
+    
+    pthread_mutex_lock(&draw_mutex);
+    if (can_draw) {
+      printf("draw\n");
+      draw();
+      can_draw = false;
+    }
+    pthread_mutex_unlock(&draw_mutex);
+    //sleep(1);
+  }
   return 0;
 }

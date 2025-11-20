@@ -58,6 +58,7 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard,
 
   xkb_keysym_t sym = xkb_state_key_get_one_sym(main_keyboard.state, key + 8);
 
+  //printf("key pressd\n");
   if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
     uint32_t character = xkb_keysym_to_utf32(sym);
     // printf("Character: %c\n", character);
@@ -74,7 +75,10 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *keyboard,
                                       uint32_t serial, uint32_t mods_depressed,
                                       uint32_t mods_latched, uint32_t mods_locked,
                                       uint32_t group) {
-    // Implementation uses xkbcommon state to update modifiers
+
+  xkb_state_update_mask(main_keyboard.state, mods_depressed, mods_latched,
+                          mods_locked, group, group, group);
+
 }
 
 // Handle Repeat Info

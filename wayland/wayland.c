@@ -11,6 +11,7 @@
 #include "input.h"
 
 #include "../window.h"
+#include "../egl.h"
 
 WaylandTerminal wayland_terminal = {};
 
@@ -156,10 +157,11 @@ bool init_wayland() {
 
   xdg_toplevel_set_title(wayland_terminal.window, "pterminal");
 
- 
-  wl_surface_commit(wayland_terminal.wayland_surface);//TODO
+  //wl_display_roundtrip(wayland_terminal.display);
 
-  wl_display_roundtrip(wayland_terminal.display);
+  init_egl();
+
+  wl_surface_commit(wayland_terminal.wayland_surface);//TODO
 
   pthread_t wayland_loop_id;
   pthread_create(&wayland_loop_id, NULL, run_wayland_loop, NULL);

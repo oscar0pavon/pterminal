@@ -27,8 +27,9 @@
 #include "ansi_escapes.h"
 
 #include "color.h"
+#include <pthread.h>
 
-/* Arbitrary sizes */
+pthread_mutex_t draw_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 enum cursor_state {
