@@ -1,10 +1,12 @@
 #include "keyboard.h"
 #include "wayland.h"
+#include <stdint.h>
 #include <stdio.h>
 #include <wayland-client-protocol.h>
 #include <unistd.h>
 #include <mman.h>
 #include <xkbcommon/xkbcommon.h>
+#include "../terminal.h"
 
 Keyboard main_keyboard;
 
@@ -53,7 +55,18 @@ static void keyboard_handle_leave(void *data, struct wl_keyboard *keyboard,
 static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard,
                                 uint32_t serial, uint32_t time, uint32_t key,
                                 uint32_t state) {
-    // Implementation uses xkbcommon state to get the character/keysym
+
+  xkb_keysym_t sym = xkb_state_key_get_one_sym(main_keyboard.state, key + 8);
+
+  if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+    uint32_t character = xkb_keysym_to_utf32(sym);
+    // printf("Character: %c\n", character);
+    int len;
+    char buf[2];
+    buf[0] = character;
+    len = 1;
+    ttywrite(buf, len, 1);
+  }
 }
 
 // Handle Modifiers Event

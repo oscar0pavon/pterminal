@@ -102,12 +102,6 @@ typedef struct {
   XVisualInfo* visual_info;
 
   Atom wmdeletewin, netwmname, netwmiconname, netwmpid;
-  struct {
-    XIM xim;
-    XIC xic;
-    XPoint spot;
-    XVaNestedList spotlist;
-  } ime;
 
   Draw draw;
   Visual *vis;

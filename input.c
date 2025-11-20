@@ -332,13 +332,8 @@ void kpress(XEvent *ev) {
   if (IS_WINDOSET(MODE_KBDLOCK))
     return;
 
-  if (xw.ime.xic) {
-    len = XmbLookupString(xw.ime.xic, e, buf, sizeof buf, &ksym, &status);
-    if (status == XBufferOverflow)
-      return;
-  } else {
-    len = XLookupString(e, buf, sizeof buf, &ksym, NULL);
-  }
+  len = XLookupString(e, buf, sizeof buf, &ksym, NULL);
+
   /* 1. shortcuts */
   for (bp = shortcuts; bp < shortcuts + LEN(shortcuts); bp++) {
     if (ksym == bp->keysym && match(bp->mod, e->state)) {

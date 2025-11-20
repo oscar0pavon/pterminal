@@ -140,7 +140,8 @@ void xsettitle(char *p) {
 
 void xsetpointermotion(int set) {
   MODBIT(xw.attrs.event_mask, set, PointerMotionMask);
-  XChangeWindowAttributes(xw.display, xw.win, CWEventMask, &xw.attrs);
+  if(terminal_window.type == XORG)
+    XChangeWindowAttributes(xw.display, xw.win, CWEventMask, &xw.attrs);
 }
 
 void xsetmode(int set, unsigned int flags) {
