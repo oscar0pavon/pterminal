@@ -1,4 +1,5 @@
 #include "input.h"
+#include "keyboard.h"
 
 #include <stdio.h>
 
@@ -27,7 +28,7 @@ static void seat_handle_capabilities(void *data, struct wl_seat *seat,
 
     printf("Compositor announced keyboard capability. Binding keyboard.\n");
     app->keyboard = wl_seat_get_keyboard(seat);
-    //add a listener to app->keyboard here
+    configure_keyboard();
 
   } else if (!(capabilities & WL_SEAT_CAPABILITY_KEYBOARD) && app->keyboard) {
 

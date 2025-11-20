@@ -85,6 +85,7 @@ void init_egl(){
     EGLint error = eglGetError();
     fprintf(stderr, "FATAL EGL Error during initialization! Code: 0x%x\n",
             error);
+    sleep(1);
     die("EGL not initialized\n");
   }
 

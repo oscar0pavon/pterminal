@@ -12,6 +12,7 @@ INCS = -I$(X11INC) -I/usr/include/freetype2
 
 LIBS = -L/usr/lib -lm -lrt -lX11 -lutil -lGL -llodepng
 LIBS += -lEGL -lwayland-client -lwayland-egl
+LIBS += -lxkbcommon
 
 STCFLAGS = $(INCS) $(CFLAGS) -g
 STLDFLAGS = $(LIBS) $(LDFLAGS)
