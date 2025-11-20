@@ -5,6 +5,7 @@
 #include "draw.h"
 #include "wayland/wayland.h"
 #include "xorg.h"
+#include "egl.h"
 
 #include <unistd.h>
 
@@ -12,6 +13,9 @@
 XWindow xw;
 XSelection xsel;
 TermWindow terminal_window;
+
+bool is_window_configured = false;
+bool can_draw = false;
 
 char *opt_class = NULL;
 char **opt_cmd = NULL;
@@ -82,8 +86,9 @@ void cresize(int width, int height) {
   xresize(col, row);
   ttyresize(terminal_window.tty_width, terminal_window.tty_height);
 
-  set_ortho_projection(terminal_window.width, terminal_window.height);
-  glViewport(0, 0, terminal_window.width, terminal_window.height);
+  wl_egl_window_resize(egl_window, width, height, 0 , 0);
+
+  can_update_size = true;
 
 }
 
@@ -93,8 +98,6 @@ void resize(XEvent *e) {
     return;
 
   cresize(e->xconfigure.width, e->xconfigure.height);
-  glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);//TODO get colors
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 }
 

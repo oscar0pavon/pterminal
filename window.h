@@ -14,6 +14,7 @@
 #include <time.h>
 
 #include "types.h"
+#include <stdbool.h>
 
 /* macros */
 #define IS_WINDOSET(flag) ((terminal_window.mode & (flag)) != 0)
@@ -120,6 +121,9 @@ typedef struct {
 extern XWindow xw;
 extern XSelection xsel;
 extern TermWindow terminal_window;
+
+extern bool is_window_configured;
+extern bool can_draw;
 
 extern char *opt_class;
 extern char **opt_cmd;

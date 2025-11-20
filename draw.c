@@ -3,6 +3,7 @@
 #include "window.h"
 #include "opengl.h"
 #include <X11/extensions/Xrender.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
 #include "utf8.h"
@@ -14,6 +15,9 @@ DC drawing_context;
 int borderpx = 2;
 unsigned int defaultrcs = 257;
 unsigned int cursorthickness = 2;
+
+
+bool can_update_size = false;
 
 
 // if we don't use EGL
@@ -30,6 +34,19 @@ void create_xgl_context() {
 void swap_draw_buffers(){
 
   eglSwapBuffers(egl_display, egl_surface);
+}
+
+void update_size() {
+  if (can_update_size) {
+
+    glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);//TODO get colors
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    set_ortho_projection(terminal_window.width, terminal_window.height);
+    glViewport(0, 0, terminal_window.width, terminal_window.height);
+
+    can_update_size = false;
+  }
 }
 
 void init_draw_method(){
@@ -66,7 +83,9 @@ void drawregion(int position_x, int position_y, int column, int row) {
 }
 
 void draw(void) {
-  // glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);
+  update_size();
+  glViewport(0, 0, terminal_window.width, terminal_window.height);
+
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   int cursor_x = term.cursor.x;
@@ -90,8 +109,8 @@ void draw(void) {
   drawregion(0, 0, term.col, term.row);
 
   xdrawcursor(cursor_x, term.cursor.y, TLINE(term.cursor.y)[cursor_x],
-              term.old_cursor_x, term.old_cursor_y,
-              TLINE(term.old_cursor_y)[term.old_cursor_x]);
+               term.old_cursor_x, term.old_cursor_y,
+               TLINE(term.old_cursor_y)[term.old_cursor_x]);
 
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;

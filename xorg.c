@@ -38,8 +38,11 @@ void wait_for_mapping(){
     }
 
   } while (event.type != MapNotify);
-  
-  cresize(width, height);
+
+  terminal_window.width = width;
+  terminal_window.height = height;
+ 
+  is_window_configured = true;
 }
 
 void create_x_window(){

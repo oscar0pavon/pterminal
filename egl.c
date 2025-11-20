@@ -4,7 +4,6 @@
 #include <EGL/eglplatform.h>
 #include <stdio.h>
 #include <wayland-egl-core.h>
-#include <wayland-egl.h>
 #include <EGL/egl.h>
 #include "wayland/wayland.h"
 #include <EGL/eglext.h>

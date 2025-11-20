@@ -3,7 +3,7 @@
 
 #include <X11/Xlib.h>
 #include "color.h"
-
+#include <stdbool.h>
 
 /* Drawing Context */
 typedef struct {
@@ -19,6 +19,8 @@ extern int borderpx;
 
 extern unsigned int defaultrcs;
 
+extern bool can_update_size;
+
 void draw(void);
 
 void drawregion(int, int, int, int);
@@ -30,6 +32,8 @@ void xdrawline(Line, int, int, int);
 
 void init_draw_method(void);
 void swap_draw_buffers(void);
+
+void update_size();
 
 /*
  * thickness of underline and bar cursors

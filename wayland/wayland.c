@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include "input.h"
 
+#include "../window.h"
 
 WaylandTerminal wayland_terminal = {};
 
@@ -46,6 +47,19 @@ void configure_window(void* data, struct xdg_toplevel* window, int width,
   WaylandTerminal* terminal = data;
 
   printf("Compositor suggested size %i %i\n",width, height); 
+
+  is_window_configured = true;
+  if(width == 0 && height == 0){
+    can_draw = true;
+    return;
+  }
+
+
+  terminal_window.width = width;
+  terminal_window.height = height;
+  cresize(terminal_window.width, terminal_window.height);
+  can_draw = true;
+  printf("resized\n");
 
 }
 
@@ -142,13 +156,14 @@ bool init_wayland() {
 
   xdg_toplevel_set_title(wayland_terminal.window, "pterminal");
 
-  //wl_surface_commit(wayland_terminal.wayland_surface);
-  
+ 
+  wl_surface_commit(wayland_terminal.wayland_surface);//TODO
 
   wl_display_roundtrip(wayland_terminal.display);
 
   pthread_t wayland_loop_id;
   pthread_create(&wayland_loop_id, NULL, run_wayland_loop, NULL);
+
 
   return true;
 }

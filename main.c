@@ -1,5 +1,6 @@
 /* See LICENSE for license details. */
 #include "wayland/wayland.h"
+#include <X11/X.h>
 #include <errno.h>
 #include <libgen.h>
 #include <limits.h>
@@ -11,6 +12,8 @@
 #include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <pthread.h>
+
 #include <wayland-client-core.h>
 
 char *argv0;
@@ -31,10 +34,13 @@ char *argv0;
 #include "mouse.h"
 #include "selection.h"
 
+
 #include "xorg.h"
 
 /* config.h for applying patches and the configuration. */
 #include "config.h"
+
+int window_manager_file_descriptor;
 
 static inline ushort sixd_to_16bit(int);
 
@@ -174,21 +180,9 @@ void exit_pterminal(){
   exit(0);
 }
 
-void run(void) {
-  XEvent event;
+void* hanlde_tty(void* none){
 
   fd_set read_file_descriptor;
-
-  int window_manager_file_descriptor;
-  if (terminal_window.type == XORG) {
-    window_manager_file_descriptor = XConnectionNumber(xw.display);
-    wait_for_mapping();
-  }else{
-
-    cresize(terminal_window.width, terminal_window.height);
-    MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
-  }
-
 
   int tty_file_descriptor;
 
@@ -234,6 +228,9 @@ void run(void) {
     if (FD_ISSET(tty_file_descriptor, &read_file_descriptor))
       ttyread();
 
+    can_draw = true;
+    continue;
+
     // this where we handle input to the pseudo terminal o serial terminal
     if (terminal_window.type == XORG)
       have_event = handle_xorg_events();
@@ -273,12 +270,39 @@ void run(void) {
       }
     }
 
-    draw();
+    can_draw = true;
 
     if (terminal_window.type == XORG)
       XFlush(xw.display);
 
     drawing = false;
+  }
+}
+
+void run(void) {
+
+  if (terminal_window.type == XORG) {
+    window_manager_file_descriptor = XConnectionNumber(xw.display);
+    wait_for_mapping();
+  }else{
+
+    while(!is_window_configured){}
+    MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
+  }
+
+  cresize(terminal_window.width, terminal_window.height);
+
+  pthread_t tty_id;
+  pthread_create(&tty_id, NULL, hanlde_tty, NULL);
+
+  while (1) {
+    draw();
+    //printf("draw\n");
+    // if (can_draw) {
+    //   printf("draw\n");
+    //   draw();
+    //   can_draw = false;
+    // }
   }
 }
 
