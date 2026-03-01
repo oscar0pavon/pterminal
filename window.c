@@ -86,7 +86,8 @@ void cresize(int width, int height) {
   xresize(col, row);
   ttyresize(terminal_window.tty_width, terminal_window.tty_height);
 
-  wl_egl_window_resize(egl_window, width, height, 0 , 0);
+  if (terminal_window.type != XORG)
+    wl_egl_window_resize(egl_window, width, height, 0 , 0);
 
   can_update_size = true;
 

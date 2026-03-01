@@ -58,10 +58,10 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard,
 
   xkb_keysym_t sym = xkb_state_key_get_one_sym(main_keyboard.state, key + 8);
 
-  //printf("key pressd\n");
+  printf("key pressd\n");
   if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
     uint32_t character = xkb_keysym_to_utf32(sym);
-    // printf("Character: %c\n", character);
+    printf("Character: %c\n", character);
     int len;
     char buf[2];
     buf[0] = character;
