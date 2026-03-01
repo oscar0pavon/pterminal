@@ -1,5 +1,6 @@
 #include "keyboard.h"
 #include "wayland.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <wayland-client-protocol.h>
@@ -7,6 +8,7 @@
 #include <mman.h>
 #include <xkbcommon/xkbcommon.h>
 #include "../terminal.h"
+#include "../events.h"
 
 Keyboard main_keyboard;
 
@@ -43,12 +45,14 @@ static void keyboard_handle_enter(void *data, struct wl_keyboard *keyboard,
                                   struct wl_array *keys) {
     printf("Keyboard focus gained.\n");
     // Change window appearance to "active"
+    focus_window(true);
 }
 
 static void keyboard_handle_leave(void *data, struct wl_keyboard *keyboard,
                                   uint32_t serial, struct wl_surface *surface) {
     printf("Keyboard focus lost.\n");
     // Change window appearance to "inactive"
+    focus_window(false);
 }
 
 // Handle Key Event (Key Press/Release)

@@ -3,6 +3,8 @@
 #include "terminal.h"
 #include "input.h"
 #include "mouse.h"
+#include "window.h"
+#include <stdbool.h>
 
 /* XEMBED messages */
 #define XEMBED_FOCUS_IN 4
@@ -50,6 +52,30 @@ void visibility(XEvent *ev) {
 
 void unmap(XEvent *ev) { terminal_window.mode &= ~MODE_VISIBLE; }
 
+void focus_window(bool is_focuses){
+  if(!terminal_window.is_ready)
+    return;
+  
+  if(is_focuses){
+
+    terminal_window.mode |= MODE_FOCUSED;
+
+    
+    if (terminal_window.type == XORG)
+      xseturgency(0);
+
+    if (IS_WINDOSET(MODE_FOCUS))
+      ttywrite("\033[I", 3, 0);
+
+  }else{
+
+    terminal_window.mode &= ~MODE_FOCUSED;
+
+    if (IS_WINDOSET(MODE_FOCUS))
+      ttywrite("\033[O", 3, 0);
+  }
+}
+
 void focus(XEvent *ev) {
   XFocusChangeEvent *e = &ev->xfocus;
 
@@ -57,14 +83,9 @@ void focus(XEvent *ev) {
     return;
 
   if (ev->type == FocusIn) {
-    terminal_window.mode |= MODE_FOCUSED;
-    xseturgency(0);
-    if (IS_WINDOSET(MODE_FOCUS))
-      ttywrite("\033[I", 3, 0);
+    focus_window(true);
   } else {
-    terminal_window.mode &= ~MODE_FOCUSED;
-    if (IS_WINDOSET(MODE_FOCUS))
-      ttywrite("\033[O", 3, 0);
+    focus_window(false);
   }
 }
 

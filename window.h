@@ -80,6 +80,7 @@ typedef struct {
   int mode;   /* window state/mode flags */
   int cursor; /* cursor style */
   WindowType type;
+  bool is_ready;
 
 } TermWindow;
 

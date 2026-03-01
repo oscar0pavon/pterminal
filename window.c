@@ -7,6 +7,7 @@
 #include "xorg.h"
 #include "egl.h"
 
+#include <stdbool.h>
 #include <unistd.h>
 
 /* Globals */
@@ -44,6 +45,8 @@ void create_window(int cols, int rows){
     terminal_window.type = WAYLAND;
     printf("Running Wayland window\n");
   }
+
+  terminal_window.is_ready = true;
 
 }
 
