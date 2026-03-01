@@ -61,9 +61,12 @@ void init_draw_method(){
 
 }
 
-void xdrawline(Line line, int position_x, int position_y, int column) {
+void draw_line(Line line, int position_y, int column) {
 
   for (int i = 0; i < column; i++) {
+
+    if(!line)
+      return;
 
     xdrawglyph(line[i],i,position_y);
   }
@@ -76,7 +79,7 @@ void drawregion(int position_x, int position_y, int column, int row) {
 
   for (i = position_y; i < row; i++) {
 
-    xdrawline(TSCREEN.buffer[line_number], position_x, i, column);
+    draw_line(TSCREEN.buffer[line_number], i, column);
 
     line_number = (line_number + 1) % TSCREEN.size;
 
