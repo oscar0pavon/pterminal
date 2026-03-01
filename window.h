@@ -81,8 +81,9 @@ typedef struct {
   int cursor; /* cursor style */
   WindowType type;
   bool is_ready;
+  bool is_running;
 
-} TermWindow;
+} TerminalWindow;
 
 typedef struct {
   Atom xtarget;
@@ -115,7 +116,7 @@ typedef struct {
 
 extern XWindow xw;
 extern XSelection xsel;
-extern TermWindow terminal_window;
+extern TerminalWindow terminal_window;
 
 extern bool is_window_configured;
 extern bool can_draw;

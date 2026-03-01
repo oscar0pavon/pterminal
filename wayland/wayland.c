@@ -64,12 +64,18 @@ void configure_window(void* data, struct xdg_toplevel* window, int width,
 
 }
 
+void handle_exit(void *data, struct xdg_toplevel* window){
+  printf("Request close window\n");
+  terminal_window.is_running = false;
+}
+
 SurfaceListener surface_listener = {
   .configure = configure_surface
 };
 
 WindowListener window_listener = {
-  .configure = configure_window
+  .configure = configure_window,
+  .close = handle_exit
 };
 
 void register_global(void *data, Registry *registry, uint32_t name_id,

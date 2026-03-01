@@ -13,7 +13,7 @@
 /* Globals */
 XWindow xw;
 XSelection xsel;
-TermWindow terminal_window;
+TerminalWindow terminal_window;
 
 bool is_window_configured = false;
 bool can_draw = false;
@@ -47,6 +47,7 @@ void create_window(int cols, int rows){
   }
 
   terminal_window.is_ready = true;
+  terminal_window.is_running = true;
 
 }
 

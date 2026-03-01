@@ -294,7 +294,7 @@ run:
   pthread_t tty_id;
   pthread_create(&tty_id, NULL, handle_tty, NULL);
 
-  while (1) {
+  while (terminal_window.is_running) {
     
     pthread_mutex_lock(&draw_mutex);
     if (can_draw) {
@@ -305,5 +305,8 @@ run:
     pthread_mutex_unlock(&draw_mutex);
     //sleep(1);
   }
+
+  printf("pterminal closed\n");
+
   return 0;
 }
