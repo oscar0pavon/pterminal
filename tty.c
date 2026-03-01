@@ -249,15 +249,16 @@ void *handle_tty(void *none) {
   tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
 
   struct pollfd fds[] = {{tty_file_descriptor, POLLIN, 0}};
+
   while (1) {
-    printf("tty loop\n");
+
     if (poll(fds, 1, -1) == -1) {
     }
+
     ttyread();
 
     pthread_mutex_lock(&draw_mutex);
     can_draw = true;
-    printf("Can draw tty\n");
     pthread_mutex_unlock(&draw_mutex);
   }
 }

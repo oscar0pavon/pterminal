@@ -298,7 +298,6 @@ run:
     
     pthread_mutex_lock(&draw_mutex);
     if (can_draw) {
-      printf("draw\n");
       draw();
       can_draw = false;
     }

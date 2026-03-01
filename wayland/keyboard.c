@@ -6,6 +6,7 @@
 #include <wayland-client-protocol.h>
 #include <unistd.h>
 #include <mman.h>
+#include <xkbcommon/xkbcommon-names.h>
 #include <xkbcommon/xkbcommon.h>
 #include "../terminal.h"
 #include "../events.h"
@@ -62,16 +63,36 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard,
 
   xkb_keysym_t sym = xkb_state_key_get_one_sym(main_keyboard.state, key + 8);
 
-  printf("key pressd\n");
   if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-    uint32_t character = xkb_keysym_to_utf32(sym);
-    printf("Character: %c\n", character);
+    char buf[32] = {0}; // Always initialize to zero to prevent the space bug
     int len;
-    char buf[2];
-    buf[0] = character;
-    len = 1;
-    ttywrite(buf, len, 1);
+
+
+    bool ctrl_pressed = xkb_state_mod_name_is_active(main_keyboard.state,
+          XKB_MOD_NAME_CTRL, XKB_STATE_MODS_EFFECTIVE);
+
+    if(ctrl_pressed){
+        // Handle Ctrl
+        if (sym >= XKB_KEY_a && sym <= XKB_KEY_z) {
+            buf[0] = sym - XKB_KEY_a + 1;
+            len = 1;
+        } else {
+            len = xkb_keysym_to_utf8(sym, buf, sizeof(buf));
+        }
+    } else {
+
+        len = xkb_keysym_to_utf8(sym, buf, sizeof(buf));
+    }
+
+    if (len > 0) {
+      if (!ctrl_pressed)
+        ttywrite(buf, len - 1, 1);
+      else
+        ttywrite(buf, len, 1);
+    }
   }
+
+
 }
 
 // Handle Modifiers Event
