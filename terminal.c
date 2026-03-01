@@ -303,7 +303,7 @@ void treset(void) {
   tfulldirt();
 }
 
-void tnew(int col, int row) {
+void new_terminal(int col, int row) {
   int i;
   term = (Term){};
   term.screen[0].buffer = xmalloc(HISTSIZE * sizeof(Line));

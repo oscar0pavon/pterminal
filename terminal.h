@@ -123,7 +123,7 @@ void sendbreak(const Arg *);
 void toggleprinter(const Arg *);
 
 int tattrset(int);
-void tnew(int, int);
+void new_terminal(int, int);
 void tresize(int, int);
 void tsetdirtattr(int);
 void ttyhangup(void);

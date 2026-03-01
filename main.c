@@ -259,16 +259,25 @@ run:
     opt_title = (opt_line || !opt_cmd) ? "pterminal" : opt_cmd[0];
 
   setlocale(LC_CTYPE, "");
-  XSetLocaleModifiers("");
+
+  if (terminal_window.type == XORG)
+    XSetLocaleModifiers("");
+
+  //if you provide arguments for size this will change
   cols = MAX(cols, 1);
-  printf("Columns %i\n", cols);
   rows = MAX(rows, 1);
-  printf("Rows %i\n", rows);
-  tnew(cols, rows);
-  printf("now terminal col %i\n", term.col);
+
+  new_terminal(cols, rows);
+
+  printf("Terminal size cols: %i rows: %i \n", term.col, term.row);
+
   create_window(cols, rows);
+
   init_draw_method();
-  xsetenv();
+
+  if (terminal_window.type == XORG)
+    xsetenv();
+
   selinit();
 
   if (terminal_window.type == XORG) {
