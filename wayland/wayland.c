@@ -87,8 +87,7 @@ void register_global(void *data, Registry *registry, uint32_t name_id,
 
     initialization.compositor = true;
     terminal->compositor =
-        wl_registry_bind(registry, name_id, &wl_compositor_interface, 1);
-    printf("Got compositor\n");
+        wl_registry_bind(registry, name_id, &wl_compositor_interface, 4);
 
   } else if (strcmp(interface_name, xdg_wm_base_interface.name) == 0) {
 
@@ -101,11 +100,10 @@ void register_global(void *data, Registry *registry, uint32_t name_id,
 
     wl_registry_bind(registry, name_id, &wl_shm_interface, 1);
 
-    printf("found shared memory\n");
 
   } else if (strcmp(interface_name, wl_seat_interface.name) == 0) {
 
-    terminal->seat = wl_registry_bind(registry, name_id, &wl_seat_interface, 1);
+    terminal->seat = wl_registry_bind(registry, name_id, &wl_seat_interface, 4);
 
     configure_input(&wayland_terminal);
 

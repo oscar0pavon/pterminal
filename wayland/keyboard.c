@@ -1,8 +1,11 @@
 #include "keyboard.h"
 #include "wayland.h"
+#include <bits/time.h>
+#include <bits/types/struct_itimerspec.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <sys/timerfd.h>
 #include <wayland-client-protocol.h>
 #include <unistd.h>
 #include <mman.h>
@@ -44,19 +47,69 @@ static void keyboard_handle_keymap(void *data, struct wl_keyboard *keyboard,
 static void keyboard_handle_enter(void *data, struct wl_keyboard *keyboard,
                                   uint32_t serial, struct wl_surface *surface,
                                   struct wl_array *keys) {
-    printf("Keyboard focus gained.\n");
-    // Change window appearance to "active"
+
     focus_window(true);
+
 }
 
 static void keyboard_handle_leave(void *data, struct wl_keyboard *keyboard,
                                   uint32_t serial, struct wl_surface *surface) {
-    printf("Keyboard focus lost.\n");
-    // Change window appearance to "inactive"
+
     focus_window(false);
+
 }
 
-// Handle Key Event (Key Press/Release)
+void handle_key_sym(xkb_keysym_t sym){
+
+  char buf[32] = {0};
+  int len;
+
+
+  bool ctrl_pressed = xkb_state_mod_name_is_active(main_keyboard.state,
+        XKB_MOD_NAME_CTRL, XKB_STATE_MODS_EFFECTIVE);
+
+  if(ctrl_pressed){
+      // Handle Ctrl
+      if (sym >= XKB_KEY_a && sym <= XKB_KEY_z) {
+          buf[0] = sym - XKB_KEY_a + 1;
+          len = 1;
+      } else {
+          len = xkb_keysym_to_utf8(sym, buf, sizeof(buf));
+      }
+  } else {
+
+      len = xkb_keysym_to_utf8(sym, buf, sizeof(buf));
+  }
+
+  if (len > 0) {
+    if (!ctrl_pressed)
+      ttywrite(buf, len - 1, 1);
+    else
+      ttywrite(buf, len, 1);
+  }
+
+}
+
+void keyboard_update_timer(){
+  if(main_keyboard.rate > 0){
+    long time_number = 1000000000L;
+    struct itimerspec timer_specs = {0};
+    timer_specs.it_value.tv_sec = main_keyboard.delay / 1000;
+    timer_specs.it_value.tv_nsec = (main_keyboard.delay % 1000) * 1000000;
+
+    long interval_ns = time_number / main_keyboard.rate;
+
+    timer_specs.it_interval.tv_sec = interval_ns / time_number;
+    timer_specs.it_interval.tv_nsec = interval_ns % time_number;
+
+    timerfd_settime(main_keyboard.timer_fd, 0, &timer_specs, NULL);
+  }
+}
+
+void handle_repeat_keys(){
+
+}
+
 static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard,
                                 uint32_t serial, uint32_t time, uint32_t key,
                                 uint32_t state) {
@@ -64,32 +117,23 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard,
   xkb_keysym_t sym = xkb_state_key_get_one_sym(main_keyboard.state, key + 8);
 
   if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-    char buf[32] = {0}; // Always initialize to zero to prevent the space bug
-    int len;
 
+    main_keyboard.last_key_sym = sym;
+    handle_key_sym(sym);
+    keyboard_update_timer();
 
-    bool ctrl_pressed = xkb_state_mod_name_is_active(main_keyboard.state,
-          XKB_MOD_NAME_CTRL, XKB_STATE_MODS_EFFECTIVE);
+  }else if( state == WL_KEYBOARD_KEY_STATE_RELEASED){
 
-    if(ctrl_pressed){
-        // Handle Ctrl
-        if (sym >= XKB_KEY_a && sym <= XKB_KEY_z) {
-            buf[0] = sym - XKB_KEY_a + 1;
-            len = 1;
-        } else {
-            len = xkb_keysym_to_utf8(sym, buf, sizeof(buf));
-        }
-    } else {
-
-        len = xkb_keysym_to_utf8(sym, buf, sizeof(buf));
+    if(sym == main_keyboard.last_key_sym){
+      struct itimerspec stop = {0};
+      timerfd_settime(main_keyboard.timer_fd, 0, &stop, NULL);
     }
 
-    if (len > 0) {
-      if (!ctrl_pressed)
-        ttywrite(buf, len - 1, 1);
-      else
-        ttywrite(buf, len, 1);
-    }
+
+  }
+  if( state == WL_KEYBOARD_KEY_STATE_REPEATED ){
+    printf("key repeated\n");
+    handle_key_sym(sym);
   }
 
 
@@ -106,10 +150,11 @@ static void keyboard_handle_modifiers(void *data, struct wl_keyboard *keyboard,
 
 }
 
-// Handle Repeat Info
 static void keyboard_handle_repeat_info(void *data, struct wl_keyboard *keyboard,
                                         int32_t rate, int32_t delay) {
-    // Store repeat rate/delay for your application logic
+  main_keyboard.delay = delay;
+  main_keyboard.rate= rate;
+
 }
 
 static const struct wl_keyboard_listener keyboard_listener = {
@@ -124,5 +169,7 @@ static const struct wl_keyboard_listener keyboard_listener = {
 void configure_keyboard(void){
 
   wl_keyboard_add_listener(wayland_terminal.keyboard, &keyboard_listener, &wayland_terminal);
+
+  main_keyboard.timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
 
 }

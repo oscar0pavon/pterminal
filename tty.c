@@ -7,10 +7,12 @@
 #include <pwd.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/poll.h>
 #include <sys/select.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -22,6 +24,7 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include "window.h"
+#include "wayland/keyboard.h"
 
 static char *shell = "/bin/sh";
 
@@ -248,11 +251,26 @@ void *handle_tty(void *none) {
 
   tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
 
-  struct pollfd fds[] = {{tty_file_descriptor, POLLIN, 0}};
+  struct pollfd fds[] = {
+    { tty_file_descriptor, POLLIN, 0 },
+    { main_keyboard.timer_fd, POLLIN, 0 }
+  };
 
   while (1) {
 
-    if (poll(fds, 1, -1) == -1) {
+    if (poll(fds, 2, -1) == -1) {
+      perror("Poll in fds, TTY or Keyboard timer");
+    }
+
+
+    //keyboard key repeat
+    if( fds[1].revents & POLLIN ){
+      uint64_t expirations;
+      read(main_keyboard.timer_fd, &expirations, sizeof(expirations));
+
+      for( uint64_t i = 0; i < expirations; i++){
+        handle_key_sym(main_keyboard.last_key_sym);
+      }
     }
 
     ttyread();
