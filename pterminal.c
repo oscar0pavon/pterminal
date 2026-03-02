@@ -56,15 +56,6 @@ void *run_pterminal(void *none) {
 
     handle_events();
 
-    //keyboard key repeat
-    if( pterminal_fds[2].revents & POLLIN ){
-      uint64_t expirations;
-      read(main_keyboard.timer_fd, &expirations, sizeof(expirations));
-
-      for( uint64_t i = 0; i < expirations; i++){
-        handle_key_sym(main_keyboard.last_key_sym);
-      }
-    }
   
     draw();
 

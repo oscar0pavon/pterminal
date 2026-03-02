@@ -149,6 +149,7 @@ void handle_events(){
 
   wl_display_dispatch_pending(wayland_terminal.display);
 
+  handle_repeat_keys();
 
 }
 

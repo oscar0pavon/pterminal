@@ -15,6 +15,7 @@ typedef struct Keyboard {
   uint32_t rate;
   uint32_t delay;
   xkb_keysym_t last_key_sym;
+  uint32_t last_key_code;
   int timer_fd;
 
 } Keyboard;
