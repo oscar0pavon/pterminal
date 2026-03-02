@@ -83,10 +83,10 @@ void handle_interrupt(int signal_number){
 void exit_pterminal(){
   ttyhangup();
 
-  if(terminal_window.type == WAYLAND){
-    wl_display_disconnect(wayland_terminal.display);
-  }
+  wl_display_disconnect(wayland_terminal.display);
+
   printf("Exit pterminal\n");
+
   exit(0);
 }
 
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
 
   run_pterminal(NULL);
 
-  printf("pterminal closed\n");
+  exit_pterminal();
 
   return 0;
 }
