@@ -10,10 +10,14 @@
 #include <pthread.h>
 #include "input.h"
 
+#include "../pterminal.h"
+
 #include "../window.h"
 #include "../egl.h"
 
 WaylandTerminal wayland_terminal = {};
+
+int wayland_fd;
 
 typedef struct WaylandInitialization{
   bool compositor;
@@ -118,6 +122,13 @@ RegistryListener registry_listener = {
   .global_remove = remove_global
 };
 
+void prepate_to_read_events(){
+  while(wl_display_prepare_read(wayland_terminal.display) != 0)
+    wl_display_dispatch_pending(wayland_terminal.display);
+
+  wl_display_flush(wayland_terminal.display);
+}
+
 void* run_wayland_loop(void*none){
   
   while(wl_display_dispatch(wayland_terminal.display)){
@@ -125,6 +136,19 @@ void* run_wayland_loop(void*none){
   }
 
   return NULL;
+}
+
+void handle_events(){
+
+  if(pterminal_fds[1].revents & POLLIN){
+    wl_display_read_events(wayland_terminal.display);
+  }else{
+    wl_display_cancel_read(wayland_terminal.display);
+  }
+
+  wl_display_dispatch_pending(wayland_terminal.display);
+
+
 }
 
 bool init_wayland() {
@@ -162,13 +186,13 @@ bool init_wayland() {
   xdg_toplevel_set_title(wayland_terminal.window, "pterminal");
 
   //wl_display_roundtrip(wayland_terminal.display);
-
-  init_egl();
-
   wl_surface_commit(wayland_terminal.wayland_surface);//TODO
 
-  pthread_t wayland_loop_id;
-  pthread_create(&wayland_loop_id, NULL, run_wayland_loop, NULL);
+
+  wayland_fd = wl_display_get_fd(wayland_terminal.display);
+
+  printf("Waynland initialized\n");
+
 
 
   return true;

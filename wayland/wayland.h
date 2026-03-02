@@ -29,6 +29,11 @@ typedef struct WaylandTerminal{
 
 extern WaylandTerminal wayland_terminal;
 
+extern int wayland_fd;
+
+void prepate_to_read_events();
+void handle_events();
+
 bool init_wayland(void);
 
 #endif

@@ -287,11 +287,13 @@ run:
     wait_for_mapping();
   }else{
 
-    while(!is_window_configured){}
+    //while(!is_window_configured){}
     MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
   }
 
   cresize(terminal_window.width, terminal_window.height);
+
+  printf("pterminal init..\n");
 
   pthread_t tty_id;
   pthread_create(&tty_id, NULL, run_pterminal, NULL);
