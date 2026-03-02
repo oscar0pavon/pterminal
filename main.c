@@ -39,11 +39,6 @@ char *argv0;
 
 static inline ushort sixd_to_16bit(int);
 
-static int xgeommasktogravity(int);
-static void xsetenv(void);
-
-static void usage(void);
-
 
 void ttysend(const Arg *arg) { 
   ttywrite(arg->s, strlen(arg->s), 1); 
