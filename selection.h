@@ -27,7 +27,9 @@ void selsnap(int *, int *, int);
 
 void selclear(void);
 void selinit(void);
-void selstart(int, int, int);
+
+void selstart(int col, int row, int snap);
+
 void selextend(int, int, int, int);
 int selected(int, int);
 char *getsel(void);

@@ -1,5 +1,6 @@
 #include "mouse.h"
 #include <errno.h>
+#include <stdio.h>
 
 #include "window.h"
 #include "macros.h"
@@ -9,7 +10,7 @@
 #include "terminal.h"
 #include "selection.h"
 
-
+#include "wayland/mouse.h"
 
 /*
  * Internal mouse shortcuts.
@@ -88,10 +89,24 @@ void selpaste(const Arg *dummy) {
   XConvertSelection(xw.display, XA_PRIMARY, xsel.xtarget, XA_PRIMARY, xw.win,
                     CurrentTime);
 }
+
+
+int mouse_to_col() {
+  int x = main_mouse.x;
+  LIMIT(x, 0, terminal_window.tty_width - 1);
+  return x / terminal_window.character_width;
+}
+
 int evcol(XEvent *e) {
   int x = e->xbutton.x - borderpx;
   LIMIT(x, 0, terminal_window.tty_width - 1);
   return x / terminal_window.character_width;
+}
+
+int mouse_to_row() {
+  int y = main_mouse.y;
+  LIMIT(y, 0, terminal_window.tty_height - 1);
+  return y / terminal_window.character_height;
 }
 
 int evrow(XEvent *e) {
@@ -209,6 +224,27 @@ int mouseaction(XEvent *e, uint release) {
   }
 
   return 0;
+}
+
+void mouse_click(){
+
+  struct timespec now;
+  int snap;
+
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  if (TIMEDIFF(now, xsel.tclick2) <= tripleclicktimeout) {
+    snap = SNAP_LINE;
+  } else if (TIMEDIFF(now, xsel.tclick1) <= doubleclicktimeout) {
+    snap = SNAP_WORD;
+  } else {
+    snap = 0;
+  }
+  xsel.tclick2 = xsel.tclick1;
+  xsel.tclick1 = now;
+
+  selstart(mouse_to_col(),mouse_to_row(), snap);
+  // printf("Mouse col %i row %i\n", mouse_to_col(), mouse_to_row());
+  // printf("Mouse x %i, mouse y %i\n", main_mouse.x, main_mouse.y);
 }
 
 void bpress(XEvent *e) {

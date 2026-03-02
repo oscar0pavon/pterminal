@@ -1,5 +1,5 @@
-#ifndef MOUSE_H
-#define MOUSE_H
+#ifndef WMOUSE_H
+#define WMOUSE_H
 
 #include <stdint.h>
 
@@ -9,9 +9,8 @@ typedef struct Mouse {
 
 }Mouse;
 
-extern Mouse main_mouse;
-
-
 void configure_mouse(void);
+
+extern Mouse main_mouse;
 
 #endif

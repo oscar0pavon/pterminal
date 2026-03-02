@@ -3,8 +3,9 @@
 #include "wayland.h"
 #include <linux/input.h>
 #include <stdio.h>
+#include "../mouse.h"
 
-Mouse main_mouse;
+Mouse main_mouse = {0};
 
 static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
                                  uint32_t serial, struct wl_surface *surface,
@@ -27,17 +28,18 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
 static void pointer_handle_button(void *data, struct wl_pointer *pointer,
                                   uint32_t serial, uint32_t time, 
                                   uint32_t button, uint32_t state) {
-    WaylandTerminal *term = data;
-    if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
-        if (button == BTN_LEFT) {
-          /* Handle Left Click */ 
-          printf("left click\n");
-        }
-        if (button == BTN_RIGHT) {
-          /* Handle Right Click */ 
-          printf("right click\n");
-        }
-    }
+  WaylandTerminal *term = data;
+  if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
+      if (button == BTN_LEFT) {
+
+        mouse_click();
+
+      }
+      if (button == BTN_RIGHT) {
+
+        printf("right click\n");
+      }
+  }
 }
 
 static void pointer_handle_axis(void *data, struct wl_pointer *pointer,

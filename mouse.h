@@ -25,6 +25,8 @@ void clippaste(const Arg *);
 int evcol(XEvent *);
 int evrow(XEvent *);
 
+void mouse_click();
+
 uint buttonmask(uint);
 int mouseaction(XEvent *, uint);
 
