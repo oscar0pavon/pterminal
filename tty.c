@@ -19,14 +19,7 @@
 #include <termios.h>
 #include <unistd.h>
 #include <pty.h>
-#include <poll.h>
 
-#include <stdbool.h>
-#include <pthread.h>
-#include "window.h"
-#include "wayland/keyboard.h"
-
-static char *shell = "/bin/sh";
 
 int iofd = 1;
 int cmdfd;
@@ -117,7 +110,7 @@ int ttynew(const char *line, char *cmd, const char *out, char **args) {
   return cmdfd;
 }
 
-size_t ttyread(void) {
+size_t read_tty(void) {
   static char buf[BUFSIZ];
   static int buflen = 0;
   int ret, written;
@@ -205,7 +198,7 @@ void ttywriteraw(const char *s, size_t n) {
          * again. Empty it.
          */
         if (n < lim)
-          lim = ttyread();
+          lim = read_tty();
         n -= r;
         s += r;
       } else {
@@ -214,7 +207,7 @@ void ttywriteraw(const char *s, size_t n) {
       }
     }
     if (FD_ISSET(cmdfd, &rfd))
-      lim = ttyread();
+      lim = read_tty();
   }
   return;
 
@@ -238,45 +231,3 @@ void ttyhangup(void) {
   kill(pid, SIGHUP);
 }
 
-void *handle_tty(void *none) {
-
-  fd_set read_file_descriptor;
-
-  int tty_file_descriptor;
-
-  bool have_event, drawing;
-
-  struct timespec seltv, *wait_time, now, lastblink, trigger;
-  double timeout;
-
-  tty_file_descriptor = ttynew(opt_line, shell, opt_io, opt_cmd);
-
-  struct pollfd fds[] = {
-    { tty_file_descriptor, POLLIN, 0 },
-    { main_keyboard.timer_fd, POLLIN, 0 }
-  };
-
-  while (1) {
-
-    if (poll(fds, 2, -1) == -1) {
-      perror("Poll in fds, TTY or Keyboard timer");
-    }
-
-
-    //keyboard key repeat
-    if( fds[1].revents & POLLIN ){
-      uint64_t expirations;
-      read(main_keyboard.timer_fd, &expirations, sizeof(expirations));
-
-      for( uint64_t i = 0; i < expirations; i++){
-        handle_key_sym(main_keyboard.last_key_sym);
-      }
-    }
-
-    ttyread();
-
-    pthread_mutex_lock(&draw_mutex);
-    can_draw = true;
-    pthread_mutex_unlock(&draw_mutex);
-  }
-}

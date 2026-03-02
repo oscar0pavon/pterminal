@@ -9,6 +9,9 @@
 #include "utf8.h"
 #include "selection.h"
 #include "egl.h"
+#include <pthread.h>
+
+pthread_mutex_t draw_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 DC drawing_context;
 

@@ -40,4 +40,6 @@ void update_size();
  */
 extern unsigned int cursorthickness;
 
+extern pthread_mutex_t draw_mutex;
+
 #endif

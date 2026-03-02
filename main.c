@@ -40,6 +40,8 @@ char *argv0;
 
 #include "xorg.h"
 
+#include "pterminal.h"
+
 /* config.h for applying patches and the configuration. */
 #include "config.h"
 
@@ -292,7 +294,7 @@ run:
   cresize(terminal_window.width, terminal_window.height);
 
   pthread_t tty_id;
-  pthread_create(&tty_id, NULL, handle_tty, NULL);
+  pthread_create(&tty_id, NULL, run_pterminal, NULL);
 
   while (terminal_window.is_running) {
     

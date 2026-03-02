@@ -10,7 +10,6 @@
 #include "types.h"
 #include "macros.h"
 
-extern pthread_mutex_t draw_mutex;
 
 enum cursor_movement { CURSOR_SAVE, CURSOR_LOAD };
 
@@ -128,7 +127,7 @@ void tresize(int, int);
 void tsetdirtattr(int);
 void ttyhangup(void);
 int ttynew(const char *, char *, const char *, char **);
-size_t ttyread(void);
+size_t read_tty(void);
 void ttyresize(int, int);
 void ttywrite(const char *, size_t, int);
 
