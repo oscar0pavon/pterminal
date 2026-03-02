@@ -1,9 +1,9 @@
 #include "input.h"
 #include "keyboard.h"
+#include "mouse.h"
 
 #include <stdio.h>
 
-// announced/removed
 static void seat_handle_capabilities(void *data, struct wl_seat *seat,
                                      uint32_t capabilities) {
   WaylandTerminal *app = data;
@@ -14,7 +14,7 @@ static void seat_handle_capabilities(void *data, struct wl_seat *seat,
 
     printf("Compositor announced pointer capability. Binding pointer.\n");
     app->pointer = wl_seat_get_pointer(seat);
-    //add a listener to app->pointer here
+    configure_mouse();
 
   } else if (!(capabilities & WL_SEAT_CAPABILITY_POINTER) && app->pointer) {
 
