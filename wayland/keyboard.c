@@ -105,6 +105,10 @@ void keyboard_update_timer(){
     timerfd_settime(main_keyboard.timer_fd, 0, &timer_specs, NULL);
   }
 }
+void init_keyboard_reapeat_handler(){
+  main_keyboard.timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
+}
+
 
 void handle_repeat_keys(){
 
@@ -155,6 +159,7 @@ static void keyboard_handle_repeat_info(void *data, struct wl_keyboard *keyboard
   main_keyboard.delay = delay;
   main_keyboard.rate= rate;
 
+  printf("got repeat info\n");
 }
 
 static const struct wl_keyboard_listener keyboard_listener = {
@@ -170,6 +175,5 @@ void configure_keyboard(void){
 
   wl_keyboard_add_listener(wayland_terminal.keyboard, &keyboard_listener, &wayland_terminal);
 
-  main_keyboard.timer_fd = timerfd_create(CLOCK_MONOTONIC, TFD_NONBLOCK | TFD_CLOEXEC);
 
 }

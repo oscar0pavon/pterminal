@@ -1,4 +1,5 @@
 #include "wayland.h"
+#include "keyboard.h"
 #include "protocol.h"
 #include <complex.h>
 #include <stdbool.h>
@@ -13,7 +14,7 @@
 #include "../pterminal.h"
 
 #include "../window.h"
-#include "../egl.h"
+
 
 WaylandTerminal wayland_terminal = {};
 
@@ -187,9 +188,11 @@ bool init_wayland() {
 
   //wl_display_roundtrip(wayland_terminal.display);
   wl_surface_commit(wayland_terminal.wayland_surface);//TODO
+  wl_display_flush(wayland_terminal.display);
 
 
   wayland_fd = wl_display_get_fd(wayland_terminal.display);
+  init_keyboard_reapeat_handler();
 
   printf("Waynland initialized\n");
 

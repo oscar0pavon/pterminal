@@ -21,6 +21,8 @@ typedef struct Keyboard {
 
 void configure_keyboard(void);
 
+void init_keyboard_reapeat_handler();
+
 void handle_repeat_keys();
 
 void handle_key_sym(xkb_keysym_t sym);
