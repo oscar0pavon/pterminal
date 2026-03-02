@@ -123,7 +123,7 @@ void zoomabs(const Arg *arg) {
   // xloadfonts(usedfont, arg->f);
   cresize(0, 0);
   redraw();
-  xhints();
+  //xhints();
 }
 
 void zoomreset(const Arg *arg) {

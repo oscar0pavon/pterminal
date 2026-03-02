@@ -112,7 +112,7 @@ void create_x_window(){
 
   resettitle();
 
-  xhints();
+  //xhints();
 
   XMapWindow(xw.display, xw.win);
 

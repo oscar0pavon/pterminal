@@ -41,7 +41,7 @@ void *run_pterminal(void *none) {
 
   printf("running pterminal\n");
 
-  while (1) {
+  while (terminal_window.is_running) {
 
     prepate_to_read_events();
 
@@ -65,10 +65,8 @@ void *run_pterminal(void *none) {
         handle_key_sym(main_keyboard.last_key_sym);
       }
     }
+  
+    draw();
 
-
-    pthread_mutex_lock(&draw_mutex);
-    can_draw = true;
-    pthread_mutex_unlock(&draw_mutex);
   }
 }
