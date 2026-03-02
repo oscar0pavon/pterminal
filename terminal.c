@@ -990,7 +990,7 @@ void tcontrolcode(uchar ascii) {
       /* backwards compatibility to xterm */
       strhandle();
     } else {
-      xbell();
+      //xbell();
     }
     break;
   case '\033': /* ESC */
@@ -1121,7 +1121,7 @@ int eschandle(uchar ascii) {
     break;
   case 'c': /* RIS -- Reset to initial state */
     treset();
-    resettitle();
+    //resettitle();
     xloadcols();
     xsetmode(0, MODE_HIDE);
     break;
@@ -1433,4 +1433,6 @@ void tresize(int col, int row) {
   tfulldirt();
 }
 
-void resettitle(void) { xsettitle(NULL); }
+void resettitle(void) { 
+  //xsettitle(NULL); 
+}

@@ -18,7 +18,7 @@
 #include <wayland-client-core.h>
 
 char *argv0;
-#include "arg.h"
+
 #include "draw.h"
 #include "terminal.h"
 #include "window.h"
@@ -81,66 +81,12 @@ void xhints(void) {
     sizeh->min_width = sizeh->max_width = terminal_window.width;
     sizeh->min_height = sizeh->max_height = terminal_window.height;
   }
-  if (xw.gm & (XValue | YValue)) {
-    sizeh->flags |= USPosition | PWinGravity;
-    sizeh->x = xw.left_offset;
-    sizeh->y = xw.top_offset;
-    sizeh->win_gravity = xgeommasktogravity(xw.gm);
-  }
+
 
   XSetWMProperties(xw.display, xw.win, NULL, NULL, NULL, 0, sizeh, &wm, &class);
   XFree(sizeh);
 }
 
-int xgeommasktogravity(int mask) {
-  switch (mask & (XNegative | YNegative)) {
-  case 0:
-    return NorthWestGravity;
-  case XNegative:
-    return NorthEastGravity;
-  case YNegative:
-    return SouthWestGravity;
-  }
-
-  return SouthEastGravity;
-}
-
-void xsetenv(void) {
-  char buf[sizeof(long) * 8 + 1];
-
-  snprintf(buf, sizeof(buf), "%lu", xw.win);
-  setenv("WINDOWID", buf, 1);
-}
-
-void xseticontitle(char *p) {
-  XTextProperty prop;
-  DEFAULT(p, opt_title);
-
-  if (p[0] == '\0')
-    p = opt_title;
-
-  if (Xutf8TextListToTextProperty(xw.display, &p, 1, XUTF8StringStyle, &prop) !=
-      Success)
-    return;
-  XSetWMIconName(xw.display, xw.win, &prop);
-  XSetTextProperty(xw.display, xw.win, &prop, xw.netwmiconname);
-  XFree(prop.value);
-}
-
-void xsettitle(char *p) {
-  XTextProperty prop;
-  DEFAULT(p, opt_title);
-
-  if (p[0] == '\0')
-    p = opt_title;
-
-  if (Xutf8TextListToTextProperty(xw.display, &p, 1, XUTF8StringStyle, &prop) !=
-      Success)
-    return;
-  XSetWMName(xw.display, xw.win, &prop);
-  XSetTextProperty(xw.display, xw.win, &prop, xw.netwmname);
-  XFree(prop.value);
-}
 
 void xsetpointermotion(int set) {
   MODBIT(xw.attrs.event_mask, set, PointerMotionMask);
@@ -162,12 +108,6 @@ int xsetcursor(int cursor) {
   return 0;
 }
 
-void xbell(void) {
-  if (!(IS_WINDOSET(MODE_FOCUSED)))
-    xseturgency(1);
-  if (bellvolume)
-    XkbBell(xw.display, xw.win, bellvolume, (Atom)NULL);
-}
 
 void handle_interrupt(int signal_number){
 
@@ -186,18 +126,6 @@ void exit_pterminal(){
 }
 
 
-void usage(void) {
-  die("usage: %s [-aiv] [-c class] [-f font] [-g geometry]"
-      " [-n name] [-o file]\n"
-      "          [-T title] [-t title] [-w windowid]"
-      " [[-e] command [args ...]]\n"
-      "       %s [-aiv] [-c class] [-f font] [-g geometry]"
-      " [-n name] [-o file]\n"
-      "          [-T title] [-t title] [-w windowid] -l line"
-      " [stty_args ...]\n",
-      argv0, argv0);
-}
-
 int main(int argc, char *argv[]) {
 
   signal(SIGINT, handle_interrupt);
@@ -208,62 +136,8 @@ int main(int argc, char *argv[]) {
   xw.isfixed = False;
   xsetcursor(cursorshape);
 
-  ARGBEGIN {
-  case 'a':
-    allowaltscreen = 0;
-    break;
-  case 'c':
-    opt_class = EARGF(usage());
-    break;
-  case 'e':
-    if (argc > 0)
-      --argc, ++argv;
-    goto run;
-  case 'f':
-    opt_font = EARGF(usage());
-    break;
-  case 'g':
-    xw.gm = XParseGeometry(EARGF(usage()), &xw.left_offset, &xw.top_offset,
-                           &cols, &rows);
-    break;
-  case 'i':
-    xw.isfixed = 1;
-    break;
-  case 'o':
-    opt_io = EARGF(usage());
-    break;
-  case 'l':
-    opt_line = EARGF(usage());
-    break;
-  case 'n':
-    opt_name = EARGF(usage());
-    break;
-  case 't':
-  case 'T':
-    opt_title = EARGF(usage());
-    break;
-  case 'w':
-    opt_embed = EARGF(usage());
-    break;
-  case 'v':
-    die("%s\n", argv0);
-    break;
-  default:
-    usage();
-  }
-  ARGEND;
-
-run:
-  if (argc > 0) /* eat all remaining arguments */
-    opt_cmd = argv;
-
-  if (!opt_title)
-    opt_title = (opt_line || !opt_cmd) ? "pterminal" : opt_cmd[0];
 
   setlocale(LC_CTYPE, "");
-
-  if (terminal_window.type == XORG)
-    XSetLocaleModifiers("");
 
   //if you provide arguments for size this will change
   cols = MAX(cols, 1);
@@ -276,9 +150,6 @@ run:
   create_window(cols, rows);
 
   init_draw_method();
-
-  if (terminal_window.type == XORG)
-    xsetenv();
 
   selinit();
 

@@ -246,17 +246,17 @@ void strhandle(void) {
     switch (par) {
     case 0:
       if (narg > 1) {
-        xsettitle(strescseq.args[1]);
-        xseticontitle(strescseq.args[1]);
+        //xsettitle(strescseq.args[1]);
+        //xseticontitle(strescseq.args[1]);
       }
       return;
     case 1:
       if (narg > 1)
-        xseticontitle(strescseq.args[1]);
+        //xseticontitle(strescseq.args[1]);
       return;
     case 2:
       if (narg > 1)
-        xsettitle(strescseq.args[1]);
+        //xsettitle(strescseq.args[1]);
       return;
     case 52:
       if (narg > 2 && allowwindowops) {
@@ -314,7 +314,7 @@ void strhandle(void) {
     }
     break;
   case 'k': /* old title set compatibility */
-    xsettitle(strescseq.args[0]);
+    //xsettitle(strescseq.args[0]);
     return;
   case 'P': /* DCS -- Device Control String */
   case '_': /* APC -- Application Program Command */
