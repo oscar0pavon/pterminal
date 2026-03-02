@@ -2,6 +2,7 @@
 
 #include "wayland.h"
 #include <linux/input.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include "../mouse.h"
 
@@ -23,6 +24,7 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
   // Convert fixed-point coordinates to doubles/integers
   main_mouse.x = wl_fixed_to_double(sx);
   main_mouse.y = wl_fixed_to_double(sy);
+  
 
   if(main_mouse.left_click){
     select_with_mouse(false);
@@ -34,7 +36,11 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
                                   uint32_t serial, uint32_t time, 
                                   uint32_t button, uint32_t state) {
   WaylandTerminal *term = data;
+  main_mouse.button_pressed = false;
+  main_mouse.button_release = false;
   if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
+      main_mouse.button_pressed = true;
+      main_mouse.button_release = false;
       if (button == BTN_LEFT) {
         main_mouse.left_click = true;
         mouse_click();
@@ -45,6 +51,8 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
         printf("right click\n");
       }
   }else{
+    main_mouse.button_pressed = false;
+    main_mouse.button_release = true;
 
     if (button == BTN_LEFT) {
       main_mouse.left_click = false;    

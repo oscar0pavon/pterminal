@@ -97,11 +97,6 @@ int mouse_to_col() {
   return x / terminal_window.character_width;
 }
 
-int evcol(XEvent *e) {
-  int x = e->xbutton.x - borderpx;
-  LIMIT(x, 0, terminal_window.tty_width - 1);
-  return x / terminal_window.character_width;
-}
 
 int mouse_to_row() {
   int y = main_mouse.y;
@@ -109,11 +104,6 @@ int mouse_to_row() {
   return y / terminal_window.character_height;
 }
 
-int evrow(XEvent *e) {
-  int y = e->xbutton.y - borderpx;
-  LIMIT(y, 0, terminal_window.tty_height - 1);
-  return y / terminal_window.character_height;
-}
 
 void select_with_mouse(bool done) {
   int type, seltype = SEL_REGULAR;
@@ -135,20 +125,20 @@ void mousesel(XEvent *e, int done) {
       break;
     }
   }
-  selextend(evcol(e), evrow(e), seltype, done);
+  // selextend(evcol(e), evrow(e), seltype, done);
   if (done)
     setsel(getsel(), e->xbutton.time);
 }
 
-void mousereport(XEvent *e) {
+void report_mouse() {
   int len, btn, code;
-  int x = evcol(e), y = evrow(e);
-  int state = e->xbutton.state;
+  int x = mouse_to_col(), y = mouse_to_row();
+  //int state = e->xbutton.state;
   char buf[40];
-  static int ox, oy;
+  static int old_x, old_y;
 
-  if (e->type == MotionNotify) {
-    if (x == ox && y == oy)
+  if (main_mouse.motion) {
+    if (x == old_x && y == old_y)
       return;
     if (!IS_WINDOSET(MODE_MOUSEMOTION) && !IS_WINDOSET(MODE_MOUSEMANY))
       return;
@@ -161,11 +151,16 @@ void mousereport(XEvent *e) {
       ;
     code = 32;
   } else {
-    btn = e->xbutton.button;
+
+    if(main_mouse.left_click)
+      btn = 1;
+    else if(main_mouse.right_click)
+      btn = 2;
+
     /* Only buttons 1 through 11 can be encoded */
     if (btn < 1 || btn > 11)
       return;
-    if (e->type == ButtonRelease) {
+    if (main_mouse.button_release) {
       /* MODE_MOUSEX10: no button release reporting */
       if (IS_WINDOSET(MODE_MOUSEX10))
         return;
@@ -176,12 +171,12 @@ void mousereport(XEvent *e) {
     code = 0;
   }
 
-  ox = x;
-  oy = y;
+  old_x = x;
+  old_y = y;
 
   /* Encode btn into code. If no button is pressed for a motion event in
    * MODE_MOUSEMANY, then encode it as a release. */
-  if ((!IS_WINDOSET(MODE_MOUSESGR) && e->type == ButtonRelease) || btn == 12)
+  if ((!IS_WINDOSET(MODE_MOUSESGR) && main_mouse.button_release) || btn == 12)
     code += 3;
   else if (btn >= 8)
     code += 128 + btn - 8;
@@ -190,15 +185,15 @@ void mousereport(XEvent *e) {
   else
     code += btn - 1;
 
-  if (!IS_WINDOSET(MODE_MOUSEX10)) {
-    code += ((state & ShiftMask) ? 4 : 0) +
-            ((state & Mod1Mask) ? 8 : 0) /* meta key: alt */
-            + ((state & ControlMask) ? 16 : 0);
-  }
+  // if (!IS_WINDOSET(MODE_MOUSEX10)) {
+  //   code += ((state & ShiftMask) ? 4 : 0) +
+  //           ((state & Mod1Mask) ? 8 : 0) /* meta key: alt */
+  //           + ((state & ControlMask) ? 16 : 0);
+  // }
 
   if (IS_WINDOSET(MODE_MOUSESGR)) {
     len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", code, x + 1, y + 1,
-                   e->type == ButtonRelease ? 'm' : 'M');
+                   main_mouse.button_release == true ? 'm' : 'M');
   } else if (x < 223 && y < 223) {
     len = snprintf(buf, sizeof(buf), "\033[M%c%c%c", 32 + code, 32 + x + 1,
                    32 + y + 1);
@@ -241,6 +236,11 @@ void mouse_click(){
   struct timespec now;
   int snap;
 
+  if ( IS_WINDOSET(MODE_MOUSE) ) {
+    report_mouse();
+    return;
+  }
+
   clock_gettime(CLOCK_MONOTONIC, &now);
   if (TIMEDIFF(now, xsel.tclick2) <= tripleclicktimeout) {
     snap = SNAP_LINE;
@@ -266,7 +266,7 @@ void bpress(XEvent *e) {
     buttons |= 1 << (btn - 1);
 
   if (IS_WINDOSET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
-    mousereport(e);
+    report_mouse();
     return;
   }
 
@@ -289,7 +289,7 @@ void bpress(XEvent *e) {
     xsel.tclick2 = xsel.tclick1;
     xsel.tclick1 = now;
 
-    selstart(evcol(e), evrow(e), snap);
+    // selstart(evcol(e), evrow(e), snap);
   }
 }
 
@@ -471,7 +471,7 @@ void brelease(XEvent *e) {
     buttons &= ~(1 << (btn - 1));
 
   if (IS_WINDOSET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
-    mousereport(e);
+    report_mouse();
     return;
   }
 
@@ -483,7 +483,7 @@ void brelease(XEvent *e) {
 
 void bmotion(XEvent *e) {
   if (IS_WINDOSET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
-    mousereport(e);
+    report_mouse();
     return;
   }
 

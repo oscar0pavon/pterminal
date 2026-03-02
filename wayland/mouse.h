@@ -8,6 +8,9 @@ typedef struct Mouse {
   uint32_t y;
   bool left_click;
   bool right_click;
+  bool motion;
+  bool button_release;
+  bool button_pressed;
 
 }Mouse;
 
