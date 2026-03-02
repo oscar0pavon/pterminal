@@ -2,11 +2,9 @@
 #include "wayland/wayland.h"
 #include <X11/X.h>
 #include <bits/pthreadtypes.h>
-#include <errno.h>
 #include <libgen.h>
 #include <limits.h>
 #include <locale.h>
-#include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +35,6 @@ char *argv0;
 
 #include "pterminal.h"
 
-/* config.h for applying patches and the configuration. */
 #include "config.h"
 
 static inline ushort sixd_to_16bit(int);
