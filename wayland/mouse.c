@@ -19,10 +19,15 @@ static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
 
 static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
                                   uint32_t time, wl_fixed_t sx, wl_fixed_t sy) {
-    WaylandTerminal *term = data;
-    // Convert fixed-point coordinates to doubles/integers
-    main_mouse.x = wl_fixed_to_double(sx);
-    main_mouse.y = wl_fixed_to_double(sy);
+  WaylandTerminal *term = data;
+  // Convert fixed-point coordinates to doubles/integers
+  main_mouse.x = wl_fixed_to_double(sx);
+  main_mouse.y = wl_fixed_to_double(sy);
+
+  if(main_mouse.left_click){
+    select_with_mouse(false);
+  }
+
 }
 
 static void pointer_handle_button(void *data, struct wl_pointer *pointer,
@@ -31,7 +36,7 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
   WaylandTerminal *term = data;
   if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
       if (button == BTN_LEFT) {
-
+        main_mouse.left_click = true;
         mouse_click();
 
       }
@@ -39,6 +44,13 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
 
         printf("right click\n");
       }
+  }else{
+
+    if (button == BTN_LEFT) {
+      main_mouse.left_click = false;    
+
+    }
+    
   }
 }
 

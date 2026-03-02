@@ -6,6 +6,8 @@
 typedef struct Mouse {
   uint32_t x;
   uint32_t y;
+  bool left_click;
+  bool right_click;
 
 }Mouse;
 

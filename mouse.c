@@ -115,6 +115,16 @@ int evrow(XEvent *e) {
   return y / terminal_window.character_height;
 }
 
+void select_with_mouse(bool done) {
+  int type, seltype = SEL_REGULAR;
+
+  selextend(mouse_to_col(), mouse_to_row(), seltype, done);
+
+  // if (done)
+  //   setsel(getsel(), e->xbutton.time);
+  //   //TODO create a clipboard for wayland
+}
+
 void mousesel(XEvent *e, int done) {
   int type, seltype = SEL_REGULAR;
   uint state = e->xbutton.state & ~(Button1Mask | forcemousemod);
