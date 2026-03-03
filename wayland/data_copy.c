@@ -5,8 +5,8 @@
 #include <string.h>
 #include <wayland-client-core.h>
 #include "wayland.h"
+#include "../selection.h"
 
-const char *my_clipboard_content = "test string for copy";
 
 static void data_source_handle_send(void *data, struct wl_data_source *source,
                                    const char *mime_type, int32_t fd) {
@@ -15,7 +15,9 @@ static void data_source_handle_send(void *data, struct wl_data_source *source,
         strcmp(mime_type, "UTF8_STRING") == 0 ||
         strcmp(mime_type, "text/plain") == 0) {
 
-        write(fd, my_clipboard_content, strlen(my_clipboard_content));
+       char* my_selection = getsel();
+
+        write(fd, my_selection, strlen(my_selection));
 
     }
     close(fd);
