@@ -106,6 +106,9 @@ int mouse_to_row() {
 
 
 void select_with_mouse(bool done) {
+  if( !main_mouse.left_click )
+    return;
+
   int type, seltype = SEL_REGULAR;
 
   selextend(mouse_to_col(), mouse_to_row(), seltype, done);
@@ -150,16 +153,18 @@ void report_mouse() {
     for (btn = 1; btn <= 11 && !(buttons & (1 << (btn - 1))); btn++)
       ;
     code = 32;
+    printf("mouse motion in terminal mouse mode\n");
   } else {
 
     if(main_mouse.left_click)
       btn = 1;
     else if(main_mouse.right_click)
-      btn = 2;
+      btn = 3;
 
     /* Only buttons 1 through 11 can be encoded */
     if (btn < 1 || btn > 11)
       return;
+
     if (main_mouse.button_release) {
       /* MODE_MOUSEX10: no button release reporting */
       if (IS_WINDOSET(MODE_MOUSEX10))
@@ -231,10 +236,40 @@ int mouseaction(XEvent *e, uint release) {
   return 0;
 }
 
+void release_button(){
+
+  int btn;
+
+  if(main_mouse.left_click)
+    btn = 1;
+  else if(main_mouse.right_click)
+    btn = 3;
+
+  if (1 <= btn && btn <= 11)
+    buttons &= ~(1 << (btn - 1));
+
+  if ( IS_WINDOSET(MODE_MOUSE) ) {
+    report_mouse();
+    return;
+  }
+
+}
+
 void mouse_click(){
 
   struct timespec now;
   int snap;
+
+  int btn;
+
+  if(main_mouse.left_click)
+    btn = 1;
+  else if(main_mouse.right_click)
+    btn = 3;
+
+  if (1 <= btn && btn <= 11)
+    buttons |= 1 << (btn - 1);
+
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {
     report_mouse();
@@ -479,6 +514,16 @@ void brelease(XEvent *e) {
     return;
   if (btn == Button1)
     mousesel(e, 1);
+}
+
+void handle_mouse_motion(){
+
+  if ( IS_WINDOSET(MODE_MOUSE) ) {
+    report_mouse();
+    return;
+  }
+  
+  select_with_mouse(false);
 }
 
 void bmotion(XEvent *e) {

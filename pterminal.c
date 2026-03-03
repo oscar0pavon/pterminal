@@ -13,6 +13,8 @@
 
 #include "draw.h"
 
+#include "wayland/mouse.h"
+
 
 static char *shell = "/bin/sh";
 
@@ -58,6 +60,8 @@ void *run_pterminal(void *none) {
 
   
     draw();
+
+    main_mouse.motion = false;
 
   }
 }
