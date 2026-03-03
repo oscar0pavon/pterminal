@@ -33,4 +33,7 @@ void handle_mouse_motion();
 uint buttonmask(uint);
 int mouseaction(XEvent *, uint);
 
+extern uint buttons; /* bit field of pressed buttons */
+extern uint current_button_number;
+
 #endif

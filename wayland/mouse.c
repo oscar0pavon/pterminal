@@ -3,10 +3,12 @@
 #include "wayland.h"
 #include <linux/input.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "../mouse.h"
 
 Mouse main_mouse = {0};
+
 
 static void pointer_handle_enter(void *data, struct wl_pointer *pointer,
                                  uint32_t serial, struct wl_surface *surface,
@@ -25,7 +27,7 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
   main_mouse.x = wl_fixed_to_double(sx);
   main_mouse.y = wl_fixed_to_double(sy);
  
-  main_mouse.motion = true;
+  report_mouse_movement();
 
   handle_mouse_motion();
 
@@ -34,48 +36,66 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
 static void pointer_handle_button(void *data, struct wl_pointer *pointer,
                                   uint32_t serial, uint32_t time, 
                                   uint32_t button, uint32_t state) {
-  WaylandTerminal *term = data;
-  main_mouse.button_pressed = false;
-  main_mouse.button_release = false;
+
+  main_mouse.current_button = NULL;
+
+  switch (button) {
+      case BTN_LEFT:
+                   main_mouse.current_button = &main_mouse.left_button; 
+                   main_mouse.current_button->id = 1;
+                   break;
+      case BTN_MIDDLE:  
+                   main_mouse.current_button = &main_mouse.middle_button; 
+                   main_mouse.current_button->id = 2;
+                   break;
+      case BTN_RIGHT:
+                   main_mouse.current_button = &main_mouse.right_button; 
+                   main_mouse.current_button->id = 3;
+                   break;
+      default:
+                   main_mouse.current_button = NULL;
+  }
 
   if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
 
-    main_mouse.button_pressed = true;
-    main_mouse.button_release = false;
-    if (button == BTN_LEFT) {
-      main_mouse.left_click = true;
+    if(main_mouse.current_button){
+
+      main_mouse.current_button->pressed = true;
+      main_mouse.current_button->released = false;
 
     }
-    if (button == BTN_RIGHT) {
 
-      main_mouse.right_click = true;
-
-    }
 
     mouse_click();
 
   }else{
 
+    if(main_mouse.current_button){
+
+      main_mouse.current_button->pressed = false;
+      main_mouse.current_button->released = true;
+
+    }
+
     release_button();
 
-    main_mouse.button_pressed = false;
-    main_mouse.button_release = true;
-
-    if (button == BTN_LEFT) {
-      main_mouse.left_click = false;    
-
-    }
-    if( button == BTN_RIGHT ){
-      main_mouse.right_click = false;
-    }
     
   }
 }
 
 static void pointer_handle_axis(void *data, struct wl_pointer *pointer,
                                 uint32_t time, uint32_t axis, wl_fixed_t value) {
-    // value > 0 is scroll down/right; value < 0 is scroll up/left
-    printf("wheel mouse\n");
+
+  double scroll_delta = wl_fixed_to_double(value);
+
+  if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
+
+    int button_number = (scroll_delta < 0) ? 4 : 5;
+
+    buttons = button_number;
+
+  }
+
 }
 
 static void pointer_handle_frame(void *data, struct wl_pointer *pointer) {

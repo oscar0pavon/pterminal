@@ -14,6 +14,7 @@
 #include "draw.h"
 
 #include "wayland/mouse.h"
+#include "mouse.h"
 
 
 static char *shell = "/bin/sh";
@@ -61,7 +62,12 @@ void *run_pterminal(void *none) {
   
     draw();
 
-    main_mouse.motion = false;
+    if(main_mouse.current_button){
+      if(main_mouse.current_button->released){
+        main_mouse.current_button->released = false;
+        main_mouse.current_button = NULL;
+      }
+    }
 
   }
 }

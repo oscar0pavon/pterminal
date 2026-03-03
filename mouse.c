@@ -31,7 +31,13 @@ static MouseShortcut mshortcuts[] = {
 static unsigned int doubleclicktimeout = 300;
 static unsigned int tripleclicktimeout = 600;
 
-static uint buttons; /* bit field of pressed buttons */
+
+uint current_button_number;
+static int old_mouse_x, old_mouse_y;
+int mouse_code = 0;
+
+uint buttons;
+
 /*
  * Force mouse select/shortcuts while mask is active (when MODE_MOUSE is set).
  * Note that if you want to use ShiftMask with selmasks, set this to an other
@@ -106,7 +112,7 @@ int mouse_to_row() {
 
 
 void select_with_mouse(bool done) {
-  if( !main_mouse.left_click )
+  if( !main_mouse.left_button.pressed )
     return;
 
   int type, seltype = SEL_REGULAR;
@@ -133,62 +139,56 @@ void mousesel(XEvent *e, int done) {
     setsel(getsel(), e->xbutton.time);
 }
 
+
+void report_mouse_movement(void){
+
+  int x = mouse_to_col(), y = mouse_to_row();
+
+  if (x == old_mouse_x && y == old_mouse_y)
+    return;
+
+  if (!IS_WINDOSET(MODE_MOUSEMOTION) && !IS_WINDOSET(MODE_MOUSEMANY))
+    return;
+
+  if (IS_WINDOSET(MODE_MOUSEMOTION) && !main_mouse.current_button){
+    printf("Movement but no button pressed\n");
+    return;
+  }
+
+  if(!main_mouse.current_button->pressed)
+    return;
+
+
+  mouse_code = 32;
+  printf("mouse movement encoded\n");
+
+}
+
 void report_mouse() {
-  int len, btn, code;
+  int len, btn;
   int x = mouse_to_col(), y = mouse_to_row();
   //int state = e->xbutton.state;
   char buf[40];
-  static int old_x, old_y;
 
-  if (main_mouse.motion) {
-    if (x == old_x && y == old_y)
-      return;
-    if (!IS_WINDOSET(MODE_MOUSEMOTION) && !IS_WINDOSET(MODE_MOUSEMANY))
-      return;
-    /* MODE_MOUSEMOTION: no reporting if no button is pressed */
-    if (IS_WINDOSET(MODE_MOUSEMOTION) && buttons == 0)
-      return;
-    /* Set btn to lowest-numbered pressed button, or 12 if no
-     * buttons are pressed. */
-    for (btn = 1; btn <= 11 && !(buttons & (1 << (btn - 1))); btn++)
-      ;
-    code = 32;
-    printf("mouse motion in terminal mouse mode\n");
-  } else {
-
-    if(main_mouse.left_click)
-      btn = 1;
-    else if(main_mouse.right_click)
-      btn = 3;
-
-    /* Only buttons 1 through 11 can be encoded */
-    if (btn < 1 || btn > 11)
-      return;
-
-    if (main_mouse.button_release) {
-      /* MODE_MOUSEX10: no button release reporting */
-      if (IS_WINDOSET(MODE_MOUSEX10))
-        return;
-      /* Don't send release events for the scroll wheel */
-      if (btn == 4 || btn == 5)
-        return;
-    }
-    code = 0;
+  if(main_mouse.current_button){
+    btn = main_mouse.current_button->id;
+  }else{
+    return;
   }
 
-  old_x = x;
-  old_y = y;
+  old_mouse_x = x;
+  old_mouse_y = y;
 
   /* Encode btn into code. If no button is pressed for a motion event in
    * MODE_MOUSEMANY, then encode it as a release. */
-  if ((!IS_WINDOSET(MODE_MOUSESGR) && main_mouse.button_release) || btn == 12)
-    code += 3;
+  if (main_mouse.current_button->released)
+    mouse_code += 3;
   else if (btn >= 8)
-    code += 128 + btn - 8;
+    mouse_code += 128 + btn - 8;
   else if (btn >= 4)
-    code += 64 + btn - 4;
+    mouse_code += 64 + btn - 4;
   else
-    code += btn - 1;
+    mouse_code += btn - 1;
 
   // if (!IS_WINDOSET(MODE_MOUSEX10)) {
   //   code += ((state & ShiftMask) ? 4 : 0) +
@@ -196,17 +196,26 @@ void report_mouse() {
   //           + ((state & ControlMask) ? 16 : 0);
   // }
 
+  char is_released;
+  if(main_mouse.current_button->released){
+    is_released = 'm';
+    printf("coding release\n");
+  }else{
+   is_released = 'M';
+    printf("coding pressed\n");
+  }
+
   if (IS_WINDOSET(MODE_MOUSESGR)) {
-    len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", code, x + 1, y + 1,
-                   main_mouse.button_release == true ? 'm' : 'M');
-  } else if (x < 223 && y < 223) {
-    len = snprintf(buf, sizeof(buf), "\033[M%c%c%c", 32 + code, 32 + x + 1,
-                   32 + y + 1);
+    len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", 
+        mouse_code, x + 1, y + 1,
+        is_released);
   } else {
     return;
   }
 
   ttywrite(buf, len, 0);
+  
+  mouse_code = 0;
 }
 
 uint buttonmask(uint button) {
@@ -238,15 +247,6 @@ int mouseaction(XEvent *e, uint release) {
 
 void release_button(){
 
-  int btn;
-
-  if(main_mouse.left_click)
-    btn = 1;
-  else if(main_mouse.right_click)
-    btn = 3;
-
-  if (1 <= btn && btn <= 11)
-    buttons &= ~(1 << (btn - 1));
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {
     report_mouse();
@@ -262,13 +262,8 @@ void mouse_click(){
 
   int btn;
 
-  if(main_mouse.left_click)
-    btn = 1;
-  else if(main_mouse.right_click)
-    btn = 3;
-
-  if (1 <= btn && btn <= 11)
-    buttons |= 1 << (btn - 1);
+  if(main_mouse.current_button)
+    btn = main_mouse.current_button->id;
 
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {

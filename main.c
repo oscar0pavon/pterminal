@@ -79,7 +79,9 @@ void exit_pterminal(){
 
   printf("Exit pterminal\n");
 
-  exit(0);
+ 
+  exit(EXIT_SUCCESS);
+
 }
 
 

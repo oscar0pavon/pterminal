@@ -2,19 +2,30 @@
 #define WMOUSE_H
 
 #include <stdint.h>
+#include <stdbool.h>
+
+typedef struct MouseButton{
+  uint32_t id;
+  bool pressed;
+  bool released;
+}MouseButton;
 
 typedef struct Mouse {
   uint32_t x;
   uint32_t y;
-  bool left_click;
-  bool right_click;
-  bool motion;
-  bool button_release;
-  bool button_pressed;
+
+  MouseButton* current_button;
+
+  MouseButton left_button;
+  MouseButton right_button;
+  MouseButton middle_button;
 
 }Mouse;
 
+
 void configure_mouse(void);
+
+void report_mouse_movement(void);
 
 extern Mouse main_mouse;
 
