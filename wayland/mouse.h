@@ -24,10 +24,16 @@ typedef struct Mouse {
   MouseButton right_button;
   MouseButton middle_button;
 
+  MouseButton wheel_up;
+  MouseButton wheel_down;
+
 }Mouse;
 
 
 void configure_mouse(void);
+void release_mouse_button();
+
+void clean_mouse_buttons();
 
 extern Mouse main_mouse;
 

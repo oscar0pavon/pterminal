@@ -62,12 +62,6 @@ void *run_pterminal(void *none) {
   
     draw();
 
-    if(main_mouse.current_button){
-      if(main_mouse.current_button->released){
-        main_mouse.current_button->released = false;
-        main_mouse.current_button = NULL;
-      }
-    }
-
+    clean_mouse_buttons();
   }
 }

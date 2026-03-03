@@ -33,6 +33,36 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
 
 }
 
+void press_button(){
+
+  if(main_mouse.current_button){
+
+    main_mouse.current_button->pressed = true;
+    main_mouse.current_button->released = false;
+
+  }
+}
+
+void clean_mouse_buttons(){
+
+  if(main_mouse.current_button){
+    if(main_mouse.current_button->released){
+      main_mouse.current_button->released = false;
+      main_mouse.current_button = NULL;
+    }
+  }
+}
+
+void release_mouse_button(){
+
+  if(main_mouse.current_button){
+    
+    main_mouse.current_button->pressed = false;
+    main_mouse.current_button->released = true;
+
+  }
+}
+
 static void pointer_handle_button(void *data, struct wl_pointer *pointer,
                                   uint32_t serial, uint32_t time, 
                                   uint32_t button, uint32_t state) {
@@ -58,24 +88,13 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
 
   if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
 
-    if(main_mouse.current_button){
-
-      main_mouse.current_button->pressed = true;
-      main_mouse.current_button->released = false;
-
-    }
-
+    press_button();
 
     mouse_click();
 
   }else{
 
-    if(main_mouse.current_button){
-
-      main_mouse.current_button->pressed = false;
-      main_mouse.current_button->released = true;
-
-    }
+    release_mouse_button();
 
     release_button();
 
@@ -117,5 +136,8 @@ static const struct wl_pointer_listener pointer_listener = {
 void configure_mouse(void){
 
   wl_pointer_add_listener(wayland_terminal.pointer, &pointer_listener, &wayland_terminal);
+
+  main_mouse.wheel_up.id = 64;
+  main_mouse.wheel_down.id = 65;
   
 }
