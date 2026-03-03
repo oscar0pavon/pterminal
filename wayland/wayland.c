@@ -10,6 +10,7 @@
 #include <wayland-client-protocol.h>
 #include <pthread.h>
 #include "input.h"
+#include "data.h"
 
 #include "../pterminal.h"
 
@@ -109,8 +110,15 @@ void register_global(void *data, Registry *registry, uint32_t name_id,
 
     configure_input(&wayland_terminal);
 
-    printf("found seat\n");
+  } else if( strcmp(interface_name, wl_data_device_manager_interface.name) == 0){
+    terminal->data_device_manager = wl_registry_bind(
+          registry,
+          name_id,
+          &wl_data_device_manager_interface,
+          3
+        );
   }
+
 }
 
 void remove_global(void *data, Registry *registry, uint32_t name) {}
@@ -191,6 +199,8 @@ bool init_wayland() {
 
   wayland_fd = wl_display_get_fd(wayland_terminal.display);
   init_keyboard_reapeat_handler();
+
+  configure_data();
 
   printf("Waynland initialized\n");
 

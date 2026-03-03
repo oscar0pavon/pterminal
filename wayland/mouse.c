@@ -1,6 +1,5 @@
 #include "mouse.h"
 
-#include "wayland.h"
 #include <linux/input.h>
 #include <stdbool.h>
 #include <stdint.h>

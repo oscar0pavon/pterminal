@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "wayland.h"
+
 typedef struct MouseButton{
   uint32_t id;
   bool pressed;

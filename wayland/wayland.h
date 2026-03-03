@@ -25,6 +25,8 @@ typedef struct WaylandTerminal{
     struct wl_seat *seat;
     struct wl_pointer *pointer;
     struct wl_keyboard *keyboard;
+    struct wl_data_device_manager *data_device_manager;
+    struct wl_data_device *data_device;
 }WaylandTerminal;
 
 extern WaylandTerminal wayland_terminal;
