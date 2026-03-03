@@ -170,61 +170,53 @@ uint32_t report_mouse_movement(void){
 
 void report_mouse(bool has_motion) {
 
-  int len, btn;
-  char buf[40];
-
-  if(main_mouse.current_button){
-    btn = main_mouse.current_button->id;
-  }
-
-  main_mouse.old_col = main_mouse.col;
-  main_mouse.old_row = main_mouse.row;
-
-  char is_released;
-  if(has_motion){
-
-    uint32_t movement_code = report_mouse_movement();
-
-    if(!main_mouse.current_button)
-      btn = 0;
-
-    mouse_code = btn + movement_code;
-  }
-  else{
-    mouse_code = btn;
-  }
+  if (!IS_WINDOSET(MODE_MOUSESGR))
+    return;
 
   if(!has_motion && !main_mouse.current_button)
     return;
 
-  // if (!IS_WINDOSET(MODE_MOUSEX10)) {
-  //   code += ((state & ShiftMask) ? 4 : 0) +
-  //           ((state & Mod1Mask) ? 8 : 0) /* meta key: alt */
-  //           + ((state & ControlMask) ? 16 : 0);
-  // }
+  int len, button;
+  char buf[40];
+  char is_released;
+
+  if(has_motion)
+    is_released = 'M';
 
   if(main_mouse.current_button){
+
+    button = main_mouse.current_button->id;
+
     if(main_mouse.current_button->released){
       is_released = 'm';
     }else{
       is_released = 'M';
     }
+
+  }else {
+    button = 0;
+  }
+  
+
+  main_mouse.old_col = main_mouse.col;
+  main_mouse.old_row = main_mouse.row;
+
+  if(has_motion){
+
+    uint32_t movement_code = report_mouse_movement();
+
+    mouse_code = button + movement_code;
+  }
+  else{
+
+    mouse_code = button;
+
   }
 
-  if(has_motion)
-    is_released = 'M';
-
-  if (IS_WINDOSET(MODE_MOUSESGR)) {
-    //printf("Code: %i %c \n", mouse_code, is_released);
-    len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", 
-        mouse_code, main_mouse.col + 1, main_mouse.row + 1,
-        is_released);
-  } else {
-    if( IS_WINDOSET(MODE_MOUSEMANY) ){
-      printf("mouse many mode\n");
-    }
-    return;
-  }
+  //printf("Code: %i %c \n", mouse_code, is_released);
+  len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", 
+      mouse_code, main_mouse.col + 1, main_mouse.row + 1,
+      is_released);
 
   ttywrite(buf, len, 0);
   
