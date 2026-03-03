@@ -54,7 +54,7 @@ void csihandle(void) {
     break;
   case 'c': /* DA -- Device Attributes */
     if (csiescseq.arg[0] == 0)
-      ttywrite(vtiden, strlen(vtiden), 0);
+      write_to_tty(vtiden, strlen(vtiden), 0);
     break;
   case 'b': /* REP -- if last char is printable print it <n> more times */
     LIMIT(csiescseq.arg[0], 1, 65535);
@@ -186,12 +186,12 @@ void csihandle(void) {
   case 'n': /* DSR -- Device Status Report */
     switch (csiescseq.arg[0]) {
     case 5: /* Status Report "OK" `0n` */
-      ttywrite("\033[0n", sizeof("\033[0n") - 1, 0);
+      write_to_tty("\033[0n", sizeof("\033[0n") - 1, 0);
       break;
     case 6: /* Report Cursor Position (CPR) "<row>;<column>R" */
       len = snprintf(buf, sizeof(buf), "\033[%i;%iR", term.cursor.y + 1,
                      term.cursor.x + 1);
-      ttywrite(buf, len, 0);
+      write_to_tty(buf, len, 0);
       break;
     default:
       goto unknown;
@@ -450,6 +450,6 @@ void osc_color_response(int num, int index, int is_osc4) {
             n < 0 ? "snprintf failed" : "truncation occurred",
             is_osc4 ? "osc4" : "osc");
   } else {
-    ttywrite(buf, n, 1);
+    write_to_tty(buf, n, 1);
   }
 }

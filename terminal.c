@@ -1047,7 +1047,7 @@ void tcontrolcode(uchar ascii) {
   case 0x99: /* TODO: SGCI */
     break;
   case 0x9a: /* DECID -- Identify Terminal */
-    ttywrite(vtiden, strlen(vtiden), 0);
+    write_to_tty(vtiden, strlen(vtiden), 0);
     break;
   case 0x9b: /* TODO: CSI */
   case 0x9c: /* TODO: ST */
@@ -1117,7 +1117,7 @@ int eschandle(uchar ascii) {
     }
     break;
   case 'Z': /* DECID -- Identify Terminal */
-    ttywrite(vtiden, strlen(vtiden), 0);
+    write_to_tty(vtiden, strlen(vtiden), 0);
     break;
   case 'c': /* RIS -- Reset to initial state */
     treset();

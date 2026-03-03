@@ -216,7 +216,7 @@ void report_mouse(bool has_motion) {
       mouse_code, main_mouse.col + 1, main_mouse.row + 1,
       is_released);
 
-  ttywrite(buf, len, 0);
+  write_to_tty(buf, len, 0);
   
   mouse_code = 0;
 }
@@ -401,10 +401,10 @@ void selnotify(XEvent *e) {
     }
 
     if (IS_WINDOSET(MODE_BRCKTPASTE) && ofs == 0)
-      ttywrite("\033[200~", 6, 0);
-    ttywrite((char *)data, nitems * format / 8, 1);
+      write_to_tty("\033[200~", 6, 0);
+    write_to_tty((char *)data, nitems * format / 8, 1);
     if (IS_WINDOSET(MODE_BRCKTPASTE) && rem == 0)
-      ttywrite("\033[201~", 6, 0);
+      write_to_tty("\033[201~", 6, 0);
     XFree(data);
     /* number of 32-bit chunks returned */
     ofs += nitems * format / 32;

@@ -46,9 +46,12 @@ static void data_device_handle_selection(void *data, struct wl_data_device *data
                                          struct wl_data_offer *offer) {
     //struct wayland_terminal *term = data;
 
-    // If a previous offer was stored, you might want to destroy it here
-    // term->active_selection_offer = offer;
-    
+    if(wayland_terminal.active_data_offer){
+      wl_data_offer_destroy(wayland_terminal.active_data_offer);
+    }
+
+    wayland_terminal.active_data_offer = offer;
+
     // This 'offer' is now the current clipboard content.
     // You typically store this pointer to use when the user hits 'Paste'.
     //term->current_selection = offer;

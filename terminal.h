@@ -129,7 +129,7 @@ void ttyhangup(void);
 int ttynew(const char *, char *, const char *, char **);
 size_t read_tty(void);
 void resize_tty(int, int);
-void ttywrite(const char *, size_t, int);
+void write_to_tty(const char *, size_t, int);
 
 int tlinelen(int);
 

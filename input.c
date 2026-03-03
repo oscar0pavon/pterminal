@@ -344,7 +344,7 @@ void kpress(XEvent *ev) {
 
   /* 2. custom keys from config.h */
   if ((customkey = kmap(ksym, e->state))) {
-    ttywrite(customkey, strlen(customkey), 1);
+    write_to_tty(customkey, strlen(customkey), 1);
     return;
   }
 
@@ -363,5 +363,5 @@ void kpress(XEvent *ev) {
       len = 2;
     }
   }
-  ttywrite(buf, len, 1);
+  write_to_tty(buf, len, 1);
 }

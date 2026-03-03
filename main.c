@@ -41,7 +41,7 @@ static inline ushort sixd_to_16bit(int);
 
 
 void ttysend(const Arg *arg) { 
-  ttywrite(arg->s, strlen(arg->s), 1); 
+  write_to_tty(arg->s, strlen(arg->s), 1); 
 }
 
 

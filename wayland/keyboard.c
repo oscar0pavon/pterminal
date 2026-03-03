@@ -1,4 +1,5 @@
 #include "keyboard.h"
+#include "copy_paste.h"
 #include "wayland.h"
 #include <bits/time.h>
 #include <bits/types/struct_itimerspec.h>
@@ -76,6 +77,17 @@ void handle_key_sym(xkb_keysym_t sym){
 
   bool ctrl_pressed = xkb_state_mod_name_is_active(main_keyboard.state,
         XKB_MOD_NAME_CTRL, XKB_STATE_MODS_EFFECTIVE);
+  
+  bool shift_pressed = xkb_state_mod_name_is_active(main_keyboard.state,
+        XKB_MOD_NAME_SHIFT, XKB_STATE_MODS_EFFECTIVE);
+
+  if(ctrl_pressed && shift_pressed){
+    if(sym == XK_V){
+      printf("Paste from clipboard\n");
+      paste_from_clipboard();
+      return;
+    }
+  }
 
   if(ctrl_pressed){
       // Handle Ctrl
@@ -92,9 +104,9 @@ void handle_key_sym(xkb_keysym_t sym){
 
   if (len > 0) {
     if (!ctrl_pressed)
-      ttywrite(buf, len - 1, 1);
+      write_to_tty(buf, len - 1, 1);
     else
-      ttywrite(buf, len, 1);
+      write_to_tty(buf, len, 1);
   }
 
 }

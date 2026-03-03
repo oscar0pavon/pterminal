@@ -65,14 +65,14 @@ void focus_window(bool is_focuses){
       xseturgency(0);
 
     if (IS_WINDOSET(MODE_FOCUS))
-      ttywrite("\033[I", 3, 0);
+      write_to_tty("\033[I", 3, 0);
 
   }else{
 
     terminal_window.mode &= ~MODE_FOCUSED;
 
     if (IS_WINDOSET(MODE_FOCUS))
-      ttywrite("\033[O", 3, 0);
+      write_to_tty("\033[O", 3, 0);
   }
 }
 

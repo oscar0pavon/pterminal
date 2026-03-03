@@ -134,7 +134,7 @@ size_t read_tty(void) {
   }
 }
 
-void ttywrite(const char *s, size_t n, int may_echo) {
+void write_to_tty(const char *s, size_t n, int may_echo) {
   const char *next;
 
   if (may_echo && IS_SET(MODE_ECHO))

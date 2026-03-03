@@ -5,7 +5,8 @@
 
 void new_serial_tty(char **);
 void ttywriteraw(const char *, size_t);
-void ttywrite(const char *s, size_t n, int may_echo);
+
+void write_to_tty(const char *s, size_t n, int may_echo);
 
 int ttynew(const char *line, char *cmd, const char *out, char **args);
 
