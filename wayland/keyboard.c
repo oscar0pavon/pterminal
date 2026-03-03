@@ -16,6 +16,7 @@
 #include <xkbcommon/xkbcommon.h>
 #include "../terminal.h"
 #include "../events.h"
+#include "data_copy.h"
 
 Keyboard main_keyboard;
 
@@ -86,6 +87,10 @@ void handle_key_sym(xkb_keysym_t sym){
       printf("Paste from clipboard\n");
       paste_from_clipboard();
       return;
+    }else if(sym == XK_C) {
+      perform_copy(main_keyboard.last_input_serial);
+      printf("Copy to clipboard\n");
+      return;
     }
   }
 
@@ -150,11 +155,14 @@ static void keyboard_handle_key(void *data, struct wl_keyboard *keyboard,
                                 uint32_t serial, uint32_t time, uint32_t key,
                                 uint32_t state) {
 
+
   uint32_t usable_key = key + 8; //linux eudev code start plus 8
                                  //
   xkb_keysym_t sym = xkb_state_key_get_one_sym(main_keyboard.state, usable_key);
 
   if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
+
+    main_keyboard.last_input_serial = serial;
 
     if(xkb_keymap_key_repeats(main_keyboard.keymap, usable_key)){
       main_keyboard.last_key_sym = sym;

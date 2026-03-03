@@ -17,6 +17,7 @@ typedef struct Keyboard {
   xkb_keysym_t last_key_sym;
   uint32_t last_key_code;
   int timer_fd;
+  uint32_t last_input_serial;
 
 } Keyboard;
 
