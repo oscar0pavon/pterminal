@@ -41,6 +41,7 @@ void press_button(){
     main_mouse.current_button->released = false;
 
   }
+  mouse_click();
 }
 
 void clean_mouse_buttons(){
@@ -90,7 +91,6 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
 
     press_button();
 
-    mouse_click();
 
   }else{
 
@@ -109,9 +109,14 @@ static void pointer_handle_axis(void *data, struct wl_pointer *pointer,
 
   if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
 
-    int button_number = (scroll_delta < 0) ? 4 : 5;
+    if(value < 0){
+      main_mouse.current_button = &main_mouse.wheel_down;
+      press_button();
+    }else if(value > 0){
 
-    buttons = button_number;
+      main_mouse.current_button = &main_mouse.wheel_up;
+      press_button();
+    }
 
   }
 
@@ -137,7 +142,7 @@ void configure_mouse(void){
 
   wl_pointer_add_listener(wayland_terminal.pointer, &pointer_listener, &wayland_terminal);
 
-  main_mouse.wheel_up.id = 64;
-  main_mouse.wheel_down.id = 65;
+  main_mouse.wheel_up.id = 65;
+  main_mouse.wheel_down.id = 64;
   
 }

@@ -35,8 +35,6 @@ static unsigned int tripleclicktimeout = 600;
 
 int mouse_code = 0;
 
-uint buttons;
-
 /*
  * Force mouse select/shortcuts while mask is active (when MODE_MOUSE is set).
  * Note that if you want to use ShiftMask with selmasks, set this to an other
@@ -297,8 +295,6 @@ void bpress(XEvent *e) {
   struct timespec now;
   int snap;
 
-  if (1 <= btn && btn <= 11)
-    buttons |= 1 << (btn - 1);
 
   if (IS_WINDOSET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
     report_mouse(false);
@@ -502,8 +498,6 @@ void xsetsel(char *str) { setsel(str, CurrentTime); }
 void brelease(XEvent *e) {
   int btn = e->xbutton.button;
 
-  if (1 <= btn && btn <= 11)
-    buttons &= ~(1 << (btn - 1));
 
   if (IS_WINDOSET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
     report_mouse(false);
