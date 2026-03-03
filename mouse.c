@@ -1,5 +1,6 @@
 #include "mouse.h"
 #include <errno.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "window.h"
@@ -143,26 +144,27 @@ void update_mouse_terminal_position(){
   main_mouse.row = mouse_to_row();
 }
 
-void report_mouse_movement(void){
+uint32_t report_mouse_movement(void){
 
+  uint32_t movement_code = 35;
 
-  if (main_mouse.col == main_mouse.old_col && main_mouse.row == main_mouse.old_row)
-    return;
+  if (IS_WINDOSET(MODE_MOUSEMOTION)){
+    if(main_mouse.current_button){
+      if (main_mouse.current_button->pressed) {
+        return 32;
+      
+      }else {
+        return 35; 
+      }
 
-  if (!IS_WINDOSET(MODE_MOUSEMOTION) && !IS_WINDOSET(MODE_MOUSEMANY))
-    return;
-
-  if (IS_WINDOSET(MODE_MOUSEMOTION) && !main_mouse.current_button){
-    //printf("Movement but no button pressed\n");
-    return;
+    }else if( IS_WINDOSET(MODE_MOUSEMANY) ){
+      return 35;
+    }
   }
+  if( IS_WINDOSET(MODE_MOUSEMANY) )
+    return 35;
 
-  if(!main_mouse.current_button->pressed)
-    return;
 
-
-  mouse_code = 32;
-  printf("mouse movement encoded\n");
 
 }
 
@@ -173,17 +175,27 @@ void report_mouse(bool has_motion) {
 
   if(main_mouse.current_button){
     btn = main_mouse.current_button->id;
-  }else{
-    return;
   }
 
   main_mouse.old_col = main_mouse.col;
   main_mouse.old_row = main_mouse.row;
 
-  if(has_motion)
-    mouse_code = (btn-1) + 32;
-  else
-    mouse_code = (btn-1);
+  char is_released;
+  if(has_motion){
+
+    uint32_t movement_code = report_mouse_movement();
+
+    if(!main_mouse.current_button)
+      btn = 0;
+
+    mouse_code = btn + movement_code;
+  }
+  else{
+    mouse_code = btn;
+  }
+
+  if(!has_motion && !main_mouse.current_button)
+    return;
 
   // if (!IS_WINDOSET(MODE_MOUSEX10)) {
   //   code += ((state & ShiftMask) ? 4 : 0) +
@@ -191,20 +203,26 @@ void report_mouse(bool has_motion) {
   //           + ((state & ControlMask) ? 16 : 0);
   // }
 
-  char is_released;
-  if(main_mouse.current_button->released){
-    is_released = 'm';
-    //printf("coding release\n");
-  }else{
-   is_released = 'M';
-    printf("coding pressed\n");
+  if(main_mouse.current_button){
+    if(main_mouse.current_button->released){
+      is_released = 'm';
+    }else{
+      is_released = 'M';
+    }
   }
 
+  if(has_motion)
+    is_released = 'M';
+
   if (IS_WINDOSET(MODE_MOUSESGR)) {
+    //printf("Code: %i %c \n", mouse_code, is_released);
     len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", 
         mouse_code, main_mouse.col + 1, main_mouse.row + 1,
         is_released);
   } else {
+    if( IS_WINDOSET(MODE_MOUSEMANY) ){
+      printf("mouse many mode\n");
+    }
     return;
   }
 

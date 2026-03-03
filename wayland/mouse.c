@@ -29,8 +29,6 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
 
   update_mouse_terminal_position();
  
-  report_mouse_movement();
-
   handle_mouse_motion(true);
 
 }
@@ -44,15 +42,15 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
   switch (button) {
       case BTN_LEFT:
                    main_mouse.current_button = &main_mouse.left_button; 
-                   main_mouse.current_button->id = 1;
+                   main_mouse.current_button->id = 0;
                    break;
       case BTN_MIDDLE:  
                    main_mouse.current_button = &main_mouse.middle_button; 
-                   main_mouse.current_button->id = 2;
+                   main_mouse.current_button->id = 1;
                    break;
       case BTN_RIGHT:
                    main_mouse.current_button = &main_mouse.right_button; 
-                   main_mouse.current_button->id = 3;
+                   main_mouse.current_button->id = 2;
                    break;
       default:
                    main_mouse.current_button = NULL;

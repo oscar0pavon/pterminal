@@ -29,8 +29,6 @@ typedef struct Mouse {
 
 void configure_mouse(void);
 
-void report_mouse_movement(void);
-
 extern Mouse main_mouse;
 
 #endif
