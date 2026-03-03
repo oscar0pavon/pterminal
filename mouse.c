@@ -32,8 +32,6 @@ static unsigned int doubleclicktimeout = 300;
 static unsigned int tripleclicktimeout = 600;
 
 
-uint current_button_number;
-static int old_mouse_x, old_mouse_y;
 int mouse_code = 0;
 
 uint buttons;
@@ -139,19 +137,23 @@ void mousesel(XEvent *e, int done) {
     setsel(getsel(), e->xbutton.time);
 }
 
+void update_mouse_terminal_position(){
+
+  main_mouse.col = mouse_to_col();
+  main_mouse.row = mouse_to_row();
+}
 
 void report_mouse_movement(void){
 
-  int x = mouse_to_col(), y = mouse_to_row();
 
-  if (x == old_mouse_x && y == old_mouse_y)
+  if (main_mouse.col == main_mouse.old_col && main_mouse.row == main_mouse.old_row)
     return;
 
   if (!IS_WINDOSET(MODE_MOUSEMOTION) && !IS_WINDOSET(MODE_MOUSEMANY))
     return;
 
   if (IS_WINDOSET(MODE_MOUSEMOTION) && !main_mouse.current_button){
-    printf("Movement but no button pressed\n");
+    //printf("Movement but no button pressed\n");
     return;
   }
 
@@ -164,10 +166,9 @@ void report_mouse_movement(void){
 
 }
 
-void report_mouse() {
+void report_mouse(bool has_motion) {
+
   int len, btn;
-  int x = mouse_to_col(), y = mouse_to_row();
-  //int state = e->xbutton.state;
   char buf[40];
 
   if(main_mouse.current_button){
@@ -176,19 +177,13 @@ void report_mouse() {
     return;
   }
 
-  old_mouse_x = x;
-  old_mouse_y = y;
+  main_mouse.old_col = main_mouse.col;
+  main_mouse.old_row = main_mouse.row;
 
-  /* Encode btn into code. If no button is pressed for a motion event in
-   * MODE_MOUSEMANY, then encode it as a release. */
-  if (main_mouse.current_button->released)
-    mouse_code += 3;
-  else if (btn >= 8)
-    mouse_code += 128 + btn - 8;
-  else if (btn >= 4)
-    mouse_code += 64 + btn - 4;
+  if(has_motion)
+    mouse_code = (btn-1) + 32;
   else
-    mouse_code += btn - 1;
+    mouse_code = (btn-1);
 
   // if (!IS_WINDOSET(MODE_MOUSEX10)) {
   //   code += ((state & ShiftMask) ? 4 : 0) +
@@ -199,7 +194,7 @@ void report_mouse() {
   char is_released;
   if(main_mouse.current_button->released){
     is_released = 'm';
-    printf("coding release\n");
+    //printf("coding release\n");
   }else{
    is_released = 'M';
     printf("coding pressed\n");
@@ -207,7 +202,7 @@ void report_mouse() {
 
   if (IS_WINDOSET(MODE_MOUSESGR)) {
     len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", 
-        mouse_code, x + 1, y + 1,
+        mouse_code, main_mouse.col + 1, main_mouse.row + 1,
         is_released);
   } else {
     return;
@@ -249,7 +244,7 @@ void release_button(){
 
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {
-    report_mouse();
+    report_mouse(false);
     return;
   }
 
@@ -267,7 +262,7 @@ void mouse_click(){
 
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {
-    report_mouse();
+    report_mouse(false);
     return;
   }
 
@@ -296,7 +291,7 @@ void bpress(XEvent *e) {
     buttons |= 1 << (btn - 1);
 
   if (IS_WINDOSET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
-    report_mouse();
+    report_mouse(false);
     return;
   }
 
@@ -501,7 +496,7 @@ void brelease(XEvent *e) {
     buttons &= ~(1 << (btn - 1));
 
   if (IS_WINDOSET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
-    report_mouse();
+    report_mouse(false);
     return;
   }
 
@@ -511,10 +506,10 @@ void brelease(XEvent *e) {
     mousesel(e, 1);
 }
 
-void handle_mouse_motion(){
+void handle_mouse_motion(bool has_motion){
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {
-    report_mouse();
+    report_mouse(has_motion);
     return;
   }
   
@@ -523,7 +518,7 @@ void handle_mouse_motion(){
 
 void bmotion(XEvent *e) {
   if (IS_WINDOSET(MODE_MOUSE) && !(e->xbutton.state & forcemousemod)) {
-    report_mouse();
+    report_mouse(true);
     return;
   }
 

@@ -26,10 +26,12 @@ static void pointer_handle_motion(void *data, struct wl_pointer *pointer,
   // Convert fixed-point coordinates to doubles/integers
   main_mouse.x = wl_fixed_to_double(sx);
   main_mouse.y = wl_fixed_to_double(sy);
+
+  update_mouse_terminal_position();
  
   report_mouse_movement();
 
-  handle_mouse_motion();
+  handle_mouse_motion(true);
 
 }
 

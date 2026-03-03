@@ -28,7 +28,8 @@ int evrow(XEvent *);
 void mouse_click();
 void release_button();
 void select_with_mouse(bool done);
-void handle_mouse_motion();
+void handle_mouse_motion(bool has_motion);
+void update_mouse_terminal_position();
 
 uint buttonmask(uint);
 int mouseaction(XEvent *, uint);

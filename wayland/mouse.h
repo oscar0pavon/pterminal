@@ -13,6 +13,10 @@ typedef struct MouseButton{
 typedef struct Mouse {
   uint32_t x;
   uint32_t y;
+  uint32_t old_col;
+  uint32_t old_row;
+  uint32_t col;
+  uint32_t row;
 
   MouseButton* current_button;
 
