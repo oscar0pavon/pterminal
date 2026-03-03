@@ -311,7 +311,7 @@ void new_terminal(int col, int row) {
   for (i = 0; i < HISTSIZE; ++i)
     term.screen[0].buffer[i] = NULL;
 
-  tresize(col, row);
+  resize_terminal(col, row);
   treset();
 }
 
@@ -1350,7 +1350,7 @@ Line ensureline(Line line) {
   return line;
 }
 
-void tresize(int col, int row) {
+void resize_terminal(int col, int row) {
   int i, j;
   int minrow = MIN(row, term.row);
   int mincol = MIN(col, term.col);

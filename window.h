@@ -142,7 +142,7 @@ void xsetsel(char *);
 int xstartdraw(void);
 void xximspot(int, int);
 
-void cresize(int width, int height);
+void resize_pterminal(int width, int height);
 
 void xhints(void);
 void resize(XEvent *e);

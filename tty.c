@@ -215,7 +215,7 @@ write_error:
   die("write error on tty: %s\n", strerror(errno));
 }
 
-void ttyresize(int tw, int th) {
+void resize_tty(int tw, int th) {
   struct winsize w;
 
   w.ws_row = term.row;

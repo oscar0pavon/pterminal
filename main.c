@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
   MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
 
 
-  cresize(terminal_window.width, terminal_window.height);
+  resize_pterminal(terminal_window.width, terminal_window.height);
 
   printf("pterminal init..\n");
 

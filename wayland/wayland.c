@@ -61,11 +61,8 @@ void configure_window(void* data, struct xdg_toplevel* window, int width,
   }
 
 
-  terminal_window.width = width;
-  terminal_window.height = height;
-  cresize(terminal_window.width, terminal_window.height);
-  can_draw = true;
-  printf("resized\n");
+  resize_pterminal(width, height);
+
 
 }
 

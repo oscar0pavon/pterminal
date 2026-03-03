@@ -123,12 +123,12 @@ void toggleprinter(const Arg *);
 
 int tattrset(int);
 void new_terminal(int, int);
-void tresize(int, int);
+void resize_terminal(int, int);
 void tsetdirtattr(int);
 void ttyhangup(void);
 int ttynew(const char *, char *, const char *, char **);
 size_t read_tty(void);
-void ttyresize(int, int);
+void resize_tty(int, int);
 void ttywrite(const char *, size_t, int);
 
 int tlinelen(int);

@@ -53,26 +53,20 @@ void create_window(int cols, int rows){
 
 void expose(XEvent *ev) { redraw(); }
 
-/*
- * Absolute coordinates.
- */
-void xclear(int x1, int y1, int x2, int y2) {
 
-  // XftDrawRect(xw.draw,
-  // 		&dc.col[IS_SET(MODE_REVERSE)? defaultfg : defaultbg],
-  // 		x1, y1, x2-x1, y2-y1);
+void clear_window() {
+
   glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);//TODO get colors
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 }
 
-void xresize(int col, int row) {
-  terminal_window.tty_width = col * terminal_window.character_width;
-  terminal_window.tty_height = row * terminal_window.character_height;
 
-  xclear(0, 0, terminal_window.width, terminal_window.height);
-}
+void resize_pterminal(int width, int height) {
 
-void cresize(int width, int height) {
+  if(terminal_window.width == width && terminal_window.height == height)
+    return;
+
   int col, row;
 
   if (width != 0)
@@ -80,21 +74,28 @@ void cresize(int width, int height) {
   if (height != 0)
     terminal_window.height = height;
 
+  wl_egl_window_resize(egl_window, width, height, 0 , 0);
+
   col = terminal_window.width / terminal_window.character_width;
+
   row = terminal_window.height / terminal_window.character_height;
 
   col = MAX(1, col);
   row = MAX(1, row);
 
-  tresize(col, row);
-  xresize(col, row);
-  ttyresize(terminal_window.tty_width, terminal_window.tty_height);
+  resize_terminal(col, row);
 
-  if (terminal_window.type != XORG)
-    wl_egl_window_resize(egl_window, width, height, 0 , 0);
+  terminal_window.tty_width = col * terminal_window.character_width;
+  terminal_window.tty_height = row * terminal_window.character_height;
+
+  clear_window();
+
+  resize_tty(terminal_window.tty_width, terminal_window.tty_height);
+
 
   can_update_size = true;
 
+  printf("resized\n");
 }
 
 void resize(XEvent *e) {
@@ -102,7 +103,7 @@ void resize(XEvent *e) {
       e->xconfigure.height == terminal_window.height)
     return;
 
-  cresize(e->xconfigure.width, e->xconfigure.height);
+  resize_pterminal(e->xconfigure.width, e->xconfigure.height);
 
 }
 
@@ -121,7 +122,7 @@ void zoom(const Arg *arg) {
 void zoomabs(const Arg *arg) {
   // xunloadfonts();
   // xloadfonts(usedfont, arg->f);
-  cresize(0, 0);
+  resize_pterminal(0, 0);
   redraw();
   //xhints();
 }
