@@ -33,15 +33,13 @@ void stop_repeat_time(){
 static void keyboard_handle_keymap(void *data, struct wl_keyboard *keyboard,
                                    uint32_t format, int32_t fd, uint32_t size) {
 
-  printf("Handling xkbcommon init\n");
-
   if(format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1){
     close(fd);
   }
 
   char *memory = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
   if(!memory){
-    printf("Can't map keyboard memory");
+    die("Can't map keyboard memory");
     return;
   }
 
@@ -213,7 +211,6 @@ static void keyboard_handle_repeat_info(void *data, struct wl_keyboard *keyboard
   main_keyboard.delay = delay;
   main_keyboard.rate= rate;
 
-  printf("got repeat info\n");
 }
 
 static const struct wl_keyboard_listener keyboard_listener = {
