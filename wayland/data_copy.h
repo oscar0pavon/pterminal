@@ -5,4 +5,6 @@
 
 void perform_copy( uint32_t serial);
 
+void perform_copy_primary();
+
 #endif

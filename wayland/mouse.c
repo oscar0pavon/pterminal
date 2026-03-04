@@ -89,6 +89,8 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
 
   if (state == WL_POINTER_BUTTON_STATE_PRESSED) {
 
+    main_mouse.last_input_serial = serial;
+
     if(button == BTN_MIDDLE){
       printf("Middle button pressed\n");
       paste_from_clipboard(true);

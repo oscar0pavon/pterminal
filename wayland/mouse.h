@@ -28,6 +28,8 @@ typedef struct Mouse {
 
   MouseButton wheel_up;
   MouseButton wheel_down;
+  
+  uint32_t last_input_serial;
 
 }Mouse;
 

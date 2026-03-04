@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "wayland/data_copy.h"
 #include "window.h"
 #include "macros.h"
 #include "draw.h"
@@ -109,16 +110,14 @@ int mouse_to_row() {
 
 
 void select_with_mouse(bool done) {
-  if( !main_mouse.left_button.pressed )
-    return;
 
   int type, seltype = SEL_REGULAR;
 
   selextend(mouse_to_col(), mouse_to_row(), seltype, done);
 
-  // if (done)
-  //   setsel(getsel(), e->xbutton.time);
-  //   //TODO create a clipboard for wayland
+  if (done)
+    perform_copy_primary();
+
 }
 
 void mousesel(XEvent *e, int done) {
@@ -254,6 +253,13 @@ void release_button(){
   if ( IS_WINDOSET(MODE_MOUSE) ) {
     report_mouse(false);
     return;
+  }
+
+  printf("release button\n");
+
+  if(main_mouse.left_button.released){
+      printf("released left click\n");
+    select_with_mouse(true);
   }
 
 }
@@ -516,8 +522,9 @@ void handle_mouse_motion(bool has_motion){
     report_mouse(has_motion);
     return;
   }
-  
-  select_with_mouse(false);
+ 
+  if(main_mouse.left_button.pressed)
+    select_with_mouse(false);
 }
 
 void bmotion(XEvent *e) {
