@@ -5,12 +5,12 @@
 
 CC = cc
 
-LIBS = -L/usr/lib -lm -lrt -lutil -lGL -llodepng
+LIBS = -lm -lrt -lutil -lGL -llodepng
 LIBS += -lEGL -lwayland-client -lwayland-egl
 LIBS += -lxkbcommon -lpthread
 
-STCFLAGS = $(CFLAGS) -g
-STLDFLAGS = $(LIBS) $(LDFLAGS)
+FLAGS = -g
+LDFLAGS = $(LIBS)
 
 wayland_src := $(wildcard ./wayland/*.c)
 wayland_objs := $(wayland_src:%.c=%.o)
@@ -28,10 +28,10 @@ all: pterminal
 $(OBJ): config.h
 
 pterminal: $(OBJ)
-	$(CC) -o $@ $(OBJ) $(STLDFLAGS)
+	$(CC) -o $@ $(OBJ) $(LDFLAGS)
 
 ./wayland/%.o: ./wayland/%.c
-	cc $(STCFLAGS) -o $@ -c $<
+	cc $(FLAGS) -o $@ -c $<
 
 clean:
 	rm -f pterminal $(OBJ) 
