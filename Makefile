@@ -5,9 +5,9 @@
 
 CC = cc
 
-LIBS = -lm -lrt -lutil -lGL -llodepng
+LIBS = -lm -lGL -llodepng
 LIBS += -lEGL -lwayland-client -lwayland-egl
-LIBS += -lxkbcommon -lpthread
+LIBS += -lxkbcommon
 
 FLAGS = -g
 LDFLAGS = $(LIBS)
