@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ ! -r lib ]; then
+  mkdir lib
+fi
+
+cd lib
+if [ ! -f lodepng.h ]; then
+  wget https://raw.githubusercontent.com/lvandeve/lodepng/refs/heads/master/lodepng.h
+fi
+if [ ! -f lodepng.c ]; then
+wget https://raw.githubusercontent.com/lvandeve/lodepng/refs/heads/master/lodepng.cpp
+fi
+if [ -f lodepng.cpp ]; then
+  mv lodepng.cpp lodepng.c
+fi
+cc -c lodepng.c
+ar rcs lodepng.a lodepng.o 
+

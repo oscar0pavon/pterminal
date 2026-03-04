@@ -3,4 +3,5 @@ pterminal
 *.diff
 compile_commands.json
 .cache
+/lib
 
