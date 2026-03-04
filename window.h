@@ -54,9 +54,9 @@ typedef struct {
 } MouseShortcut;
 
 typedef struct {
-  KeySym k;
+  KeySym key_sym;
   uint mask;
-  char *s;
+  char *esc_to_print;
   /* three-valued logic variables: 0 indifferent, 1 on, -1 off */
   signed char appkey;    /* application keypad */
   signed char appcursor; /* application cursor */

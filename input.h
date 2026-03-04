@@ -11,8 +11,7 @@
 #define XK_NO_MOD 0
 #define XK_SWITCH_MOD (1 << 13 | 1 << 14)
 
-char *kmap(KeySym, uint);
-void kpress(XEvent *);
+char *get_esc_from_special_keys(KeySym key_sym, uint state);
 int match(uint mask, uint state);
 void numlock(const Arg *);
 

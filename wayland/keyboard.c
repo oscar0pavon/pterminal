@@ -6,18 +6,21 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/timerfd.h>
 #include <wayland-client-protocol.h>
 #include <unistd.h>
 #include <mman.h>
 #include <poll.h>
 #include "../pterminal.h"
+#include <xkbcommon/xkbcommon-keysyms.h>
 #include <xkbcommon/xkbcommon-names.h>
 #include <xkbcommon/xkbcommon.h>
 #include "../terminal.h"
 #include "../events.h"
 #include "data_copy.h"
 #include "mouse.h"
+#include "../input.h"
 
 Keyboard main_keyboard;
 
@@ -93,6 +96,13 @@ void handle_key_sym(xkb_keysym_t sym){
       printf("Copy to clipboard\n");
       return;
     }
+  }
+
+  char* esc_to_print = get_esc_from_special_keys(sym, 0);
+  if(esc_to_print){
+    uint32_t len = strlen(esc_to_print);
+    write_to_tty(esc_to_print, len, 0);
+    return;
   }
 
 

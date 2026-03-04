@@ -36,11 +36,6 @@ static Shortcut shortcuts[] = {
  */
 static uint ignoremod = Mod2Mask|XK_SWITCH_MOD;
 
-/*
- * If you want keys other than the X11 function keys (0xFD00 - 0xFFFF)
- * to be mapped below, add them to this array.
- */
-static KeySym mappedkeys[] = { -1 };
 
 /*
  * Special keys (change & recompile st.info accordingly)
@@ -67,7 +62,7 @@ static KeySym mappedkeys[] = { -1 };
  * This is the huge key array which defines all compatibility to the Linux
  * world. Please decide about changes wisely.
  */
-static Key key[] = {
+static Key special_keys[] = {
 	/* keysym           mask            string      appkey appcursor */
 	{ XK_KP_Home,       ShiftMask,      "\033[2J",       0,   -1},
 	{ XK_KP_Home,       ShiftMask,      "\033[1;2H",     0,   +1},
@@ -283,36 +278,32 @@ int match(uint mask, uint state) {
   return mask == XK_ANY_MOD || mask == (state & ~ignoremod);
 }
 
-char *kmap(KeySym k, uint state) {
-  Key *kp;
+
+char *get_esc_from_special_keys(KeySym key_sym, uint state) {
+  Key *current_key;
   int i;
 
-  /* Check for mapped keys out of X11 function keys. */
-  for (i = 0; i < LEN(mappedkeys); i++) {
-    if (mappedkeys[i] == k)
-      break;
-  }
-  if (i == LEN(mappedkeys)) {
-    if ((k & 0xFFFF) < 0xFD00)
-      return NULL;
-  }
+  state = XK_ANY_MOD;
 
-  for (kp = key; kp < key + LEN(key); kp++) {
-    if (kp->k != k)
+  for (current_key = special_keys; 
+      current_key < special_keys + LEN(special_keys); 
+      current_key++) {
+
+    if (current_key->key_sym != key_sym)
       continue;
 
-    if (!match(kp->mask, state))
+    if (!match(current_key->mask, state))
       continue;
 
-    if (IS_WINDOSET(MODE_APPKEYPAD) ? kp->appkey < 0 : kp->appkey > 0)
+    if (IS_WINDOSET(MODE_APPKEYPAD) ? current_key->appkey < 0 : current_key->appkey > 0)
       continue;
-    if (IS_WINDOSET(MODE_NUMLOCK) && kp->appkey == 2)
-      continue;
-
-    if (IS_WINDOSET(MODE_APPCURSOR) ? kp->appcursor < 0 : kp->appcursor > 0)
+    if (IS_WINDOSET(MODE_NUMLOCK) && current_key->appkey == 2)
       continue;
 
-    return kp->s;
+    if (IS_WINDOSET(MODE_APPCURSOR) ? current_key->appcursor < 0 : current_key->appcursor > 0)
+      continue;
+
+    return current_key->esc_to_print;
   }
 
   return NULL;

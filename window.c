@@ -25,11 +25,9 @@ void create_window(int cols, int rows){
   xloadcols();
 
   if(init_wayland() == false){
-
-  }else{
-    terminal_window.type = WAYLAND;
-    printf("Running Wayland window\n");
+    die("Can't create Wayland window");
   }
+
 
   terminal_window.is_ready = true;
   terminal_window.is_running = true;
