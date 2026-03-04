@@ -1,5 +1,6 @@
 #include "wayland.h"
 #include "keyboard.h"
+#include "primary_selection.h"
 #include "protocol.h"
 #include <complex.h>
 #include <stdbool.h>
@@ -11,6 +12,8 @@
 #include <pthread.h>
 #include "input.h"
 #include "data.h"
+
+#include "selection.h"
 
 #include "../pterminal.h"
 
@@ -117,6 +120,14 @@ void register_global(void *data, Registry *registry, uint32_t name_id,
           &wl_data_device_manager_interface,
           3
         );
+  } else if (strcmp(interface_name, "zwp_primary_selection_device_manager_v1") == 0) {
+
+    terminal->primary_selection_manager = 
+      wl_registry_bind(registry, name_id,
+          &zwp_primary_selection_device_manager_v1_interface, 1);
+
+    printf("Primary selection global detected\n");
+    configure_selection();
   }
 
 }

@@ -2,6 +2,7 @@
 #define COPY_PASTE_H
 
 
-void paste_from_clipboard();
+#include <stdbool.h>
+void paste_from_clipboard(bool is_primary);
 
 #endif

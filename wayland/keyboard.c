@@ -85,7 +85,7 @@ void handle_key_sym(xkb_keysym_t sym){
   if(ctrl_pressed && shift_pressed){
     if(sym == XK_V){
       printf("Paste from clipboard\n");
-      paste_from_clipboard();
+      paste_from_clipboard(false);
       return;
     }else if(sym == XK_C) {
       perform_copy(main_keyboard.last_input_serial);

@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <wayland-client-protocol.h>
+#include "primary_selection.h"
 
 typedef struct wl_buffer_listener BufferListener;
 typedef struct xdg_surface_listener SurfaceListener;
@@ -28,6 +29,7 @@ typedef struct WaylandTerminal{
     struct wl_data_device_manager *data_device_manager;
     struct wl_data_device *data_device;
     struct wl_data_offer *active_data_offer;
+    struct zwp_primary_selection_device_manager_v1 *primary_selection_manager;
 }WaylandTerminal;
 
 extern WaylandTerminal wayland_terminal;
