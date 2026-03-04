@@ -4,7 +4,7 @@
 #include "types.h"
 #include "draw.h"
 #include "wayland/wayland.h"
-#include "xorg.h"
+
 #include "egl.h"
 
 #include <stdbool.h>
@@ -39,8 +39,7 @@ void create_window(int cols, int rows){
   xloadcols();
 
   if(init_wayland() == false){
-    terminal_window.type = XORG;
-    create_x_window(); 
+
   }else{
     terminal_window.type = WAYLAND;
     printf("Running Wayland window\n");
