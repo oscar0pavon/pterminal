@@ -2,16 +2,11 @@
 #include "terminal.h"
 #include "window.h"
 #include "opengl.h"
-#include <X11/extensions/Xrender.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <time.h>
 #include "utf8.h"
 #include "selection.h"
 #include "egl.h"
-#include <pthread.h>
 
-pthread_mutex_t draw_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 DC drawing_context;
 
@@ -23,16 +18,6 @@ unsigned int cursorthickness = 2;
 bool can_update_size = false;
 
 
-// if we don't use EGL
-void create_xgl_context() {
-
-  xw.gl_context = glXCreateContext(xw.display, xw.visual_info, None, GL_TRUE);
-  if (!xw.gl_context) {
-    die("Can't create GLX context");
-  }
-
-  glXMakeCurrent(xw.display, xw.win, xw.gl_context);
-}
 
 void swap_draw_buffers(){
 

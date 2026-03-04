@@ -62,17 +62,13 @@ void handle_egl_error(EGLSurface surface) {
 
 void init_egl(){
 
-  if(terminal_window.type == XORG)
-    egl_display = eglGetDisplay((EGLNativeDisplayType)xw.display);
-  else{
 
-    //egl_display = eglGetDisplay((EGLNativeDisplayType)wayland_terminal.display);
-    if(wayland_terminal.display == NULL){
-      die("Wayland display NULL\n");
-    }
-    egl_display = eglGetPlatformDisplay(EGL_PLATFORM_WAYLAND_KHR,
-                                        (void *)wayland_terminal.display, NULL);
+  //egl_display = eglGetDisplay((EGLNativeDisplayType)wayland_terminal.display);
+  if(wayland_terminal.display == NULL){
+    die("Wayland display NULL\n");
   }
+  egl_display = eglGetPlatformDisplay(EGL_PLATFORM_WAYLAND_KHR,
+                                      (void *)wayland_terminal.display, NULL);
 
   if(egl_display == EGL_NO_DISPLAY){
     die("Can't create EGL display\n");
@@ -103,29 +99,22 @@ void init_egl(){
 
   egl_context = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, NULL);
 
-  if(terminal_window.type == XORG){
 
-    egl_surface = eglCreateWindowSurface(egl_display, egl_config,
-                                       (EGLNativeWindowType)xw.win, NULL);
+  egl_window =
+      wl_egl_window_create(wayland_terminal.wayland_surface,
+                           terminal_window.width, terminal_window.height);
 
-  } else { // WAYLAND
-
-    egl_window =
-        wl_egl_window_create(wayland_terminal.wayland_surface,
-                             terminal_window.width, terminal_window.height);
-
-    if (!egl_window) {
-      die("Can't create EGL Wayland\n");
-    }
-
-    egl_surface = eglCreateWindowSurface(egl_display, egl_config,
-                                         (EGLNativeWindowType)egl_window, NULL);
-    if(egl_surface == EGL_NO_SURFACE){
-      handle_egl_error(egl_surface);
-      die("Can't create EGL surface\n");
-    }
-    
+  if (!egl_window) {
+    die("Can't create EGL Wayland\n");
   }
+
+  egl_surface = eglCreateWindowSurface(egl_display, egl_config,
+                                       (EGLNativeWindowType)egl_window, NULL);
+  if(egl_surface == EGL_NO_SURFACE){
+    handle_egl_error(egl_surface);
+    die("Can't create EGL surface\n");
+  }
+    
   
   eglMakeCurrent(egl_display, egl_surface, egl_surface, egl_context);
 

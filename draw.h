@@ -1,7 +1,6 @@
 #ifndef DRAW_H
 #define DRAW_H
 
-#include <X11/Xlib.h>
 #include "color.h"
 #include <stdbool.h>
 
@@ -9,8 +8,6 @@
 typedef struct {
   Color *colors;
   size_t colors_count;
-  Font font, bfont, ifont, ibfont;
-  GC gc;
 } DC;
 
 extern DC drawing_context;
@@ -40,6 +37,5 @@ void update_size();
  */
 extern unsigned int cursorthickness;
 
-extern pthread_mutex_t draw_mutex;
 
 #endif

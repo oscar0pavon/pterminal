@@ -6,11 +6,6 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#include <X11/cursorfont.h>
-#include <X11/Xft//Xft.h>
-#include <GL/glx.h>
 #include <time.h>
 
 #include "types.h"
@@ -86,35 +81,12 @@ typedef struct {
 } TerminalWindow;
 
 typedef struct {
-  Atom xtarget;
-  char *primary, *clipboard;
   struct timespec tclick1;
   struct timespec tclick2;
 } XSelection;
 
-typedef XftDraw *Draw;
 
 
-typedef struct {
-  Display *display;
-  Colormap cmap;
-  Window win;
-  //OpenGL
-  GLXContext gl_context;
-  XVisualInfo* visual_info;
-
-  Atom wmdeletewin, netwmname, netwmiconname, netwmpid;
-
-  Draw draw;
-  Visual *vis;
-  XSetWindowAttributes attrs;
-  int screen;
-  int isfixed; /* is fixed geometry? */
-  int left_offset, top_offset;    /* left and top offset */
-  int gm;      /* geometry mask */
-} XWindow;
-
-extern XWindow xw;
 extern XSelection xsel;
 extern TerminalWindow terminal_window;
 

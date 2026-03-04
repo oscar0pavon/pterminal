@@ -1,5 +1,4 @@
 #include "window.h"
-#include "opengl.h"
 #include "terminal.h"
 #include "types.h"
 #include "draw.h"
@@ -10,8 +9,6 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-/* Globals */
-XWindow xw;
 XSelection xsel;
 TerminalWindow terminal_window;
 
