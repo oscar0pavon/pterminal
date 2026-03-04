@@ -3,7 +3,7 @@
 #include "types.h"
 #include "draw.h"
 #include "wayland/wayland.h"
-
+#include <stdio.h>
 #include "egl.h"
 
 #include <stdbool.h>

@@ -1,4 +1,3 @@
-#include <X11/extensions/Xrender.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include "color.h"
@@ -7,6 +6,7 @@
 #include "macros.h"
 #include "draw.h"
 #include "terminal.h"
+#include <string.h>
 
 /* Terminal colors (16 first used in escape sequence) */
 //in HTML notation #cc24cd
@@ -54,30 +54,30 @@ unsigned int defaultcs = 256;
 ushort sixd_to_16bit(int x) { return x == 0 ? 0 : 0x3737 + 0x2828 * x; }
 
 // Function to convert an 0xRRGGBB integer to an XftColor
-int hexToXftColor(unsigned int hexValue, XftColor *out_color) {
+int hexToXftColor(unsigned int hexValue, Color *out_color) {
 
     // Extract R, G, B components (8-bit values)
     unsigned int r8 = (hexValue >> 16) & 0xFF;
     unsigned int g8 = (hexValue >> 8) & 0xFF;
     unsigned int b8 = hexValue & 0xFF;
 
-    XftColor xft_color;
+    Color xft_color;
     // Convert to 16-bit values expected by XftColorAllocValue (0 to 65535)
-    XRenderColor new_color;
+    TRenderColor new_color;
     new_color.red = (unsigned short)(r8 * 257);   // or (r8 << 8) | r8
     new_color.green = (unsigned short)(g8 * 257); // 255 * 257 = 65535
     new_color.blue = (unsigned short)(b8 * 257);
     new_color.alpha = 0xFFFF; // Full opacity
     xft_color.color = new_color;
 
-    memcpy(out_color,&xft_color,sizeof(XftColor));
+    memcpy(out_color,&xft_color,sizeof(Color));
 
 
     return 1; // Success
 }
 
 int xloadcolor(int i, const char *name, Color *out_color) {
-  XRenderColor color = {.alpha = 0xffff};
+  TRenderColor color = {.alpha = 0xffff};
   Color new_color;
 
   if (!name) {
@@ -92,13 +92,13 @@ int xloadcolor(int i, const char *name, Color *out_color) {
       }
       new_color.color = color;
 
-      memcpy(out_color, &new_color, sizeof(XftColor));
+      memcpy(out_color, &new_color, sizeof(Color));
 
       return 1;
     } else {
 
       hexToXftColor(my_colors[i], &new_color);
-      memcpy(out_color, &new_color, sizeof(XftColor));
+      memcpy(out_color, &new_color, sizeof(Color));
     }
   }
 
@@ -156,7 +156,7 @@ int xsetcolorname(int x, const char *name) {
 void get_color_from_glyph(PGlyph* base, RenderColor* out){
 
   Color *fg, *bg, *temp;
-  XRenderColor colfg, colbg;
+  TRenderColor colfg, colbg;
 
 
   if (IS_TRUECOL(base->fg)) {
@@ -164,7 +164,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
     colfg.red = TRUERED(base->fg);
     colfg.green = TRUEGREEN(base->fg);
     colfg.blue = TRUEBLUE(base->fg);
-    memcpy(&out->truefg.color,&colfg,sizeof(XRenderColor));
+    memcpy(&out->truefg.color,&colfg,sizeof(TRenderColor));
     fg = &out->truefg;
   } else {
     fg = &drawing_context.colors[base->fg];
@@ -175,7 +175,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
     colbg.green = TRUEGREEN(base->bg);
     colbg.red = TRUERED(base->bg);
     colbg.blue = TRUEBLUE(base->bg);
-    memcpy(&out->truebg.color,&colbg,sizeof(XRenderColor));
+    memcpy(&out->truebg.color,&colbg,sizeof(TRenderColor));
     bg = &out->truebg;
   } else {
     bg = &drawing_context.colors[base->bg];
@@ -193,7 +193,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
       colfg.green = ~fg->color.green;
       colfg.blue = ~fg->color.blue;
       colfg.alpha = fg->color.alpha;
-      memcpy(&out->revfg.color,&colbg,sizeof(XRenderColor));
+      memcpy(&out->revfg.color,&colbg,sizeof(TRenderColor));
       fg = &out->revfg;
     }
 
@@ -204,7 +204,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
       colbg.green = ~bg->color.green;
       colbg.blue = ~bg->color.blue;
       colbg.alpha = bg->color.alpha;
-      memcpy(&out->revbg.color,&colbg,sizeof(XRenderColor));
+      memcpy(&out->revbg.color,&colbg,sizeof(TRenderColor));
       bg = &out->revbg;
     }
   }
@@ -214,7 +214,7 @@ void get_color_from_glyph(PGlyph* base, RenderColor* out){
     colfg.green = fg->color.green / 2;
     colfg.blue = fg->color.blue / 2;
     colfg.alpha = fg->color.alpha;
-    memcpy(&out->revfg.color,&colfg,sizeof(XRenderColor));
+    memcpy(&out->revfg.color,&colfg,sizeof(TRenderColor));
     fg = &out->revfg;
   }
 

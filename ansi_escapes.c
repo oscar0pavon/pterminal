@@ -5,6 +5,8 @@
 #include <ctype.h>
 #include "terminal.h"
 #include "window.h"
+#include <limits.h>
+#include <string.h>
 
 CSIEscape csiescseq;
 STREscape strescseq;

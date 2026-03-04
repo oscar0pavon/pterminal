@@ -11,7 +11,7 @@
 #include "input.h"
 #include "terminal.h"
 #include "selection.h"
-
+#include <string.h>
 #include "wayland/mouse.h"
 
 /*

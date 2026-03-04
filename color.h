@@ -2,7 +2,6 @@
 #define COLOR_H
 
 #include <GL/gl.h>
-#include <X11/Xft/Xft.h>
 #include "terminal.h"
 
 #define TRUERED(x) (((x) & 0xff0000) >> 8)
@@ -18,7 +17,18 @@ typedef struct PColor{
   GLfloat b;
 } PColor;
 
-typedef XftColor Color;
+typedef struct TRenderColor{
+    unsigned short red;
+    unsigned short green;
+    unsigned short blue;
+    unsigned short alpha;
+} TRenderColor;
+
+typedef struct Color {
+    unsigned long   pixel;
+    TRenderColor    color;
+} Color;
+
 typedef struct RenderColor{
   Color truefg, truebg;
   Color revfg, revbg;
@@ -26,6 +36,7 @@ typedef struct RenderColor{
   PColor gl_foreground_color;
 
 }RenderColor;
+
 
 void get_color_from_glyph(PGlyph* base, RenderColor* out);
 

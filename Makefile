@@ -5,16 +5,11 @@
 
 CC = cc
 
-X11INC = /usr/include
-X11LIB = /usr/lib
-
-INCS = -I$(X11INC) -I/usr/include/freetype2
-
 LIBS = -L/usr/lib -lm -lrt -lutil -lGL -llodepng
 LIBS += -lEGL -lwayland-client -lwayland-egl
 LIBS += -lxkbcommon -lpthread
 
-STCFLAGS = $(INCS) $(CFLAGS) -g
+STCFLAGS = $(CFLAGS) -g
 STLDFLAGS = $(LIBS) $(LDFLAGS)
 
 wayland_src := $(wildcard ./wayland/*.c)
