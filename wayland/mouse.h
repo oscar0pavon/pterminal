@@ -6,6 +6,12 @@
 
 #include "wayland.h"
 
+#define Button1			1
+#define Button2			2
+#define Button3			3
+#define Button4			4
+#define Button5			5
+
 typedef struct MouseButton{
   uint32_t id;
   bool pressed;

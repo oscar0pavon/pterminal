@@ -1,10 +1,7 @@
 #include "input.h"
-#include <X11/XKBlib.h>
 #include "macros.h"
 #include "window.h"
 #include "terminal.h"
-#include "mouse.h"
-#include "utf8.h"
 #include <xkbcommon/xkbcommon-keysyms.h>
 
 
@@ -14,20 +11,20 @@
 
 static Shortcut shortcuts[] = {
 	/* mask                 keysym          function        argument */
-	{ XK_ANY_MOD,           XK_Break,       sendbreak,      {.i =  0} },
-	{ ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
-	{ ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
-	{ XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
-	{ TERMMOD,              XK_K,						zoom,           {.f = +1} },
-	{ TERMMOD,              XK_J,						zoom,           {.f = -1} },
-	{ TERMMOD,              XK_I,						zoomreset,      {.f =  0} },
-	//{ TERMMOD,              XK_C,           clipcopy,       {.i =  0} },
-	//{ ControlMask | ShiftMask,              XK_V,           clippaste,      {.i =  0} },
-	//{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
-	//{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
-	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
-	{ ShiftMask,            XK_Page_Up,     kscrollup,      {.f = -0.1} },
-	{ ShiftMask,            XK_Page_Down,   kscrolldown,    {.f = -0.1} },
+	// { XK_ANY_MOD,           XK_Break,       sendbreak,      {.i =  0} },
+	// { ControlMask,          XK_Print,       toggleprinter,  {.i =  0} },
+	// { ShiftMask,            XK_Print,       printscreen,    {.i =  0} },
+	// { XK_ANY_MOD,           XK_Print,       printsel,       {.i =  0} },
+	// { TERMMOD,              XK_K,						zoom,           {.f = +1} },
+	// { TERMMOD,              XK_J,						zoom,           {.f = -1} },
+	// { TERMMOD,              XK_I,						zoomreset,      {.f =  0} },
+	// //{ TERMMOD,              XK_C,           clipcopy,       {.i =  0} },
+	// //{ ControlMask | ShiftMask,              XK_V,           clippaste,      {.i =  0} },
+	// //{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
+	// //{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
+	// { TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
+	// { ShiftMask,            XK_Page_Up,     kscrollup,      {.f = -0.1} },
+	// { ShiftMask,            XK_Page_Down,   kscrolldown,    {.f = -0.1} },
 };
 
 /*
@@ -279,7 +276,7 @@ int match(uint mask, uint state) {
 }
 
 
-char *get_esc_from_special_keys(KeySym key_sym, uint state) {
+char *get_esc_from_special_keys(xkb_keysym_t key_sym, uint state) {
   Key *current_key;
   int i;
 

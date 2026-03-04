@@ -2,14 +2,11 @@
 #ifndef XWINDOW_H
 #define XWINDOW_H
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
-#include <X11/XKBlib.h>
 #include <time.h>
 
 #include "types.h"
 #include <stdbool.h>
+#include <xkbcommon/xkbcommon.h>
 
 /* macros */
 #define IS_WINDOSET(flag) ((terminal_window.mode & (flag)) != 0)
@@ -40,7 +37,7 @@ enum win_mode {
 /* types used in config.h */
 typedef struct {
   uint mod;
-  KeySym keysym;
+  xkb_keysym_t keysym;
   void (*func)(const Arg *);
   const Arg arg;
 } Shortcut;
@@ -54,7 +51,7 @@ typedef struct {
 } MouseShortcut;
 
 typedef struct {
-  KeySym key_sym;
+  xkb_keysym_t key_sym;
   uint mask;
   char *esc_to_print;
   /* three-valued logic variables: 0 indifferent, 1 on, -1 off */

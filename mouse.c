@@ -54,10 +54,6 @@ static uint selmasks[] = {
 };
 
 
-static void selclear_(XEvent *);
-static void setsel(char *, Time);
-static void mousesel(XEvent *, int);
-static void mousereport(XEvent *);
 
 char *xstrdup(const char *s) {
   char *p;
