@@ -1,34 +1,23 @@
 /* See LICENSE for license details. */
-#include "wayland/wayland.h"
-#include <X11/X.h>
-#include <bits/pthreadtypes.h>
-#include <libgen.h>
+
 #include <limits.h>
 #include <locale.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <sys/select.h>
 #include <unistd.h>
-#include <pthread.h>
 
-#include <wayland-client-core.h>
-
-char *argv0;
+#include "wayland/wayland.h"
 
 #include "draw.h"
 #include "terminal.h"
 #include "window.h"
 
-// OpenGL
-#include "opengl.h"
-#include <GL/gl.h>
-#include <GL/glx.h>
-#include <stdbool.h>
 
 #include "selection.h"
-#include <pthread.h>
 
 #include "tty.h"
 
@@ -84,10 +73,7 @@ int main(int argc, char *argv[]) {
 
   signal(SIGINT, handle_interrupt);
 
-  is_opengl = true;
 
-  xw.left_offset = xw.top_offset = 0;
-  xw.isfixed = False;
   xsetcursor(cursorshape);
 
 

@@ -1,17 +1,13 @@
 #include "opengl.h"
+
 #include <GL/gl.h>
+#include <GL/glx.h>
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <lodepng.h>
 #include <math.h>
-#include "terminal.h"
-#include "types.h"
-#include "window.h"
-
-
-
-bool is_opengl = false;
 
 int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
