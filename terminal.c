@@ -764,22 +764,18 @@ void tsetmode(int priv, int set, const int *args, int narg) {
         xsetmode(!set, MODE_HIDE);
         break;
       case 9: /* X10 mouse compatibility mode */
-        xsetpointermotion(0);
         xsetmode(0, MODE_MOUSE);
         xsetmode(set, MODE_MOUSEX10);
         break;
       case 1000: /* 1000: report button press */
-        xsetpointermotion(0);
         xsetmode(0, MODE_MOUSE);
         xsetmode(set, MODE_MOUSEBTN);
         break;
       case 1002: /* 1002: report motion on button press */
-        xsetpointermotion(0);
         xsetmode(0, MODE_MOUSE);
         xsetmode(set, MODE_MOUSEMOTION);
         break;
       case 1003: /* 1003: enable all mouse motions */
-        xsetpointermotion(set);
         xsetmode(0, MODE_MOUSE);
         xsetmode(set, MODE_MOUSEMANY);
         break;

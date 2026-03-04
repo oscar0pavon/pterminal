@@ -45,11 +45,6 @@ void ttysend(const Arg *arg) {
 }
 
 
-void xsetpointermotion(int set) {
-  MODBIT(xw.attrs.event_mask, set, PointerMotionMask);
-  if(terminal_window.type == XORG)
-    XChangeWindowAttributes(xw.display, xw.win, CWEventMask, &xw.attrs);
-}
 
 void xsetmode(int set, unsigned int flags) {
   int mode = terminal_window.mode;

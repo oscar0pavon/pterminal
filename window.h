@@ -130,14 +130,12 @@ extern char *opt_line;
 extern char *opt_name;
 extern char *opt_title;
 
-void xclipcopy(void);
 void xfinishdraw(void);
 void xloadcols(void);
 int xsetcolorname(int, const char *);
 int xgetcolor(int, unsigned char *, unsigned char *, unsigned char *);
 int xsetcursor(int);
 void xsetmode(int, unsigned int);
-void xsetpointermotion(int);
 void xsetsel(char *);
 int xstartdraw(void);
 void xximspot(int, int);
