@@ -56,11 +56,9 @@ void configure_window(void* data, struct xdg_toplevel* window, int width,
 
   WaylandTerminal* terminal = data;
 
-  printf("Compositor suggested size %i %i\n",width, height); 
+  //printf("Compositor suggested size %i %i\n",width, height); 
 
-  is_window_configured = true;
   if(width == 0 && height == 0){
-    can_draw = true;
     return;
   }
 

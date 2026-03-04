@@ -90,17 +90,7 @@ typedef struct {
 extern XSelection xsel;
 extern TerminalWindow terminal_window;
 
-extern bool is_window_configured;
-extern bool can_draw;
 
-extern char *opt_class;
-extern char **opt_cmd;
-extern char *opt_embed;
-extern char *opt_font;
-extern char *opt_io;
-extern char *opt_line;
-extern char *opt_name;
-extern char *opt_title;
 
 void xfinishdraw(void);
 void xloadcols(void);
@@ -110,13 +100,9 @@ int xsetcursor(int);
 void xsetmode(int, unsigned int);
 void xsetsel(char *);
 int xstartdraw(void);
-void xximspot(int, int);
 
 void resize_pterminal(int width, int height);
 
-void xhints(void);
-void resize(XEvent *e);
-void expose(XEvent *ev);
 
 /* function definitions used in config.h */
 void zoom(const Arg *);

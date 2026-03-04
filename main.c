@@ -94,7 +94,6 @@ int main(int argc, char *argv[]) {
   selinit();
 
 
-  //while(!is_window_configured){}
   MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
 
 

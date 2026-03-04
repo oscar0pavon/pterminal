@@ -12,17 +12,6 @@
 XSelection xsel;
 TerminalWindow terminal_window;
 
-bool is_window_configured = false;
-bool can_draw = false;
-
-char *opt_class = NULL;
-char **opt_cmd = NULL;
-char *opt_embed = NULL;
-char *opt_font = NULL;
-char *opt_io = NULL;
-char *opt_line = NULL;
-char *opt_name = NULL;
-char *opt_title = NULL;
 
 void create_window(int cols, int rows){
   terminal_window.character_height = 24;
@@ -46,8 +35,6 @@ void create_window(int cols, int rows){
   terminal_window.is_running = true;
 
 }
-
-void expose(XEvent *ev) { redraw(); }
 
 
 void clear_window() {
@@ -94,14 +81,6 @@ void resize_pterminal(int width, int height) {
   printf("resized\n");
 }
 
-void resize(XEvent *e) {
-  if (e->xconfigure.width == terminal_window.width &&
-      e->xconfigure.height == terminal_window.height)
-    return;
-
-  resize_pterminal(e->xconfigure.width, e->xconfigure.height);
-
-}
 
 void redraw(void) {
   tfulldirt();

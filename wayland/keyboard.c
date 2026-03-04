@@ -84,11 +84,11 @@ void handle_key_sym(xkb_keysym_t sym){
         XKB_MOD_NAME_SHIFT, XKB_STATE_MODS_EFFECTIVE);
 
   if(ctrl_pressed && shift_pressed){
-    if(sym == XK_V){
+    if(sym == XKB_KEY_V){
       printf("Paste from clipboard\n");
       paste_from_clipboard(false);
       return;
-    }else if(sym == XK_C) {
+    }else if(sym == XKB_KEY_C) {
       perform_copy(main_keyboard.last_input_serial);
       printf("Copy to clipboard\n");
       return;
