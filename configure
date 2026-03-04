@@ -15,5 +15,5 @@ if [ -f lodepng.cpp ]; then
   mv lodepng.cpp lodepng.c
 fi
 cc -c lodepng.c
-ar rcs lodepng.a lodepng.o 
+ar rcs liblodepng.a lodepng.o 
 

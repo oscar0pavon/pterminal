@@ -9,7 +9,7 @@ LIBS = -lm -lGL -llodepng
 LIBS += -lEGL -lwayland-client -lwayland-egl
 LIBS += -lxkbcommon
 
-FLAGS = -I lib/ -g
+FLAGS = -g
 LDFLAGS = -L lib/ $(LIBS)
 
 wayland_src := $(wildcard ./wayland/*.c)

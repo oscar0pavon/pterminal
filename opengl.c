@@ -1,15 +1,17 @@
 #include "opengl.h"
 
 #include <GL/gl.h>
-#include <GL/glx.h>
 
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <lodepng.h>
+#if __has_include("./lib/lodepng.h")
+#include "./lib/lodepng.h"
+#else
+#error "lodepng.h missing run: ./configure"
+#endif
 #include <math.h>
 
-int gl_attributes[4] = {GLX_DEPTH_SIZE, 16, GLX_DOUBLEBUFFER, None};
 
 typedef struct UV{
     float x;
