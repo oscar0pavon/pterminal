@@ -17,6 +17,7 @@
 #include "../terminal.h"
 #include "../events.h"
 #include "data_copy.h"
+#include "mouse.h"
 
 Keyboard main_keyboard;
 
@@ -93,6 +94,7 @@ void handle_key_sym(xkb_keysym_t sym){
       return;
     }
   }
+
 
   if(ctrl_pressed){
       // Handle Ctrl

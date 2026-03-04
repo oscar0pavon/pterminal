@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "../mouse.h"
 #include "copy_paste.h"
+#include "../terminal.h"
 
 Mouse main_mouse = {0};
 
@@ -118,12 +119,28 @@ static void pointer_handle_axis(void *data, struct wl_pointer *pointer,
   if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
 
     if(value < 0){
-      main_mouse.current_button = &main_mouse.wheel_down;
-      press_button();
+      
+      if(is_on_mouse_mode()){
+        main_mouse.current_button = &main_mouse.wheel_down;
+        press_button();
+      }
+
+      if(!is_on_mouse_mode()){
+       Arg new_arg;
+       new_arg.f = -0.1f;
+       kscrollup(&new_arg);
+      }
     }else if(value > 0){
 
-      main_mouse.current_button = &main_mouse.wheel_up;
-      press_button();
+      if(!is_on_mouse_mode()){
+        Arg new_arg;
+        new_arg.f = -0.1f;
+        kscrolldown(&new_arg);
+      }else{
+        main_mouse.current_button = &main_mouse.wheel_up;
+        press_button();
+
+      }
     }
 
   }
