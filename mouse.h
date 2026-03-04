@@ -34,6 +34,8 @@ void update_mouse_terminal_position();
 uint buttonmask(uint);
 int mouseaction(XEvent *, uint);
 
+bool is_on_mouse_mode();
+
 extern uint buttons; /* bit field of pressed buttons */
 extern uint current_button_number;
 

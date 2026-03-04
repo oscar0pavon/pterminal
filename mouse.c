@@ -264,6 +264,10 @@ void release_button(){
 
 }
 
+bool is_on_mouse_mode(){
+  return IS_WINDOSET(MODE_MOUSE);
+}
+
 void mouse_click(){
 
   struct timespec now;

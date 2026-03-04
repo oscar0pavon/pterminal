@@ -91,9 +91,11 @@ static void pointer_handle_button(void *data, struct wl_pointer *pointer,
 
     main_mouse.last_input_serial = serial;
 
-    if(button == BTN_MIDDLE){
-      printf("Middle button pressed\n");
-      paste_from_clipboard(true);
+    if(!is_on_mouse_mode()){
+      if(button == BTN_MIDDLE){
+        printf("Middle button pressed\n");
+        paste_from_clipboard(true);
+      }
     }
     press_button();
 
