@@ -96,7 +96,7 @@ void handle_key_sym(xkb_keysym_t sym){
     }
   }
 
-  //if(print_special_key(sym)) return;
+  if(print_special_key(sym)) return;
 
   if(ctrl_pressed){
       // Handle Ctrl

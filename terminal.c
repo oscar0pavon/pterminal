@@ -739,6 +739,7 @@ void tsetmode(int priv, int set, const int *args, int narg) {
       switch (*args) {
       case 1: /* DECCKM -- Cursor key */
         xsetmode(set, MODE_APPCURSOR);
+        printf("MODE APPCURSOR\n");
         break;
       case 5: /* DECSCNM -- Reverse video */
         xsetmode(set, MODE_REVERSE);
@@ -770,14 +771,18 @@ void tsetmode(int priv, int set, const int *args, int narg) {
       case 1000: /* 1000: report button press */
         xsetmode(0, MODE_MOUSE);
         xsetmode(set, MODE_MOUSEBTN);
+        printf("MODE MOUSE BTN\n");
+
         break;
       case 1002: /* 1002: report motion on button press */
         xsetmode(0, MODE_MOUSE);
         xsetmode(set, MODE_MOUSEMOTION);
+        printf("MODE MOUSE MOTION\n");
         break;
       case 1003: /* 1003: enable all mouse motions */
         xsetmode(0, MODE_MOUSE);
         xsetmode(set, MODE_MOUSEMANY);
+        printf("MODE MOUSE MANY\n");
         break;
       case 1004: /* 1004: send focus events to tty */
         xsetmode(set, MODE_FOCUS);
@@ -1123,9 +1128,11 @@ int eschandle(uchar ascii) {
     break;
   case '=': /* DECPAM -- Application keypad */
     xsetmode(1, MODE_APPKEYPAD);
+    printf("APP KEY PAD mode\n");
     break;
   case '>': /* DECPNM -- Normal keypad */
     xsetmode(0, MODE_APPKEYPAD);
+    printf("NO APP KEY PAD mode\n");
     break;
   case '7': /* DECSC -- Save Cursor */
     tcursor(CURSOR_SAVE);

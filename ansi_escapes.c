@@ -410,6 +410,28 @@ void csiparse(void) {
   csiescseq.mode[1] = (p < csiescseq.buf + csiescseq.len) ? *p : '\0';
 }
 
+void print_csi(const char* csi) {
+  size_t i;
+  uint c;
+
+  fprintf(stderr, "ESC[");
+  for (i = 0; i < strlen(csi); i++) {
+    c = csi[i] & 0xff;
+    if (isprint(c)) {
+      putc(c, stderr);
+    } else if (c == '\n') {
+      fprintf(stderr, "(\\n)");
+    } else if (c == '\r') {
+      fprintf(stderr, "(\\r)");
+    } else if (c == 0x1b) {
+      fprintf(stderr, "(\\e)");
+    } else {
+      fprintf(stderr, "(%02x)", c);
+    }
+  }
+  putc('\n', stderr);
+}
+
 void csidump(void) {
   size_t i;
   uint c;

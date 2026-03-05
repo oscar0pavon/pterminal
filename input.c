@@ -5,6 +5,7 @@
 #include <xkbcommon/xkbcommon-keysyms.h>
 #include <xkbcommon/xkbcommon.h>
 #include <string.h>
+#include "ansi_escapes.h"
 
 /* Internal keyboard shortcuts. */
 #define MODKEY Mod1Mask
@@ -60,6 +61,13 @@ static uint ignoremod = Mod2Mask|XK_SWITCH_MOD;
  * This is the huge key array which defines all compatibility to the Linux
  * world. Please decide about changes wisely.
  */
+#define APP_CURSOR +1
+#define NO_APP_CURSOR -1
+#define NO_MATTER_MODE 0
+#define APP_KEY +1
+#define NO_APP_KEY -1
+#define NUM_LOCK +2
+
 static Key special_keys[] = {
 	/* keysym           mask            string      appkey appcursor */
 	{ XKB_KEY_Home,       ShiftMask,      "\033[2J",       0,   -1},
@@ -108,7 +116,7 @@ static Key special_keys[] = {
 	// { XKB_KEY_decimal,    XK_ANY_MOD,     "\033On",       +2,    0},
 	// { XKB_KEY_divide,     XK_ANY_MOD,     "\033Oo",       +2,    0},
 	{ XKB_KEY_0,          XK_ANY_MOD,     "\033Op",       +2,    0},
-	{ XKB_KEY_1,          XK_ANY_MOD,     "\033Oq",       +2,    0},
+	{ XKB_KEY_1,          XK_ANY_MOD,     "\033Oq",       NUM_LOCK,    NO_MATTER_MODE},
 	{ XKB_KEY_2,          XK_ANY_MOD,     "\033Or",       +2,    0},
 	{ XKB_KEY_3,          XK_ANY_MOD,     "\033Os",       +2,    0},
 	{ XKB_KEY_4,          XK_ANY_MOD,     "\033Ot",       +2,    0},
@@ -282,6 +290,8 @@ bool print_special_key(xkb_keysym_t sym){
   if(esc_to_print){
     uint32_t len = strlen(esc_to_print);
     write_to_tty(esc_to_print, len, 0);
+    print_csi(esc_to_print);
+    printf("printed special key\n");
     return true;
   }
 

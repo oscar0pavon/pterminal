@@ -55,6 +55,8 @@ void strhandle(void);
 void strparse(void);
 void strreset(void);
 
+void print_csi(const char* csi);
+
 extern CSIEscape csiescseq;
 extern STREscape strescseq;
 
