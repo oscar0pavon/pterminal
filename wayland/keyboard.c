@@ -96,13 +96,7 @@ void handle_key_sym(xkb_keysym_t sym){
     }
   }
 
-  char* esc_to_print = get_esc_from_special_keys(sym, 0);
-  if(esc_to_print){
-    uint32_t len = strlen(esc_to_print);
-    write_to_tty(esc_to_print, len, 0);
-    return;
-  }
-
+  //if(print_special_key(sym)) return;
 
   if(ctrl_pressed){
       // Handle Ctrl

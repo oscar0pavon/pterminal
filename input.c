@@ -3,7 +3,8 @@
 #include "window.h"
 #include "terminal.h"
 #include <xkbcommon/xkbcommon-keysyms.h>
-
+#include <xkbcommon/xkbcommon.h>
+#include <string.h>
 
 /* Internal keyboard shortcuts. */
 #define MODKEY Mod1Mask
@@ -275,12 +276,21 @@ int match(uint mask, uint state) {
   return mask == XK_ANY_MOD || mask == (state & ~ignoremod);
 }
 
+bool print_special_key(xkb_keysym_t sym){
+
+  char* esc_to_print = get_esc_from_special_keys(sym, 0);
+  if(esc_to_print){
+    uint32_t len = strlen(esc_to_print);
+    write_to_tty(esc_to_print, len, 0);
+    return true;
+  }
+
+  return false;
+}
 
 char *get_esc_from_special_keys(xkb_keysym_t key_sym, uint state) {
   Key *current_key;
   int i;
-
-  state = XK_ANY_MOD;
 
   for (current_key = special_keys; 
       current_key < special_keys + LEN(special_keys); 
