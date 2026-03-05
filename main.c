@@ -10,6 +10,7 @@
 #include <sys/select.h>
 #include <unistd.h>
 
+#include "mouse.h"
 #include "wayland/wayland.h"
 
 #include "draw.h"
@@ -93,6 +94,8 @@ int main(int argc, char *argv[]) {
 
   selinit();
 
+
+  init_mouse();
 
   MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
 

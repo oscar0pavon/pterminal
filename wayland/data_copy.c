@@ -9,7 +9,7 @@
 #include "../selection.h"
 #include "primary_selection.h"
 #include "selection.h"
-#include "mouse.h"
+#include "../mouse.h"
 
 void copy_data_to_fd(const char* mime_type, int32_t fd){
 

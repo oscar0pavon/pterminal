@@ -7,6 +7,7 @@
 #include "../mouse.h"
 #include "copy_paste.h"
 #include "../terminal.h"
+#include "wayland.h"
 
 Mouse main_mouse = {0};
 

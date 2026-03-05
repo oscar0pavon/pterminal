@@ -148,7 +148,7 @@ void report_mouse(bool has_motion) {
     }
 
   }else {
-    button = 0;
+    button = 35;
   }
   
 
@@ -241,7 +241,9 @@ void selclear(void) {
 }
 
 
-
+void init_mouse(){
+  memset(&main_mouse,0,sizeof(main_mouse));
+}
 
 void handle_mouse_motion(bool has_motion){
 
