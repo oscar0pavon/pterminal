@@ -45,7 +45,7 @@ void init_draw_method(){
 
   set_ortho_projection(terminal_window.width, terminal_window.height);
   glViewport(0, 0, terminal_window.width, terminal_window.height);
-  load_texture(&font_texture_id, "/root/pterminal/font1.png");
+  load_texture(&font_texture_id, "/home/pavon/pterminal/font1.png");
 
 }
 

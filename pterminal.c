@@ -5,14 +5,10 @@
 #include <sys/poll.h>
 #include <unistd.h>
 #include "window.h"
-#include "wayland/keyboard.h"
-#include "wayland/wayland.h"
 
 #include "tty.h"
 
 #include "draw.h"
-
-#include "wayland/mouse.h"
 
 
 static char *shell = "/bin/sh";

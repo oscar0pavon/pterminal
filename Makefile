@@ -12,12 +12,9 @@ LIBS += -lxkbcommon
 FLAGS = -g
 LDFLAGS = -L lib/ $(LIBS)
 
-wayland_src := $(wildcard ./wayland/*.c)
-wayland_objs := $(wayland_src:%.c=%.o)
 
 SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
-OBJ += $(wayland_objs)
 
 all: pterminal
 

@@ -5,9 +5,9 @@
 #include <stdio.h>
 #include <wayland-egl-core.h>
 #include <EGL/egl.h>
-#include "wayland/wayland.h"
 #include <EGL/eglext.h>
 #include <unistd.h>
+#include <pway.h>
 
 EGLDisplay egl_config;
 EGLContext egl_context;
@@ -63,12 +63,8 @@ void handle_egl_error(EGLSurface surface) {
 void init_egl(){
 
 
-  //egl_display = eglGetDisplay((EGLNativeDisplayType)wayland_terminal.display);
-  if(wayland_terminal.display == NULL){
-    die("Wayland display NULL\n");
-  }
   egl_display = eglGetPlatformDisplay(EGL_PLATFORM_WAYLAND_KHR,
-                                      (void *)wayland_terminal.display, NULL);
+                                      (void *)pway_display, NULL);
 
   if(egl_display == EGL_NO_DISPLAY){
     die("Can't create EGL display\n");
@@ -100,9 +96,9 @@ void init_egl(){
   egl_context = eglCreateContext(egl_display, egl_config, EGL_NO_CONTEXT, NULL);
 
 
-  egl_window =
-      wl_egl_window_create(wayland_terminal.wayland_surface,
-                           terminal_window.width, terminal_window.height);
+  egl_window = wl_egl_window_create(pway_surface,
+                           terminal_window.width, 
+                           terminal_window.height);
 
   if (!egl_window) {
     die("Can't create EGL Wayland\n");

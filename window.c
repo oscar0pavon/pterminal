@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+#include <pway.h>
+
 XSelection xsel;
 TerminalWindow terminal_window;
 
@@ -24,7 +26,7 @@ void create_window(int cols, int rows){
 
   xloadcols();
 
-  if(init_wayland() == false){
+  if(pway_create_window("pterminal0.2") == false){
     die("Can't create Wayland window");
   }
 

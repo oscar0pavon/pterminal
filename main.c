@@ -11,7 +11,6 @@
 #include <unistd.h>
 
 #include "mouse.h"
-#include "wayland/wayland.h"
 
 #include "draw.h"
 #include "terminal.h"
@@ -26,6 +25,8 @@
 #include "pterminal.h"
 
 #include "config.h"
+
+#include <pway.h>
 
 static inline ushort sixd_to_16bit(int);
 
@@ -60,7 +61,7 @@ void handle_interrupt(int signal_number){
 void exit_pterminal(){
   ttyhangup();
 
-  wl_display_disconnect(wayland_terminal.display);
+  pway_finish();
 
   printf("Exit pterminal\n");
 
