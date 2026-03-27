@@ -27,8 +27,8 @@ void *run_pterminal(void *none) {
   tty_fd = ttynew(NULL, shell, NULL, NULL);
 
   struct pollfd tty_poll = {tty_fd, POLLIN, 0};
-  struct pollfd wayland_poll = {wayland_fd, POLLIN, 0};
-  struct pollfd keyboard_timer_poll= {main_keyboard.timer_fd, POLLIN, 0};
+  struct pollfd wayland_poll = {pway->fd, POLLIN, 0};
+  struct pollfd keyboard_timer_poll= {pway->keys_timer_fd, POLLIN, 0};
 
   pterminal_fds[0] = tty_poll;
   pterminal_fds[1] = wayland_poll;

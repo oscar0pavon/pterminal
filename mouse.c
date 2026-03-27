@@ -87,7 +87,7 @@ void select_with_mouse(bool done) {
   selextend(mouse_to_col(), mouse_to_row(), seltype, done);
 
   if (done)
-    perform_copy_primary();
+    pway_primary_copy();
 
 }
 
