@@ -14,6 +14,29 @@
 XSelection xsel;
 TerminalWindow terminal_window;
 
+void focus_window(bool is_focuses){
+  if(!terminal_window.is_ready)
+    return;
+  
+  if(is_focuses){
+
+    terminal_window.mode |= MODE_FOCUSED;
+
+    if (IS_WINDOSET(MODE_FOCUS))
+      write_to_tty("\033[I", 3, 0);
+
+  }else{
+
+    terminal_window.mode &= ~MODE_FOCUSED;
+
+    if (IS_WINDOSET(MODE_FOCUS))
+      write_to_tty("\033[O", 3, 0);
+  }
+}
+
+void end_window(){
+  terminal_window.is_running = false;  
+}
 
 void create_window(int cols, int rows){
   terminal_window.character_height = 24;
@@ -27,6 +50,9 @@ void create_window(int cols, int rows){
   xloadcols();
 
   pway = pway_init();
+  pway->resize = resize_pterminal;
+  pway->exit = end_window;
+  pway->focus = focus_window;
 
   if(pway_create_window("pterminal0.2") == false){
     die("Can't create Wayland window");

@@ -16,6 +16,7 @@ static char *shell = "/bin/sh";
 
 struct pollfd pterminal_fds[3];
 
+
 void *run_pterminal(void *none) {
 
   fd_set read_file_descriptor;
@@ -54,6 +55,7 @@ void *run_pterminal(void *none) {
 
   
     draw();
+    printf("draw\n");
 
     clean_mouse_buttons();
   }
