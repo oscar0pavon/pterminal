@@ -33,6 +33,8 @@ void *run_pterminal(void *none) {
   pterminal_fds[1] = wayland_poll;
   pterminal_fds[2] = keyboard_timer_poll;
 
+  pway->events_fds = &pterminal_fds[0];
+
   printf("running pterminal\n");
 
   while (terminal_window.is_running) {

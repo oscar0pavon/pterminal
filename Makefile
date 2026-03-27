@@ -19,7 +19,7 @@ OBJ = $(SRC:.c=.o)
 all: pterminal
 
 .c.o:
-	$(CC) $(STCFLAGS) -c $<
+	$(CC) $(FLAGS) -c $<
 
 
 $(OBJ): config.h
