@@ -96,9 +96,6 @@ int main(int argc, char *argv[]) {
 
   selinit();
 
-
-  init_mouse();
-
   terminal_window.mode = MODE_NUMLOCK;
 
   MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);

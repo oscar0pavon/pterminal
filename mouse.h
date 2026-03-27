@@ -20,7 +20,6 @@ void select_with_mouse(bool done);
 void handle_mouse_motion(bool has_motion);
 void update_mouse_terminal_position();
 
-void init_mouse();
 
 bool is_on_mouse_mode();
 

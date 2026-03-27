@@ -14,6 +14,8 @@
 #include "terminal.h"
 #include "selection.h"
 
+Mouse main_mouse;
+
 /*
  * Internal mouse shortcuts.
  * Beware that overloading Button1 will disable the selection.
@@ -238,11 +240,6 @@ void selclear(void) {
   selection.mode = SEL_IDLE;
   selection.original_beginning.x = -1;
   tsetdirt(selection.beginning_normalized.y, selection.end_normalized.y);
-}
-
-
-void init_mouse(){
-  memset(&main_mouse,0,sizeof(main_mouse));
 }
 
 void handle_mouse_motion(bool has_motion){

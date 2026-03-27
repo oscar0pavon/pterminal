@@ -5,7 +5,7 @@
 
 CC = cc
 
-LIBS = -lm -lGL -llodepng
+LIBS = -lm -lGL -llodepng -lpway
 LIBS += -lEGL -lwayland-client -lwayland-egl
 LIBS += -lxkbcommon
 

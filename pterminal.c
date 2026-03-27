@@ -11,7 +11,6 @@
 
 #include "draw.h"
 
-PWay* pway;
 
 static char *shell = "/bin/sh";
 
