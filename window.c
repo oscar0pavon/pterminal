@@ -14,6 +14,11 @@
 XSelection xsel;
 TerminalWindow terminal_window;
 
+void input_keys(const char* text, int len){
+  write_to_tty(text, len, 1);
+}
+
+
 void focus_window(bool is_focuses){
   if(!terminal_window.is_ready)
     return;
@@ -53,6 +58,7 @@ void create_window(int cols, int rows){
   pway->resize = resize_pterminal;
   pway->exit = end_window;
   pway->focus = focus_window;
+  pway->input = input_keys;
 
   if(pway_create_window("pterminal0.2") == false){
     die("Can't create Wayland window");
