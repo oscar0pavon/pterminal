@@ -1,5 +1,6 @@
 #include "pterminal.h"
 
+#include <pway/pway.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/poll.h>
@@ -37,7 +38,7 @@ void *run_pterminal(void *none) {
 
   while (terminal_window.is_running) {
 
-    prepate_to_read_events();
+    pway_prepare_to_read_events();
 
     if (poll(pterminal_fds, 3, -1) == -1) {
       perror("Poll in fds, TTY or Wayland, Keyboard timer");
@@ -48,7 +49,7 @@ void *run_pterminal(void *none) {
     }
 
 
-    handle_events();
+    pway_handle_events();
 
   
     draw();
