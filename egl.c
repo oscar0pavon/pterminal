@@ -7,7 +7,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <unistd.h>
-#include <pway.h>
+#include <pway/pway.h>
 
 EGLDisplay egl_config;
 EGLContext egl_context;

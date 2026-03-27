@@ -1,10 +1,12 @@
 #include "mouse.h"
 
 #include <errno.h>
+#include <pway/pway.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "pterminal.h"
 #include "window.h"
 #include "macros.h"
 #include "types.h"
@@ -65,14 +67,14 @@ char *xstrdup(const char *s) {
 
 
 int mouse_to_col() {
-  int x = main_mouse.x;
+  int x = pway->mouse.x;
   LIMIT(x, 0, terminal_window.tty_width - 1);
   return x / terminal_window.character_width;
 }
 
 
 int mouse_to_row() {
-  int y = main_mouse.y;
+  int y = pway->mouse.y;
   LIMIT(y, 0, terminal_window.tty_height - 1);
   return y / terminal_window.character_height;
 }
@@ -101,8 +103,8 @@ uint32_t report_mouse_movement(void){
   uint32_t movement_code = 35;
 
   if (IS_WINDOSET(MODE_MOUSEMOTION)){
-    if(main_mouse.current_button){
-      if (main_mouse.current_button->pressed) {
+    if(pway->mouse.current_button){
+      if (pway->mouse.current_button->pressed) {
         return 32;
       
       }else {
@@ -125,7 +127,7 @@ void report_mouse(bool has_motion) {
   if (!IS_WINDOSET(MODE_MOUSESGR))
     return;
 
-  if(!has_motion && !main_mouse.current_button)
+  if(!has_motion && !pway->mouse.current_button)
     return;
 
   int len, button;
@@ -135,11 +137,11 @@ void report_mouse(bool has_motion) {
   if(has_motion)
     is_released = 'M';
 
-  if(main_mouse.current_button){
+  if(pway->mouse.current_button){
 
-    button = main_mouse.current_button->id;
+    button = pway->mouse.current_button->id;
 
-    if(main_mouse.current_button->released){
+    if(pway->mouse.current_button->released){
       is_released = 'm';
     }else{
       is_released = 'M';
@@ -186,7 +188,7 @@ void release_button(){
 
   printf("release button\n");
 
-  if(main_mouse.left_button.released){
+  if(pway->mouse.left_button.released){
       printf("released left click\n");
     select_with_mouse(true);
   }
@@ -204,8 +206,8 @@ void mouse_click(){
 
   int btn;
 
-  if(main_mouse.current_button)
-    btn = main_mouse.current_button->id;
+  if(pway->mouse.current_button)
+    btn = pway->mouse.current_button->id;
 
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {
@@ -250,7 +252,7 @@ void handle_mouse_motion(bool has_motion){
     return;
   }
  
-  if(main_mouse.left_button.pressed)
+  if(pway->mouse.left_button.pressed)
     select_with_mouse(false);
 }
 

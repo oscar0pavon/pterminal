@@ -26,7 +26,8 @@
 
 #include "config.h"
 
-#include <pway.h>
+#include <pway/pway.h>
+
 
 static inline ushort sixd_to_16bit(int);
 

@@ -1,4 +1,5 @@
 #include "window.h"
+#include "pterminal.h"
 #include "terminal.h"
 #include "types.h"
 #include "draw.h"
@@ -9,7 +10,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 
-#include <pway.h>
+#include <pway/pway.h>
 
 XSelection xsel;
 TerminalWindow terminal_window;
@@ -25,6 +26,8 @@ void create_window(int cols, int rows){
   terminal_window.height = rows * terminal_window.character_height;
 
   xloadcols();
+
+  pway = pway_init();
 
   if(pway_create_window("pterminal0.2") == false){
     die("Can't create Wayland window");
