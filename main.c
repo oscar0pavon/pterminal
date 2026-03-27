@@ -45,12 +45,6 @@ void xsetmode(int set, unsigned int flags) {
     redraw();
 }
 
-int xsetcursor(int cursor) {
-  if (!BETWEEN(cursor, 0, 7)) /* 7: st extension */
-    return 1;
-  terminal_window.cursor = cursor;
-  return 0;
-}
 
 
 void handle_interrupt(int signal_number){
@@ -77,7 +71,7 @@ int main(int argc, char *argv[]) {
   signal(SIGINT, handle_interrupt);
 
 
-  xsetcursor(cursorshape);
+  set_terminal_cursor(cursorshape);
 
 
   setlocale(LC_CTYPE, "");

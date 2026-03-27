@@ -8,6 +8,8 @@
 #include <limits.h>
 #include <string.h>
 
+#include "pterminal.h"
+
 CSIEscape csiescseq;
 STREscape strescseq;
 
@@ -218,7 +220,7 @@ void csihandle(void) {
   case ' ':
     switch (csiescseq.mode[1]) {
     case 'q': /* DECSCUSR -- Set Cursor Style */
-      if (xsetcursor(csiescseq.arg[0]))
+      if (set_terminal_cursor(csiescseq.arg[0]))
         goto unknown;
       break;
     default:

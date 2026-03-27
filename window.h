@@ -89,14 +89,7 @@ extern TerminalWindow terminal_window;
 
 
 
-void xfinishdraw(void);
-void xloadcols(void);
-int xsetcolorname(int, const char *);
-int xgetcolor(int, unsigned char *, unsigned char *, unsigned char *);
-int xsetcursor(int);
 void xsetmode(int, unsigned int);
-void xsetsel(char *);
-int xstartdraw(void);
 
 void resize_pterminal(int width, int height);
 

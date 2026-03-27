@@ -16,6 +16,12 @@ static char *shell = "/bin/sh";
 
 struct pollfd pterminal_fds[3];
 
+int set_terminal_cursor(int cursor) {
+  if (!BETWEEN(cursor, 0, 7)) /* 7: st extension */
+    return 1;
+  terminal_window.cursor = cursor;
+  return 0;
+}
 
 void *run_pterminal(void *none) {
 
