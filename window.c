@@ -38,6 +38,7 @@ void focus_window(bool is_focuses){
     if (IS_WINDOSET(MODE_FOCUS))
       write_to_tty("\033[O", 3, 0);
   }
+  can_draw = true;
 }
 
 void end_window(){
@@ -116,6 +117,7 @@ void resize_pterminal(int width, int height) {
 
 
   can_update_size = true;
+  can_draw = true;
 
   printf("resized\n");
 }
