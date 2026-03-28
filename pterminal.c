@@ -11,6 +11,7 @@
 
 #include "draw.h"
 
+bool can_draw;
 
 static char *shell = "/bin/sh";
 
@@ -40,8 +41,12 @@ void *run_pterminal(void *none) {
 
     if( pway_app_has_event() ){
       read_tty();
+      can_draw = true;
+    }
+
+    if(can_draw){
       draw();
-      printf("draw\n");
+      can_draw = false;
     }
 
     clean_mouse_buttons();

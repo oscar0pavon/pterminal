@@ -1,4 +1,5 @@
 #include "window.h"
+#include "mouse.h"
 #include "pterminal.h"
 #include "terminal.h"
 #include "types.h"
@@ -59,6 +60,10 @@ void create_window(int cols, int rows){
   pway->exit = end_window;
   pway->focus = focus_window;
   pway->input = input_keys;
+  pway->click = mouse_click;
+  pway->click_release = release_button;
+  pway->update_mouse = update_mouse;
+
 
   if(pway_create_window("pterminal0.2") == false){
     die("Can't create Wayland window");

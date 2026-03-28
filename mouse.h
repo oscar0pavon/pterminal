@@ -17,9 +17,8 @@ typedef struct Mouse {
 void mouse_click();
 void release_button();
 void select_with_mouse(bool done);
-void handle_mouse_motion(bool has_motion);
-void update_mouse_terminal_position();
-
+void update_mouse();
+void send_mouse_info_to_tty();
 
 bool is_on_mouse_mode();
 

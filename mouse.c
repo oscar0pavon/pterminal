@@ -91,13 +91,23 @@ void select_with_mouse(bool done) {
   if (done)
     pway_primary_copy();
 
+  can_draw = true;
+
 }
 
 
-void update_mouse_terminal_position(){
+void update_mouse(){
 
   main_mouse.col = mouse_to_col();
   main_mouse.row = mouse_to_row();
+
+  if ( IS_WINDOSET(MODE_MOUSE) ) {
+    send_mouse_info_to_tty();
+    return;
+  }
+ 
+  if(pway->mouse.left_button.pressed)
+    select_with_mouse(false);
 }
 
 uint32_t report_mouse_movement(void){
@@ -124,20 +134,19 @@ uint32_t report_mouse_movement(void){
 
 }
 
-void report_mouse(bool has_motion) {
+void send_mouse_info_to_tty() {
 
   if (!IS_WINDOSET(MODE_MOUSESGR))
     return;
 
-  if(!has_motion && !pway->mouse.current_button)
+  if(!pway->mouse.current_button)
     return;
 
   int len, button;
   char buf[40];
   char is_released;
 
-  if(has_motion)
-    is_released = 'M';
+  is_released = 'M';
 
   if(pway->mouse.current_button){
 
@@ -157,17 +166,10 @@ void report_mouse(bool has_motion) {
   main_mouse.old_col = main_mouse.col;
   main_mouse.old_row = main_mouse.row;
 
-  if(has_motion){
 
-    uint32_t movement_code = report_mouse_movement();
+  uint32_t movement_code = report_mouse_movement();
 
-    mouse_code = button + movement_code;
-  }
-  else{
-
-    mouse_code = button;
-
-  }
+  mouse_code = button + movement_code;
 
   //printf("Code: %i %c \n", mouse_code, is_released);
   len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", 
@@ -184,7 +186,7 @@ void release_button(){
 
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {
-    report_mouse(false);
+    send_mouse_info_to_tty();
     return;
   }
 
@@ -213,7 +215,7 @@ void mouse_click(){
 
 
   if ( IS_WINDOSET(MODE_MOUSE) ) {
-    report_mouse(false);
+    send_mouse_info_to_tty();
     return;
   }
 
@@ -242,14 +244,4 @@ void selclear(void) {
   tsetdirt(selection.beginning_normalized.y, selection.end_normalized.y);
 }
 
-void handle_mouse_motion(bool has_motion){
-
-  if ( IS_WINDOSET(MODE_MOUSE) ) {
-    report_mouse(has_motion);
-    return;
-  }
- 
-  if(pway->mouse.left_button.pressed)
-    select_with_mouse(false);
-}
 
