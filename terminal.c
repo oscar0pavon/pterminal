@@ -878,7 +878,7 @@ void printsel(const Arg *arg) { tdumpsel(); }
 void tdumpsel(void) {
   char *ptr;
 
-  if ((ptr = getsel())) {
+  if ( (ptr = get_selection() ) ) {
     tprinter(ptr, strlen(ptr));
     free(ptr);
   }

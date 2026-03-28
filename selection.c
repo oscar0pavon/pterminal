@@ -2,6 +2,8 @@
 #include "terminal.h"
 #include "utf8.h"
 
+#include <pway/pway.h>
+
 Selection selection;
 
 void selinit(void) {
@@ -28,8 +30,11 @@ void selstart(int col, int row, int snap) {
 void selextend(int col, int row, int type, int done) {
   int oldey, oldex, oldsby, oldsey, oldtype;
 
-  if (selection.mode == SEL_IDLE)
+  if (selection.mode == SEL_IDLE){
+    
     return;
+  }
+
   if (done && selection.mode == SEL_EMPTY) {
     selclear();
     return;
@@ -52,6 +57,7 @@ void selextend(int col, int row, int type, int done) {
              MAX(selection.end_normalized.y, oldsey));
 
   selection.mode = done ? SEL_IDLE : SEL_READY;
+
 }
 
 void selnormalize(void) {
@@ -179,7 +185,7 @@ void selsnap(int *x, int *y, int direction) {
   }
 }
 
-char *getsel(void) {
+char * get_selection(void) {
   char *str, *ptr;
   int y, bufsize, lastx, linelen;
   const PGlyph *gp, *last;

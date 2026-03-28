@@ -1,6 +1,7 @@
 #include "window.h"
 #include "mouse.h"
 #include "pterminal.h"
+#include "selection.h"
 #include "terminal.h"
 #include "types.h"
 #include "draw.h"
@@ -64,6 +65,7 @@ void create_window(int cols, int rows){
   pway->click = mouse_click;
   pway->click_release = release_button;
   pway->update_mouse = update_mouse;
+  pway->get_text = get_selection;
 
 
   if(pway_create_window("pterminal0.2") == false){

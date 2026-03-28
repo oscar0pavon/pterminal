@@ -81,6 +81,28 @@ int mouse_to_row() {
   return y / terminal_window.character_height;
 }
 
+void release_button(){
+
+
+  if ( IS_WINDOSET(MODE_MOUSE) ) {
+    send_mouse_info_to_tty();
+    return;
+  }
+
+  printf("release button\n");
+
+  if(pway->mouse.middle_button.released){
+    paste_from_clipboard(true);
+    printf("paste\n");
+    return;
+  }
+
+  if(pway->mouse.left_button.released){
+    printf("released left click\n");
+    select_with_mouse(true);
+  }
+
+}
 
 void select_with_mouse(bool done) {
 
@@ -88,8 +110,9 @@ void select_with_mouse(bool done) {
 
   selextend(mouse_to_col(), mouse_to_row(), seltype, done);
 
-  if (done)
+  if (done){
     pway_primary_copy();
+  }
 
   can_draw = true;
 
@@ -182,28 +205,14 @@ void send_mouse_info_to_tty() {
 }
 
 
-void release_button(){
-
-
-  if ( IS_WINDOSET(MODE_MOUSE) ) {
-    send_mouse_info_to_tty();
-    return;
-  }
-
-  printf("release button\n");
-
-  if(pway->mouse.left_button.released){
-      printf("released left click\n");
-    select_with_mouse(true);
-  }
-
-}
 
 bool is_on_mouse_mode(){
   return IS_WINDOSET(MODE_MOUSE);
 }
 
 void mouse_click(){
+
+
 
   struct timespec now;
   int snap;
@@ -218,6 +227,7 @@ void mouse_click(){
     send_mouse_info_to_tty();
     return;
   }
+  
 
   clock_gettime(CLOCK_MONOTONIC, &now);
   if (TIMEDIFF(now, xsel.tclick2) <= tripleclicktimeout) {
@@ -233,6 +243,7 @@ void mouse_click(){
   selstart(mouse_to_col(),mouse_to_row(), snap);
   // printf("Mouse col %i row %i\n", mouse_to_col(), mouse_to_row());
   // printf("Mouse x %i, mouse y %i\n", main_mouse.x, main_mouse.y);
+  
 }
 
 

@@ -32,6 +32,7 @@ void selstart(int col, int row, int snap);
 
 void selextend(int, int, int, int);
 int selected(int, int);
-char *getsel(void);
+
+char * get_selection(void);
 
 #endif
