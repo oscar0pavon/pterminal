@@ -11,7 +11,7 @@ extern GLuint font_texture_id;
 
 
 void set_ortho_projection(float width, float height);
-void load_texture(GLuint* texture_pointer, const char* path);
+void load_font_image(GLuint* texture_pointer);
 void gl_draw_rect(PColor color,  float x, float y, float width, float height);
 
 void gl_draw_char(uint8_t character, PColor color, float x, float y,

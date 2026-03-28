@@ -21,26 +21,20 @@ all: pterminal
 .c.o:
 	$(CC) $(FLAGS) -c $<
 
-
 $(OBJ): config.h
 
-pterminal: $(OBJ)
-	$(CC) -o $@ $(OBJ) $(LDFLAGS)
+font.o: font.png
+	ld -r -b binary -o font.o font.png
+	objcopy --add-section .note.GNU-stack=/dev/null font.o
 
-./wayland/%.o: ./wayland/%.c
-	cc $(FLAGS) -o $@ -c $<
+pterminal: $(OBJ) font.o
+	$(CC) -o $@ $(OBJ) font.o $(LDFLAGS)
 
 clean:
-	rm -f pterminal $(OBJ) 
+	rm -f pterminal $(OBJ) font.o
 
 install: pterminal
 	cp -f pterminal /bin
-
-EGL = WAYLAND_DISPLAY=wayland-0 EGL_LOG_LEVEL=debug MESA_DEBUG=egl MESA_LOADER_DRIVER_OVERRIDE=llvmpipe LIBGL_ALWAYS_SOFTWARE=1 GALLIUM_DRIVER=llvmpipe
-
-
-test: all
-	./pterminal -c "pterminal-test" -t "pterminal" -g 30x10
 
 
 .PHONY: all clean install
