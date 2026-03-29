@@ -111,6 +111,7 @@ void select_with_mouse(bool done) {
   selextend(mouse_to_col(), mouse_to_row(), seltype, done);
 
   if (done){
+    printf("seletion: %s\n", get_selection());
     pway_primary_copy();
   }
 
@@ -212,8 +213,6 @@ bool is_on_mouse_mode(){
 
 void mouse_click(){
 
-
-
   struct timespec now;
   int snap;
 
@@ -228,6 +227,9 @@ void mouse_click(){
     return;
   }
   
+
+  if(!pway->mouse.left_button.pressed)
+    return;
 
   clock_gettime(CLOCK_MONOTONIC, &now);
   if (TIMEDIFF(now, xsel.tclick2) <= tripleclicktimeout) {
