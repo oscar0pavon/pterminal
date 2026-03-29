@@ -90,6 +90,22 @@ void release_button(){
 
   printf("release button\n");
 
+  if(pway->mouse.wheel_down.released){
+     Arg new_arg;
+     new_arg.f = -0.1f;
+     kscrollup(&new_arg);
+     can_draw = true;
+     return;
+  }
+  
+  if(pway->mouse.wheel_up.released){
+     Arg new_arg;
+     new_arg.f = -0.1f;
+     kscrolldown(&new_arg);
+     can_draw = true;
+     return;
+  }
+
   if(pway->mouse.middle_button.released){
     paste_from_clipboard(true);
     printf("paste\n");
@@ -135,20 +151,6 @@ void update_mouse(){
 #define DRAG 32
 #define NO_BUTTON 35
 
-uint32_t get_mouse_code(void){
-
-    // }else if( IS_WINDOSET(MODE_MOUSEMANY) ){
-    //   return NO_DRAG;
-    // }
-  //
-  // if( IS_WINDOSET(MODE_MOUSEMANY) )
-  //   return NO_DRAG;
-
-  return 0;
-
-
-}
-
 void send_mouse_scape(int code, int col, int row, char release){
 
   int len;
@@ -159,9 +161,8 @@ void send_mouse_scape(int code, int col, int row, char release){
       release);
 
   write_to_tty(buf, len, 0);
-  
 
-  printf("Code: %i %c\n",code, release);
+  //printf("Code: %i %c\n",code, release);
 }
 
 bool drag = false;
@@ -184,6 +185,11 @@ void send_mouse_info_to_tty() {
 
     if(pway->mouse.current_button->released){
       is_released = 'm';
+
+      if(pway->mouse.wheel_down.released || pway->mouse.wheel_up.released){
+        is_released = 'M';
+      }
+
       send_mouse_scape(code, main_mouse.col + 1, main_mouse.row + 1, is_released);
       drag = false;
       return;
