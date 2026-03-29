@@ -5,8 +5,8 @@
 #include <stdbool.h>
 #include "utf8.h"
 #include "selection.h"
-#include "egl.h"
 
+#include <pway/pway.h>
 
 DC drawing_context;
 
@@ -20,8 +20,8 @@ bool can_update_size = false;
 
 
 void swap_draw_buffers(){
-
-  eglSwapBuffers(egl_display, egl_surface);
+  
+  pway_swap_buffers();
 }
 
 void update_size() {
@@ -39,8 +39,8 @@ void update_size() {
 
 void init_draw_method(){
 
-  init_egl();
-  
+
+  pway_init_egl();
 
 
   set_ortho_projection(terminal_window.width, terminal_window.height);

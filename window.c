@@ -6,7 +6,6 @@
 #include "types.h"
 #include "draw.h"
 #include <stdio.h>
-#include "egl.h"
 
 #include <stdbool.h>
 #include <unistd.h>
@@ -68,7 +67,7 @@ void create_window(int cols, int rows){
   pway->get_text = get_selection;
 
 
-  if(pway_create_window("pterminal0.2") == false){
+  if(pway_create_window("pterminal0.2",terminal_window.width, terminal_window.height) == false){
     die("Can't create Wayland window");
   }
 
@@ -99,7 +98,7 @@ void resize_pterminal(int width, int height) {
   if (height != 0)
     terminal_window.height = height;
 
-  wl_egl_window_resize(egl_window, width, height, 0 , 0);
+  pway_egl_resize(width, height);
 
   col = terminal_window.width / terminal_window.character_width;
 

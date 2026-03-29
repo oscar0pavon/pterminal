@@ -49,7 +49,7 @@ void *run_pterminal(void *none) {
       can_draw = false;
     }
 
-    clean_mouse_buttons();
+    //clean_mouse_buttons();
 
   }
 }
