@@ -17,10 +17,6 @@
 
 Mouse main_mouse;
 
-/*
- * Internal mouse shortcuts.
- * Beware that overloading Button1 will disable the selection.
- */
 static MouseShortcut mshortcuts[] = {
 	/* mask                 button   function        argument       release */
 	{ ShiftMask,            Button4, kscrollup,      {.f = -0.1} },
@@ -35,37 +31,6 @@ static MouseShortcut mshortcuts[] = {
 /* selection timeouts (in milliseconds) */
 static unsigned int doubleclicktimeout = 300;
 static unsigned int tripleclicktimeout = 600;
-
-
-
-/*
- * Force mouse select/shortcuts while mask is active (when MODE_MOUSE is set).
- * Note that if you want to use ShiftMask with selmasks, set this to an other
- * modifier, set to 0 to not use it.
- */
-static uint forcemousemod = ShiftMask;
-/*
- * Selection types' masks.
- * Use the same masks as usual.
- * Button1Mask is always unset, to make masks match between ButtonPress.
- * ButtonRelease and MotionNotify.
- * If no match is found, regular selection is used.
- */
-static uint selmasks[] = {
-	[SEL_RECTANGULAR] = Mod1Mask,
-};
-
-
-
-char *xstrdup(const char *s) {
-  char *p;
-
-  if ((p = strdup(s)) == NULL)
-    die("strdup: %s\n", strerror(errno));
-
-  return p;
-}
-
 
 
 int mouse_to_col() {
@@ -110,6 +75,7 @@ void release_button(){
   if(pway->mouse.middle_button.released){
     paste_from_clipboard(true);
     printf("paste\n");
+    can_draw = true;
     return;
   }
 
@@ -219,13 +185,7 @@ void send_mouse_info_to_tty() {
     }
   }
 
-
-
-
-
 }
-
-
 
 bool is_on_mouse_mode(){
   return IS_WINDOSET(MODE_MOUSE);
