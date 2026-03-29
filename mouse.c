@@ -1,6 +1,7 @@
 #include "mouse.h"
 
 #include <errno.h>
+#include <pway/mouse.h>
 #include <pway/pway.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -128,6 +129,7 @@ void select_with_mouse(bool done) {
   if (done){
     printf("seletion: %s\n", get_selection());
     pway_primary_copy();
+    pway_set_default_cursor();
   }
 
   can_draw = true;
@@ -261,6 +263,7 @@ void mouse_click(){
   xsel.tclick1 = now;
 
   selstart(mouse_to_col(),mouse_to_row(), snap);
+  pway_set_text_cursor();
   // printf("Mouse col %i row %i\n", mouse_to_col(), mouse_to_row());
   // printf("Mouse x %i, mouse y %i\n", main_mouse.x, main_mouse.y);
   
