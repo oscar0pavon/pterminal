@@ -36,7 +36,6 @@ static unsigned int doubleclicktimeout = 300;
 static unsigned int tripleclicktimeout = 600;
 
 
-int mouse_code = 0;
 
 /*
  * Force mouse select/shortcuts while mask is active (when MODE_MOUSE is set).
@@ -133,76 +132,89 @@ void update_mouse(){
   if(pway->mouse.left_button.pressed)
     select_with_mouse(false);
 }
+#define DRAG 32
+#define NO_BUTTON 35
 
-uint32_t report_mouse_movement(void){
+uint32_t get_mouse_code(void){
 
-  uint32_t movement_code = 35;
+    // }else if( IS_WINDOSET(MODE_MOUSEMANY) ){
+    //   return NO_DRAG;
+    // }
+  //
+  // if( IS_WINDOSET(MODE_MOUSEMANY) )
+  //   return NO_DRAG;
 
-  if (IS_WINDOSET(MODE_MOUSEMOTION)){
-    if(pway->mouse.current_button){
-      if (pway->mouse.current_button->pressed) {
-        return 32;
-      
-      }else {
-        return 35; 
-      }
-
-    }else if( IS_WINDOSET(MODE_MOUSEMANY) ){
-      return 35;
-    }
-  }
-  if( IS_WINDOSET(MODE_MOUSEMANY) )
-    return 35;
-
+  return 0;
 
 
 }
+
+void send_mouse_scape(int code, int col, int row, char release){
+
+  int len;
+  char buf[40];
+
+  len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", 
+      code, col, row,
+      release);
+
+  write_to_tty(buf, len, 0);
+  
+
+  printf("Code: %i %c\n",code, release);
+}
+
+bool drag = false;
 
 void send_mouse_info_to_tty() {
 
   if (!IS_WINDOSET(MODE_MOUSESGR))
     return;
 
-  if(!pway->mouse.current_button)
-    return;
+  main_mouse.old_col = main_mouse.col;
+  main_mouse.old_row = main_mouse.row;
 
-  int len, button;
-  char buf[40];
   char is_released;
 
   is_released = 'M';
 
   if(pway->mouse.current_button){
 
-    button = pway->mouse.current_button->id;
+   int code = pway->mouse.current_button->id;
 
     if(pway->mouse.current_button->released){
       is_released = 'm';
-    }else{
+      send_mouse_scape(code, main_mouse.col + 1, main_mouse.row + 1, is_released);
+      drag = false;
+      return;
+    }
+    if(pway->mouse.current_button->pressed){
       is_released = 'M';
+
+      if(!drag)
+        send_mouse_scape(code, main_mouse.col + 1, main_mouse.row + 1, is_released);
+
+      drag = true;
+
+      if(IS_WINDOSET(MODE_MOUSEMOTION)){
+        code += DRAG;
+      }
+      send_mouse_scape(code, main_mouse.col + 1, main_mouse.row + 1, is_released);
+      return;
     }
 
   }else {
-    button = 35;
+    if(IS_WINDOSET(MODE_MOUSEMANY)){
+      is_released = 'M';
+      send_mouse_scape(NO_BUTTON, main_mouse.col + 1, main_mouse.row + 1, is_released);
+      return;
+    }
   }
-  
-
-  main_mouse.old_col = main_mouse.col;
-  main_mouse.old_row = main_mouse.row;
 
 
-  uint32_t movement_code = report_mouse_movement();
 
-  mouse_code = button + movement_code;
 
-  //printf("Code: %i %c \n", mouse_code, is_released);
-  len = snprintf(buf, sizeof(buf), "\033[<%d;%d;%d%c", 
-      mouse_code, main_mouse.col + 1, main_mouse.row + 1,
-      is_released);
 
-  write_to_tty(buf, len, 0);
-  
-  mouse_code = 0;
 }
 
 
