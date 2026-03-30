@@ -46,6 +46,44 @@ int mouse_to_row() {
   return y / terminal_window.character_height;
 }
 
+void mouse_click(){
+
+  struct timespec now;
+  int snap;
+
+  int btn;
+
+  if(pway->mouse.current_button)
+    btn = pway->mouse.current_button->id;
+
+
+  if ( IS_WINDOSET(MODE_MOUSE) ) {
+    send_mouse_info_to_tty();
+    return;
+  }
+  
+
+  if(!pway->mouse.left_button.pressed)
+    return;
+
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  if (TIMEDIFF(now, xsel.tclick2) <= tripleclicktimeout) {
+    snap = SNAP_LINE;
+  } else if (TIMEDIFF(now, xsel.tclick1) <= doubleclicktimeout) {
+    snap = SNAP_WORD;
+  } else {
+    snap = 0;
+  }
+  xsel.tclick2 = xsel.tclick1;
+  xsel.tclick1 = now;
+
+  selstart(mouse_to_col(),mouse_to_row(), snap);
+  pway_set_text_cursor();
+  // printf("Mouse col %i row %i\n", mouse_to_col(), mouse_to_row());
+  // printf("Mouse x %i, mouse y %i\n", main_mouse.x, main_mouse.y);
+  
+}
+
 void release_button(){
 
 
@@ -189,44 +227,6 @@ void send_mouse_info_to_tty() {
 
 bool is_on_mouse_mode(){
   return IS_WINDOSET(MODE_MOUSE);
-}
-
-void mouse_click(){
-
-  struct timespec now;
-  int snap;
-
-  int btn;
-
-  if(pway->mouse.current_button)
-    btn = pway->mouse.current_button->id;
-
-
-  if ( IS_WINDOSET(MODE_MOUSE) ) {
-    send_mouse_info_to_tty();
-    return;
-  }
-  
-
-  if(!pway->mouse.left_button.pressed)
-    return;
-
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  if (TIMEDIFF(now, xsel.tclick2) <= tripleclicktimeout) {
-    snap = SNAP_LINE;
-  } else if (TIMEDIFF(now, xsel.tclick1) <= doubleclicktimeout) {
-    snap = SNAP_WORD;
-  } else {
-    snap = 0;
-  }
-  xsel.tclick2 = xsel.tclick1;
-  xsel.tclick1 = now;
-
-  selstart(mouse_to_col(),mouse_to_row(), snap);
-  pway_set_text_cursor();
-  // printf("Mouse col %i row %i\n", mouse_to_col(), mouse_to_row());
-  // printf("Mouse x %i, mouse y %i\n", main_mouse.x, main_mouse.y);
-  
 }
 
 
