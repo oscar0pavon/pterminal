@@ -2,6 +2,7 @@
 #include "macros.h"
 #include "window.h"
 #include "terminal.h"
+#include <pway/keyboard.h>
 #include <xkbcommon/xkbcommon-keysyms.h>
 #include <xkbcommon/xkbcommon.h>
 #include <string.h>
@@ -284,18 +285,21 @@ int match(uint mask, uint state) {
   return mask == XK_ANY_MOD || mask == (state & ~ignoremod);
 }
 
-bool print_special_key(xkb_keysym_t sym){
+void print_special_key(){
 
-  char* esc_to_print = get_esc_from_special_keys(sym, 0);
+  char* esc_to_print = get_esc_from_special_keys(pway_current_key.sym, 0);
   if(esc_to_print){
     uint32_t len = strlen(esc_to_print);
     write_to_tty(esc_to_print, len, 0);
     print_csi(esc_to_print);
     printf("printed special key\n");
-    return true;
   }
 
-  return false;
+}
+
+void handle_keys(void){
+
+  print_special_key();
 }
 
 char *get_esc_from_special_keys(xkb_keysym_t key_sym, uint state) {

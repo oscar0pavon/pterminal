@@ -20,9 +20,10 @@
 #define Mod4Mask		(1<<6)
 #define Mod5Mask		(1<<7)
 
-bool print_special_key(xkb_keysym_t sym);
 char *get_esc_from_special_keys(xkb_keysym_t key_sym, uint state);
 int match(uint mask, uint state);
 void numlock(const Arg *);
+
+void handle_keys(void);
 
 #endif

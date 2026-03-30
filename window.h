@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <xkbcommon/xkbcommon.h>
 
+#include <pway/keyboard.h>
+
 /* macros */
 #define IS_WINDOSET(flag) ((terminal_window.mode & (flag)) != 0)
 
