@@ -111,7 +111,7 @@ void release_button(){
   }
 
   if(pway->mouse.middle_button.released){
-    paste_from_clipboard(true);
+    pway_paste(true);
     printf("paste\n");
     can_draw = true;
     return;
