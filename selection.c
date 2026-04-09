@@ -119,7 +119,7 @@ int selected(int x, int y) {
 void selsnap(int *x, int *y, int direction) {
   int newx, newy, xt, yt;
   int delim, prevdelim;
-  const PGlyph *gp, *prevgp;
+  const Glyph *gp, *prevgp;
 
   switch (selection.snap) {
   case SNAP_WORD:
@@ -188,7 +188,7 @@ void selsnap(int *x, int *y, int direction) {
 char * get_selection(void) {
   char *str, *ptr;
   int y, bufsize, lastx, linelen;
-  const PGlyph *gp, *last;
+  const Glyph *gp, *last;
 
   if (selection.original_beginning.x == -1)
     return NULL;

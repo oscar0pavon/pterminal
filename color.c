@@ -153,7 +153,7 @@ int xsetcolorname(int x, const char *name) {
   return 0;
 }
 
-void get_color_from_glyph(PGlyph* base, RenderColor* out){
+void get_color_from_glyph(Glyph* base, RenderColor* out){
 
   Color *fg, *bg, *temp;
   TRenderColor colfg, colbg;

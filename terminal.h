@@ -65,20 +65,20 @@ enum glyph_attribute {
 
 typedef uint_least32_t Rune;
 
-typedef struct PGlyph{
+typedef struct Glyph{
   Rune u;      /* character code */
   ushort mode; /* attribute flags */
   uint32_t fg; /* foreground  */
   uint32_t bg; /* background  */
   uint16_t utf8_value;
-} PGlyph;
+} Glyph;
 
-typedef PGlyph *Line;
+typedef Glyph *Line;
 
 
 
 typedef struct {
-  PGlyph attr; /* current char attributes */
+  Glyph attr; /* current char attributes */
   int x;
   int y;
   char state;
@@ -177,7 +177,7 @@ void treset(void);
 void tscrollup(int, int);
 void tscrolldown(int, int);
 void tsetattr(const int *, int);
-void tsetchar(Rune, PGlyph *, int, int);
+void tsetchar(Rune, Glyph *, int, int);
 void tsetscroll(int, int);
 void tswapscreen(void);
 void tsetmode(int, int, const int *, int);
@@ -189,7 +189,7 @@ int32_t tdefcolor(const int *, int *, int);
 void tdeftran(char);
 void tstrsequence(uchar);
 
-void clearline(Line, PGlyph, int, int);
+void clearline(Line, Glyph, int, int);
 Line ensureline(Line);
 
 char *base64dec(const char *);

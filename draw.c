@@ -8,6 +8,8 @@
 
 #include <pway/pway.h>
 
+#include <pfonts/pfonts.h>
+
 DC drawing_context;
 
 int borderpx = 2;
@@ -18,19 +20,13 @@ unsigned int cursorthickness = 2;
 bool can_update_size = false;
 
 
-
-void swap_draw_buffers(){
-  
-  pway_swap_buffers();
-}
-
 void update_size() {
   if (can_update_size) {
 
     glClearColor(40 / 255.f, 44 / 255.f, 52 / 255.f, 1);//TODO get colors
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    set_ortho_projection(terminal_window.width, terminal_window.height);
+    pfonts_set_ortho_projection(terminal_window.width, terminal_window.height);
     glViewport(0, 0, terminal_window.width, terminal_window.height);
 
     can_update_size = false;
@@ -43,9 +39,9 @@ void init_draw_method(){
   pway_init_egl();
 
 
-  set_ortho_projection(terminal_window.width, terminal_window.height);
+  pfonts_set_ortho_projection(terminal_window.width, terminal_window.height);
   glViewport(0, 0, terminal_window.width, terminal_window.height);
-  load_font_image(&font_texture_id);
+  load_font_image(&pfont_texture_id);
 
 }
 
@@ -56,11 +52,11 @@ void draw_line(Line line, int position_y, int column) {
     if(!line)
       return;
 
-    xdrawglyph(line[i],i,position_y);
+    draw_glyph(line[i],i,position_y);
   }
 }
 
-void drawregion(int position_x, int position_y, int column, int row) {
+void draw_region(int position_x, int position_y, int column, int row) {
   int i, line_number;
 
   line_number = TLINEOFFSET(position_y);
@@ -97,7 +93,7 @@ void draw(void) {
   if (TLINE(term.cursor.y)[cursor_x].mode & ATTR_WDUMMY)
     cursor_x--;
 
-  drawregion(0, 0, term.col, term.row);
+  draw_region(0, 0, term.col, term.row);
 
   xdrawcursor(cursor_x, term.cursor.y, TLINE(term.cursor.y)[cursor_x],
                term.old_cursor_x, term.old_cursor_y,
@@ -106,19 +102,19 @@ void draw(void) {
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
 
-  swap_draw_buffers();
+  pway_swap_buffers();
 }
 
 
 
-void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
-                 PGlyph og) {
+void xdrawcursor(int cursor_x, int cursor_y, Glyph g, int old_x, int old_y,
+                 Glyph og) {
   Color drawcol;
 
   /* remove the old cursor */
   if (selected(old_x, old_y))
     og.mode ^= ATTR_REVERSE;
-  xdrawglyph(og, old_x, old_y);
+  draw_glyph(og, old_x, old_y);
 
   if (IS_WINDOSET(MODE_HIDE))
     return;
@@ -156,14 +152,14 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
     case 0:         /* Blinking Block */
     case 1:         /* Blinking Block (Default) */
     case 2:         /* Steady Block */
-      xdrawglyph(g, cursor_x, cursor_y);
+      draw_glyph(g, cursor_x, cursor_y);
       break;
     case 3: /* Blinking Underline */
     case 4: /* Steady Underline */
 
       winx = cursor_x * terminal_window.character_width;
       winy = (cursor_y + 1) * terminal_window.character_height;
-      gl_draw_rect(cursor_color, winx,
+      pfonts_draw_rect(cursor_color, winx,
                    winy, terminal_window.character_width, cursorthickness);
 
       break;
@@ -171,7 +167,7 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
     case 6: /* Steady bar */
       winx = cursor_x * terminal_window.character_width;
       winy = (cursor_y) * terminal_window.character_height;
-      gl_draw_rect(cursor_color, winx, winy, cursorthickness,
+      pfonts_draw_rect(cursor_color, winx, winy, cursorthickness,
                    terminal_window.character_height);
       break;
     }
@@ -187,7 +183,7 @@ void xdrawcursor(int cursor_x, int cursor_y, PGlyph g, int old_x, int old_y,
   }
 }
 
-void xdrawglyph(PGlyph glyph, int x, int y) {
+void draw_glyph(Glyph glyph, int x, int y) {
 
   if (selected(x, y))
     glyph.mode ^= ATTR_REVERSE;
@@ -202,7 +198,7 @@ void xdrawglyph(PGlyph glyph, int x, int y) {
   int background_x = x * terminal_window.character_width;
 
 
-  gl_draw_rect(color.gl_background_color, background_x, winy,
+  pfonts_draw_rect(color.gl_background_color, background_x, winy,
                terminal_window.character_width,
                terminal_window.character_height);
 
@@ -228,7 +224,7 @@ void xdrawglyph(PGlyph glyph, int x, int y) {
     ascii_value = glyph.u;
   }
 
-  gl_draw_char(ascii_value, color.gl_foreground_color, draw_x, draw_y,
+  pfonts_draw_char(ascii_value, color.gl_foreground_color, draw_x, draw_y,
                terminal_window.character_gl_width,
                terminal_window.character_gl_height);
 }

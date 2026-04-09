@@ -22,9 +22,9 @@ void draw(void);
 
 void drawregion(int, int, int, int);
 
-void xdrawglyph(PGlyph glyph, int x, int y);
+void draw_glyph(Glyph glyph, int x, int y);
 
-void xdrawcursor(int, int, PGlyph, int, int, PGlyph);
+void xdrawcursor(int, int, Glyph, int, int, Glyph);
 void xdrawline(Line, int, int, int);
 
 void init_draw_method(void);

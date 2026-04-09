@@ -1,8 +1,9 @@
 #ifndef COLOR_H
 #define COLOR_H
 
-#include <GL/gl.h>
 #include "terminal.h"
+
+#include <pfonts/pfonts.h>
 
 #define TRUERED(x) (((x) & 0xff0000) >> 8)
 #define TRUEGREEN(x) (((x) & 0xff00))
@@ -11,11 +12,6 @@
 #define TRUECOLOR(r, g, b) (1 << 24 | (r) << 16 | (g) << 8 | (b))
 #define IS_TRUECOL(x) (1 << 24 & (x))
 
-typedef struct PColor{
-  GLfloat r;
-  GLfloat g;
-  GLfloat b;
-} PColor;
 
 typedef struct TRenderColor{
     unsigned short red;
@@ -38,7 +34,7 @@ typedef struct RenderColor{
 }RenderColor;
 
 
-void get_color_from_glyph(PGlyph* base, RenderColor* out);
+void get_color_from_glyph(Glyph* base, RenderColor* out);
 
 int xgetcolor(int x, unsigned char *r, unsigned char *g, unsigned char *b);
 

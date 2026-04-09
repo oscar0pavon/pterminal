@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include <pway/pway.h>
+#include <GL/gl.h>
 
 XSelection xsel;
 TerminalWindow terminal_window;
