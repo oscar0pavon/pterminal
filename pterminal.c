@@ -13,7 +13,7 @@
 
 bool can_draw;
 
-static char *shell = "/usr/bin/zsh";
+static char *shell = "/bin/sh";
 
 int set_terminal_cursor(int cursor) {
   if (!BETWEEN(cursor, 0, 7)) /* 7: st extension */
