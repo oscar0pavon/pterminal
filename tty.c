@@ -59,26 +59,9 @@ void new_serial_tty(char **args) {
     perror("Couldn't call stty");
 }
 
-int ttynew(const char *line, char *cmd, const char *out, char **args) {
+int new_tty(char *cmd, const char *out, char **args) {
   int master, slave;
   
-  //for using like serial terminal
-  if (out) {
-    term.mode |= MODE_PRINT;
-    iofd = (!strcmp(out, "-")) ? 1 : open(out, O_WRONLY | O_CREAT, 0666);
-    if (iofd < 0) {
-      fprintf(stderr, "Error opening %s:%s\n", out, strerror(errno));
-    }
-  }
-
-  if (line) {
-    if ((cmdfd = open(line, O_RDWR)) < 0)
-      die("open line '%s' failed: %s\n", line, strerror(errno));
-    dup2(cmdfd, 0);
-    new_serial_tty(args);
-    return cmdfd;
-  }
-  //end serial terminal
 
   /* seems to work fine on linux, openbsd and freebsd */
   if (openpty(&master, &slave, NULL, NULL, NULL) < 0)

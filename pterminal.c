@@ -13,7 +13,7 @@
 
 bool can_draw;
 
-static char *shell = "/bin/sh";
+static char *shell = "/usr/bin/zsh";
 
 int set_terminal_cursor(int cursor) {
   if (!BETWEEN(cursor, 0, 7)) /* 7: st extension */
@@ -29,7 +29,7 @@ void *run_pterminal(void *none) {
   int tty_fd;
 
 
-  tty_fd = ttynew(NULL, shell, NULL, NULL);
+  tty_fd = new_tty(shell, NULL, NULL);
 
   pway_set_app_fd(tty_fd);
 

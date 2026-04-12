@@ -8,7 +8,9 @@ void ttywriteraw(const char *, size_t);
 
 void write_to_tty(const char *s, size_t n, int may_echo);
 
-int ttynew(const char *line, char *cmd, const char *out, char **args);
+
+
+int new_tty(char *cmd, const char *out, char **args);
 
 size_t read_tty(void);
 

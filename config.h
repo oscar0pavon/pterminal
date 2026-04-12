@@ -1,17 +1,6 @@
 /* See LICENSE file for copyright and license details. */
 
 
-/*
- * What program is execed by st depends of these precedence rules:
- * 1: program passed with -e
- * 2: scroll and/or utmp
- * 3: SHELL environment variable
- * 4: value of shell in /etc/passwd
- * 5: value of shell in config.h
- */
-char *utmp = NULL;
-/* scroll program: to enable use a string like "scroll" */
-char *scroll = NULL;
 char *stty_args = "stty raw pass8 nl -echo -iexten -cstopb 38400";
 
 /* identification sequence returned in DA and DECID */
