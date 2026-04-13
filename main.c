@@ -10,27 +10,18 @@
 #include <sys/select.h>
 #include <unistd.h>
 
-#include "mouse.h"
+#include <pway/pway.h>
+
+#include "pterminal.h"
 
 #include "draw.h"
 #include "terminal.h"
 #include "window.h"
-
-
 #include "selection.h"
-
 #include "tty.h"
-
-
-#include "pterminal.h"
-
 #include "config.h"
 
-#include <pway/pway.h>
-
-
 static inline ushort sixd_to_16bit(int);
-
 
 void ttysend(const Arg *arg) { 
   write_to_tty(arg->s, strlen(arg->s), 1); 
@@ -44,8 +35,6 @@ void xsetmode(int set, unsigned int flags) {
   if ((terminal_window.mode & MODE_REVERSE) != (mode & MODE_REVERSE))
     redraw();
 }
-
-
 
 void handle_interrupt(int signal_number){
 
@@ -99,7 +88,7 @@ int main(int argc, char *argv[]) {
 
   printf("pterminal init..\n");
 
-  run_pterminal(NULL);
+  run_pterminal();
 
   exit_pterminal();
 

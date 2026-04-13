@@ -1,6 +1,5 @@
 #include "pterminal.h"
 
-#include <pway/pway.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <sys/poll.h>
@@ -22,7 +21,7 @@ int set_terminal_cursor(int cursor) {
   return 0;
 }
 
-void *run_pterminal(void *none) {
+void run_pterminal(void) {
 
   fd_set read_file_descriptor;
 
