@@ -42,7 +42,9 @@ void init_draw_method(){
   pfonts_set_ortho_projection(terminal_window.width, terminal_window.height);
   glViewport(0, 0, terminal_window.width, terminal_window.height);
   load_font_image(&pfont_texture_id);
-
+  
+  pfonts_load_font("/root/.fonts/fonts/ttf/FiraCode-Regular.ttf");
+  
 }
 
 void draw_line(Line line, int position_y, int column) {
@@ -101,6 +103,8 @@ void draw(void) {
 
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
+
+  pfonts_draw_sdf_char();
 
   pway_swap_buffers();
 }
