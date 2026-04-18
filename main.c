@@ -59,9 +59,7 @@ int main(int argc, char *argv[]) {
 
   signal(SIGINT, handle_interrupt);
 
-
   set_terminal_cursor(cursorshape);
-
 
   setlocale(LC_CTYPE, "");
 
@@ -83,12 +81,29 @@ int main(int argc, char *argv[]) {
 
   MODBIT(terminal_window.mode, 1 , MODE_VISIBLE);
 
-
   resize_pterminal(terminal_window.width, terminal_window.height);
 
-  printf("pterminal init..\n");
 
-  run_pterminal();
+  int tty_fd = new_tty("/bin/sh", NULL, NULL);
+
+  pway_set_app_fd(tty_fd);
+
+  //Main loop
+  while (terminal_window.is_running) {
+    
+    pway_handle_events();
+
+    if( pway_app_has_event() ){
+      read_tty();
+      can_draw = true;
+    }
+
+    if(can_draw){
+      draw();
+      can_draw = false;
+    }
+
+  }
 
   exit_pterminal();
 

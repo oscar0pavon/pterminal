@@ -104,7 +104,8 @@ void draw(void) {
   term.old_cursor_x = cursor_x;
   term.old_cursor_y = term.cursor.y;
 
-  pfonts_draw_sdf_char();
+  int size = 256;
+  pfonts_draw_sdf_char(100, 100, size,size);
 
   pway_swap_buffers();
 }

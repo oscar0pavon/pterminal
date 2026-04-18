@@ -7,8 +7,6 @@ extern PWay* pway;
 
 extern bool can_draw;
 
-void run_pterminal(void);
-
 int set_terminal_cursor(int cursor);
 
 #endif

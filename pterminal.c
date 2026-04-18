@@ -1,12 +1,10 @@
 #include "pterminal.h"
 
 #include <stdbool.h>
-#include <stdio.h>
 #include <sys/poll.h>
 #include <unistd.h>
 #include "window.h"
 
-#include "tty.h"
 
 #include "draw.h"
 
@@ -21,32 +19,3 @@ int set_terminal_cursor(int cursor) {
   return 0;
 }
 
-void run_pterminal(void) {
-
-  fd_set read_file_descriptor;
-
-  int tty_fd;
-
-
-  tty_fd = new_tty(shell, NULL, NULL);
-
-  pway_set_app_fd(tty_fd);
-
-  printf("running pterminal\n");
-
-  while (terminal_window.is_running) {
-    
-    pway_handle_events();
-
-    if( pway_app_has_event() ){
-      read_tty();
-      can_draw = true;
-    }
-
-    if(can_draw){
-      draw();
-      can_draw = false;
-    }
-
-  }
-}
