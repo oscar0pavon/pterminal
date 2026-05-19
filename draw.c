@@ -5,10 +5,11 @@
 #include <stdbool.h>
 #include "utf8.h"
 #include "selection.h"
-
+#include <stdlib.h>
 #include <pway/pway.h>
 
 #include <pfonts/pfonts.h>
+#include <stdio.h>
 
 DC drawing_context;
 
@@ -42,8 +43,19 @@ void init_draw_method(){
   pfonts_set_ortho_projection(terminal_window.width, terminal_window.height);
   glViewport(0, 0, terminal_window.width, terminal_window.height);
   load_font_image(&pfont_texture_id);
-  
-  pfonts_load_font("/root/.fonts/fonts/ttf/FiraCode-Regular.ttf");
+
+
+  const char* home = getenv("HOME");
+
+  char path[256];
+
+  const char* font_dir = ".fonts/ttf/FiraCode-Regular.ttf";
+
+  snprintf(path, sizeof(path),"%s/%s",  home, font_dir);
+
+  printf("%s\n",path);
+
+  pfonts_load_font(path);
   
 }
 
